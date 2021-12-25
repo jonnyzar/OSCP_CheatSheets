@@ -1,0 +1,6 @@
+www
+ftp
+mail
+owa
+proxy
+router

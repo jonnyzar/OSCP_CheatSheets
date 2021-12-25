@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ "$1" == "" ]
+then
+    echo "ERROR: no domain name provided"
+else 
+    for ITEM in "$@"
+    do 
+        a=$(dig +short $ITEM)
+        echo "$ITEM: $a"  
+    done
+fi

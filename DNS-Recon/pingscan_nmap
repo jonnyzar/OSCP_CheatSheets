@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#try to bypass ping sweep filter
+nmap -sn -PS $1 --disable-arp-ping
+
+#try to bypass TCP SYN  filter
+nmap -sn -PA $1 --disable-arp-ping
+
+#bypass using ICMP Echo ping scan
+nmap -sn -PE $1 --disable-arp-ping
+
+#bypass using ICMP Timestamp Ping
+nmap -sn -PP $1 --disable-arp-ping
+
+#bypass using UDP Scan
+nmap -sn -PU $1 --disable-arp-ping
+
+#bypass using protocol scan
+nmap -sn -PO $1 --disable-arp-ping
+
+#bypass using no ping scan
+nmap -sn -PN $1 --disable-arp-ping
+

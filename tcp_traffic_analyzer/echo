@@ -1,0 +1,4 @@
+23:28:02.074837 IP6 fe80::858:b403:598e:2a23 > fe80::f2b0:14ff:fed7:9aa4: ICMP6, neighbor solicitation, who has fe80::f2b0:14ff:fed7:9aa4, length 32
+23:28:02.082586 IP6 fe80::f2b0:14ff:fed7:9aa4 > fe80::858:b403:598e:2a23: ICMP6, neighbor advertisement, tgt is fe80::f2b0:14ff:fed7:9aa4, length 24
+23:28:02.085502 IP 192.168.178.24.60731 > static.223.155.202.116.clients.your-server.de.https: Flags [P.], seq 3499916499:3499917035, ack 4015354514, win 5068, options [nop,nop,TS val 374404793 ecr 881406101], length 536
+

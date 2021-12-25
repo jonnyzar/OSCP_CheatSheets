@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fping -a --quiet -g $1
