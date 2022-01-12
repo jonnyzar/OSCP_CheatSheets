@@ -1,4 +1,6 @@
-# Shadow file generation and alteration
+# /etc/passwd
+
+# Shadow file hash cracking/adding
 
 Generate shadow files ([stackoverflow](https://unix.stackexchange.com/questions/81240/manually-generate-password-for-etc-shadow)):
 
