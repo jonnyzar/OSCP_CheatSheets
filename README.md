@@ -4,6 +4,6 @@ Use at your own risk and only on your own equipment that would not cause harm to
 
 Author of this tools rejects any responsibility for any harm caused by inappopriate use of these tools.
 
-# TBD Mindmap for selecting appropriate tools when needed
+* TBD Mindmap for selecting appropriate tools when needed
 
 
