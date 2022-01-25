@@ -6,4 +6,4 @@ Author of this tools rejects any responsibility for any harm caused by inappopri
 
 * to be done:  Mindmap for selecting appropriate tools when needed
 
-
+All referenced tools such as nishang, impacket and other third party tools remain property of their creators and are used within this package in accordance with their licence.
