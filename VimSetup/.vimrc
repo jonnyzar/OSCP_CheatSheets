@@ -10,6 +10,9 @@ set nocompatible
 set number 
 
 " set tab to 4 spaces
+filetype plugin indent on
+set tabstop=4
+set expandtab
 set ts=4 sw=4
 set softtabstop=4
 set shiftwidth=4
