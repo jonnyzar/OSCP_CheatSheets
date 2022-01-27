@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#bruteforce of RDP credentials
+#please use for legal purposes only
+
+#required: rdp_check from impacket
+#already integreated in Kali: impacket_rdp_check
+
 check="[-] Access Denied"
 login=Administrator
 list=your_list_of_passwords.txt
