@@ -21,6 +21,8 @@ Search for specific user: <code>  Get-ADUser -Filter 'UserPrincipalName -like "u
 
 Get all Users (including Computernames): <code> Get-ADObject -LDAPFilter "objectClass=User" -Properties SamAccountName | select SamAccountName </code>
 
+Groups:  <code> Get-ADGroup -Filter * | select SamAccountName </code> 
+
 Check trusted domains: <code> nltest /domain_trusts </code>
 
 * Get current active domain for the user:
