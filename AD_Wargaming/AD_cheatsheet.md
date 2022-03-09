@@ -7,7 +7,7 @@
 
 Understanding the target AD environment is key to further exploitation.
 
-* AD infos:  
+* **AD infos**:  
 
 Get Domain infos: <code> Get-ADDomain </code>
 
@@ -27,10 +27,15 @@ Groups:  <code> Get-ADGroup -Filter * | select SamAccountName </code>
 
 Check trusted domains: <code> nltest /domain_trusts </code>
 
-* Get current active domain for the user:
+* **Get current active domain for the user**:
 
 <code> (Get-WmiObject Win32_ComputerSystem).Domain </code>
 
-* Domain can be also identified using [SID](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/security-identifiers):
+* **Domain can be also identified using** [SID](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/security-identifiers):
 
 <code> Get-ADDomain | select DNSRoot, NetBIOSName, DomainSID </code>
+
+## Domain Controller Discovery
+
+* **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.contoso.local`
+* **Using nltest**: `nltest /dclist:domain.local`
