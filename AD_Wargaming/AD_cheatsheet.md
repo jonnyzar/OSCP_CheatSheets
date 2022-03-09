@@ -23,6 +23,8 @@ Get all Users (including Computernames): <code> Get-ADObject -LDAPFilter "object
 
 Groups:  <code> Get-ADGroup -Filter * | select SamAccountName </code> 
 
+**AD Admins group**:  `Get-ADGroup "Domain Admins" -Properties members,memberof`
+
 Check trusted domains: <code> nltest /domain_trusts </code>
 
 * Get current active domain for the user:
