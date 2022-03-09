@@ -17,6 +17,10 @@ AD user info: <code> Get-ADUser Administrator </code>
 
 Important AD users:  <code> Get-ADUser -Filter * | select SamAccountName </code>
 
+Search for specific user: <code>  Get-ADUser -Filter 'UserPrincipalName -like "user*"' </code>
+
+Get all Users (including Computernames): <code> Get-ADObject -LDAPFilter "objectClass=User" -Properties SamAccountName | select SamAccountName </code>
+
 Check trusted domains: <code> nltest /domain_trusts </code>
 
 * Get current active domain for the user:
