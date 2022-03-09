@@ -6,11 +6,16 @@
 # Reconaissance
 
 Understanding the target AD environment is key to further exploitation.
+
 * AD infos:  
 
 Get Domain infos: <code> Get-ADDomain </code>
 
 Get Forest infos: <code> Get-ADForest</code>
+
+AD user info: <code> Get-ADUser Administrator </code>
+
+Important AD users:  <code> Get-ADUser -Filter * | select SamAccountName </code>
 
 Check trusted domains: <code> nltest /domain_trusts </code>
 
