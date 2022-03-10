@@ -28,6 +28,11 @@ Bloodhound: https://github.com/BloodHoundAD/BloodHound
 
 After finding the hosts, you need to connect to them.
 
+## Connection
+
+* RPC/SMB
+
+
 # Lateral Movement
 
 ## In-Depth Discovery:
