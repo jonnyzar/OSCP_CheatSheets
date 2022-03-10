@@ -6,7 +6,33 @@
 
 Understanding the target AD environment is key to further exploitation.
 
-* **AD infos**:  
+* **Tools**:
+
+AD recon: https://github.com/sense-of-security/ADRecon
+Bloodhound: https://github.com/BloodHoundAD/BloodHound
+
+
+## Domain Controller Discovery
+
+* **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.contoso.local`
+* **Using nltest**: `nltest /dclist:domain.local`
+
+## Domain Hosts Discovery
+
+* NetBios scan: `nbtscan 192.168.100.0/24`
+* LDAP query of domain base (credentials required): `ldapsearch -H ldap://dc.ip -x -LLL -W -D "anakin@contoso.local" -b "dc=contoso,dc=local" "(objectclass=computer)" "DNSHostName" "OperatingSystem" `
+* NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
+* Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
+
+# Foothold
+
+After finding the hosts, you need to connect to them.
+
+# Lateral Movement
+
+## In-Depth Discovery:
+
+* **Manual information gathering on AD member **:  
 
 Get Domain infos: <code> Get-ADDomain </code>
 
@@ -34,18 +60,4 @@ Check trusted domains: <code> nltest /domain_trusts </code>
 
 <code> Get-ADDomain | select DNSRoot, NetBIOSName, DomainSID </code>
 
-## Domain Controller Discovery
 
-* **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.contoso.local`
-* **Using nltest**: `nltest /dclist:domain.local`
-
-## Domain Hosts Discovery
-
-* NetBios scan: `nbtscan 192.168.100.0/24`
-* LDAP query of domain base (credentials required): `ldapsearch -H ldap://dc.ip -x -LLL -W -D "anakin@contoso.local" -b "dc=contoso,dc=local" "(objectclass=computer)" "DNSHostName" "OperatingSystem" `
-* NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
-* Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
-
-# Foothold
-
-After finding the hosts, you need to connect to them.
