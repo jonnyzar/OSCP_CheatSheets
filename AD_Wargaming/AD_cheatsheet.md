@@ -46,6 +46,6 @@ Check trusted domains: <code> nltest /domain_trusts </code>
 * NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
 * Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
 
-## Foothold
+# Foothold
 
 After finding the hosts, you need to connect to them.
