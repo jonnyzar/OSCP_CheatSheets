@@ -1,3 +1,25 @@
+# General Info
+
+comming soon
+
+# Transfer files
+
+* ssh
+* nc
+```
+#start listener
+nc -lvnp 80 > output.txt
+
+#start sender
+nc -nv listener_ip 80 < input.txt
+
+#wait some time depending on file size: 10 seconds to 10 minutes...
+cat output.txt
+```
+
+* bash
+* netcat original
+
 # /etc/passwd
 
 ## The structure of the passwd file is as follows
