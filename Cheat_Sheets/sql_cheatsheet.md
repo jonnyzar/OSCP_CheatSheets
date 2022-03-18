@@ -1,10 +1,19 @@
-# default credentials connection:
+# SQL overview
+
+* null session:
 
 mysql -u root -h ip 
 
-# SQL injectoin
+# SQL injection
 
-All examples are based on bWAPP (free pentesting practice tool) examples.
+Here are 5 types of injection to look for (source: [OWASP](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection))
+* Union Operator: can be used when the SQL injection flaw happens in a SELECT statement, making it possible to combine two queries into a single result or result set.
+* Boolean: use Boolean condition(s) to verify whether certain conditions are true or false.
+* Error based: this technique forces the database to generate an error, giving the attacker or tester information upon which to refine their injection.
+* Out-of-band: technique used to retrieve data using a different channel (e.g., make a HTTP connection to send the results to a web server).
+* Time delay: use database commands (e.g. sleep) to delay answers in conditional queries. It is useful when attacker doesn’t have some kind of answer (result, output, or error) from the application.
+
+* All examples are based on bWAPP (free pentesting practice tool) examples.
 
 ## Test for SQLi vulnerability
 * It is necessary to identify a possible SQLi entry point
