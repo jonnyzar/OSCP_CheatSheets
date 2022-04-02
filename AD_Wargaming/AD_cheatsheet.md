@@ -9,6 +9,9 @@ Understanding the target AD environment is key to further exploitation.
 * **Tools**:
 
 * Most important tool: `enum4linux`
+
+`enum4linux -a target_ip > enum.log`
+
 * AD recon: https://github.com/sense-of-security/ADRecon
 * Bloodhound: https://github.com/BloodHoundAD/BloodHound
 * targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
@@ -51,7 +54,7 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 
 ```
 
-   1. Look for vulnerable users via LDAP
+   1. Look for users via LDAP
       
    2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
     
