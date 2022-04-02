@@ -1,0 +1,11 @@
+# Exfiltration options
+
+## Windows
+
+### SMB service
+
+1. Run SMB on kali:
+
+`smbserver.py share . -smb2support -username df -password df`
+
+## Linux
