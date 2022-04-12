@@ -2,6 +2,12 @@
 
 comming soon
 
+# Reconaissance
+
+## Network
+
+* View which ports are open and which processes use them: `ss -lntup` 
+
 # Transfer files
 
 * ssh
