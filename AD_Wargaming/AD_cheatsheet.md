@@ -170,6 +170,10 @@ tr -d '\n' < tgt.txt | tr -d ' '
 
 # Lateral Movement
 
+## Dumping Credentials
+
+Best to use remote tool `lsassy`
+
 ## In-Depth Discovery:
 
 * **Manual information gathering on AD member **:  
