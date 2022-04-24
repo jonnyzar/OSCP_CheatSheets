@@ -162,11 +162,14 @@ tr -d '\n' < tgt.txt | tr -d ' '
 
 ## Hash cracking
 
-* in most cases pass the hash attack is better as it does not waste time
 
-### MsCacheV2
+* MsCacheV2
 
 `hashcat -m2100 '$DCC2$10240#spot#3407de6ff2f044ab21711a394d85fxxx' /usr/share/wordlists/rockyou.txt --force --potfile-disable`
+
+* NTLM
+
+`hashcat -a 0 -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt --force --potfile-disable`
 
 # Lateral Movement
 
