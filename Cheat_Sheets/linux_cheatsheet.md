@@ -6,7 +6,7 @@ comming soon
 
 ## Network
 
-* View which ports are open and which processes use them: `ss -lntup` 
+* View which ports are open and which processes use them: `ss -ptunl` (easy to remember as "Ptunnel")
 
 # Transfer files
 

