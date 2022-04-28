@@ -27,7 +27,9 @@ from pyasn1.codec.der import decoder, encoder
 
 from pyasn1.type.univ import noValue
 from impacket.krb5.asn1 import KRB_CRED, EncKrbCredPart, Ticket, seq_set, seq_set_iter, KrbCredInfo, EncryptionKey
-from impacket.krb5.ccache import CCache, Header, Principal, Credential, KeyBlock, Times, CountedOctetString
+from impacket.krb5.ccache import CCache, Header, Principal, Credential, Times, CountedOctetString
+#replace V4 with V3 in case of problems
+from impacket.krb5.ccache import KeyBlockV4 as KeyBlock 
 from impacket.krb5 import types
 from impacket.krb5.types import KerberosTime
 
