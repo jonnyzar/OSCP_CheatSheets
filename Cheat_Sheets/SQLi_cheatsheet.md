@@ -198,6 +198,9 @@ If time based injection is valid then for TRUE conditions certain amount of dela
 ```
 ' AND sleep(15)#
 
+# or use
+'; SELECT sleep(10)--
+
 
 Benchmark:
 
