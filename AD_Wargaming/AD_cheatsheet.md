@@ -1,14 +1,118 @@
 # Intro
-* Sources for this cheat sheet: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
-* Good list of AD pentest commands and tools: https://wadcoms.github.io/
-* Using impacket scripts input Domain Names in **lower case** if connection fails!
-* Rubeus is to be used when remote access to some AD host avialable
+
+## Notes
+* Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
+* Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
+
+
+
+## AD Structure
+
+* Domain Controller (DC) is a Windows Server containing  Active Directory Domain Services (AD DS)
+* AD DS data store: **NTDS.dit** - a database that contains all of the information of an Active Directory domain controller as well as password hashes for domain users.
+* **NTDS.dit** is stored by default in %SystemRoot%\NTDS  
+* DC handles authentication and authorization services 
+* DC replicate updates from other domain controllers in the forest
+* DC Allows admin access to manage domain resources
+
+### Forest
+* Forest: collection of one or more trees
+* Tree: collection of several domains with hierarchical order
+* Organizational Units (OUs): Containers for groups, computers, users, printers and other OUs
+* Trusts: Allows users to access resources in other domains
+* Objects: users, groups, printers, computers, shares
+* Domain Services: DNS Server, LLMNR, IPv6, MSSQL etc.
+* Domain Schema: Rules for object creation
+
+Example strucutre would have top domain like **main.com** and under it may be further domains **sub.main.com** and **external.main.com**. Thos three domain represnet a tree. OUs in main can access sub and external but not in reverse.
+
+### Users
+
+Users are core of AD and DC's task is to manage access of those users to services.
+
+* Domain Admins: have ultimate control over the domain. They can access to the domain controller. If DA is compromised then NTDS.dit can be dumped using dsync attack.
+* Service Accounts (can be also have Domain Admin rights): required by Windows for services such as SQL to pair a service with a service account. Some of them are associated with user accounts and have human-made passwords what makes them vulnerable to Kerberoasting attacks. 
+* Local Administrators: local machine administrators. Compromis of local admin can lead to ticket and credentials grabbing from local machine to impersonate other users and services in AD.
+* Domain Users: normal users. They can log into machines where they are authorized to. Users may be part of interesting groups that allows lateral movement once the user account is compromised.
+
+## Groups
+
+* Security Groups: permissions users and services. Some groups have rights to change DACLs.
+* Distribution Groups: email distribution lists. As an attacker these groups are less beneficial to us but can still be beneficial in enumeration
 
 # Reconaissance
 
 Understanding the target AD environment is key to further exploitation.
 
-* **Tools**:
+
+## Manual Discovery
+
+* good practice is to use PowerView
+
+```
+#get all computers in AD
+
+Get-NetComputer -fulldata | select cn
+
+# users
+
+Get-NetUser | select cn
+
+# groups 
+
+Get-NetGroup
+
+```
+
+* Using native tools:  
+
+```
+# Get Domain infos:  
+
+Get-ADDomain 
+
+# Get Forest infos:  
+
+Get-ADForest
+
+# AD user info: 
+
+Get-ADUser Administrator 
+
+# Important AD users:   
+
+Get-ADUser -Filter * | select SamAccountName 
+
+# Search for specific user:  
+
+Get-ADUser -Filter 'UserPrincipalName -like "user*"' 
+
+# Get all Users (including Computernames):  
+
+Get-ADObject -LDAPFilter "objectClass=User" -Properties SamAccountName | select SamAccountName 
+
+# Groups:   
+
+Get-ADGroup -Filter * | select SamAccountName  
+
+# AD Admins group:  
+
+Get-ADGroup "Domain Admins" -Properties members,memberof
+
+# Check trusted domains:  nltest /domain_trusts 
+
+# Get current active domain for the user:
+
+ (Get-WmiObject Win32_ComputerSystem).Domain 
+
+# get SID
+
+Get-ADDomain | select DNSRoot, NetBIOSName, DomainSID 
+
+
+```
+
+* Helpful **Tools**:
 
 * crackmapexec
 * Rubeus
@@ -189,40 +293,8 @@ Make kirbi ticket from BASE64 blob
 
 `hashcat -a 0 -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt --force --potfile-disable`
 
-# Lateral Movement
 
 ## Dumping Credentials
 
-Best to use remote tool `lsassy`
-
-## In-Depth Discovery:
-
-* **Manual information gathering on AD member **:  
-
-Get Domain infos: <code> Get-ADDomain </code>
-
-Get Forest infos: <code> Get-ADForest</code>
-
-AD user info: <code> Get-ADUser Administrator </code>
-
-Important AD users:  <code> Get-ADUser -Filter * | select SamAccountName </code>
-
-Search for specific user: <code>  Get-ADUser -Filter 'UserPrincipalName -like "user*"' </code>
-
-Get all Users (including Computernames): <code> Get-ADObject -LDAPFilter "objectClass=User" -Properties SamAccountName | select SamAccountName </code>
-
-Groups:  <code> Get-ADGroup -Filter * | select SamAccountName </code> 
-
-**AD Admins group**:  `Get-ADGroup "Domain Admins" -Properties members,memberof`
-
-Check trusted domains: <code> nltest /domain_trusts </code>
-
-* **Get current active domain for the user**:
-
-<code> (Get-WmiObject Win32_ComputerSystem).Domain </code>
-
-* **Domain can be also identified using** [SID](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/security-identifiers):
-
-<code> Get-ADDomain | select DNSRoot, NetBIOSName, DomainSID </code>
-
-
+use remote tool `lsassy`
+or local tools: mimikatz and etc
