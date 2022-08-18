@@ -58,13 +58,15 @@ Sometimes those programs can be vulnerable or tricked into executing some malici
 1. Find SUID or SGID files
 
 For SUID:
-`find . -perm /4000`
+`find . -perm /4000 2>/dev/null`
 
 For SGID:
-`find . -perm /2000`
+`find . -perm /2000 2>/dev/null`
 
-For files with both bits set:
-`find . -perm /6000`
+For both (preferred way):
+`find / -perm -u=s -type f 2>/dev/null`
+
+
 
 # Write on root owned files
 
