@@ -146,6 +146,10 @@ hashcat -m 1800 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
 `find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null`
 `find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null`
 
+9. Kernel exploit
+
+`uname -a`
+`lsb_release -a`
 
 ## File transfering 
 
