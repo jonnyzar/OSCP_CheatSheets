@@ -40,6 +40,13 @@ If an attacker is able to find flaws in an authentication mechanism, they would 
 2. Manipulate GET requests containing IDs or usernames
 3. Register as user with similar name: add space " admin" or numbers
 
+## Sensitive Data Exposure
+
+1. Search web source code
+2. Dirbust for hidden files
+3. Dork with Google or Github
+4. Try downloading db files with command injection
+
 # Advanced Web Attacks
 
 ## API
