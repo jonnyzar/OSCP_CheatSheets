@@ -69,7 +69,34 @@ For payloads refer to: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/
 
 * Accessible S3 Buckets
 * Non functional additional features enabled: like status pages, accounts or privileges
-* 
+* Default credentials
+* Verbose error messages disclosing system properties
+* Not using HTTP and cookies security headers
+* Non patched systems
+
+## XXS
+
+1. Detect XXS
+
+Alert() is dead: https://portswigger.net/research/alert-is-dead-long-live-print
+
+Use print() instead or use only firefox browser for testing. But this would fail if user uses Chrome and its derivates.
+
+Payloads: https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
+
+```
+#get document cookies
+
+<script>print(document.cookie)</script>
+
+#get host ip
+<script>print(window.location.host)</script>
+
+
+```
+
+
+
 
 # Advanced Web Attacks
 
