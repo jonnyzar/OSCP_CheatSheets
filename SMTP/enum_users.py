@@ -25,7 +25,8 @@ with open(sys.argv[1],'r') as hosts_file:
 
     for host in hosts:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            print(host)
+            s.settimeout(2) 
+
             try:
                 s.connect((host.strip("\n\r "),25))
             except OSError as msg:
@@ -34,7 +35,6 @@ with open(sys.argv[1],'r') as hosts_file:
                 continue
 
             banner = s.recv(1024)
-            print (banner)
                 
             #open file with users
             users = get_users(sys.argv[2])
