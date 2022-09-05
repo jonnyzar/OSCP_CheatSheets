@@ -97,9 +97,39 @@ Payloads: https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 
 ## Insecure Deserialization
 
+tbd properly
 
+## Framework identification
 
+* Wappalyzer
+* Favicon
+```
+# grab the favicon like this 
+user@machine$ curl https://ip.site.com/sites/favicon/images/favicon.ico | md5sum
+```
+Then find the framework on: https://wiki.owasp.org/index.php/OWASP_favicon_database
 
+* Inspect Headers
+`user@machine$ curl http://MACHINE_IP -v`
+
+## Fuzzing
+
+* https://github.com/ffuf/ffuf
+* gobuster
+* dibr
+
+## My approach to Dirbusting
+
+1. scan for common directories non recursively with gobuster first:
+`gobuster dir -u http://ip -w /usr/share/seclists/Discovery/Web-Content/common.txt`
+
+2. then scan recursively within found directories
+
+`dirb http://ip /usr/share/seclists/Discovery/Web-Content/big.txt -X .html,.php,.cgi`
+
+3. finally you can also fuzz the discovered content or anything else within head or requests
+
+`ffuf -w /usr/share/seclists/Discovery/Web-Content/common.txt -u http://ip/FUZZ` (FUZZ keyword is there where you want to fuzz)
 
 
 # Advanced Web Attacks

