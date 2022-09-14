@@ -6,6 +6,7 @@ mysql -u root -h ip
 
 # SQL injection
 
+
 ## Payloads Cheat Sheet
 
 My cheat sheet shows the methods of SQL injection. To effectively apply them, you need to know and use payloads as well. Here is more than enough: 
@@ -42,8 +43,14 @@ All examples are based on bWAPP (free pentesting practice tool) examples.
 Wildcard (*)
 &apos;  # required for XML content
 ```
+## Auth bypass
 
-## Example of UNION based sql injection 
+```
+1` or 1=1 limit 1 #
+
+```
+
+## UNION based sql injection 
 This works if you get feedback from the server to your requests.
 
 

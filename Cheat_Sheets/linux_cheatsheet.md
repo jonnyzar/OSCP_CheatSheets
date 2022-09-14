@@ -151,6 +151,8 @@ hashcat -m 1800 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
 `uname -a`
 `lsb_release -a`
 
+Very good collection of nix exploits: https://github.com/FuzzySecurity/Unix-PrivEsc
+
 ## File transfering 
 
 * scp
@@ -194,11 +196,13 @@ cat output.txt
 
 So to **make oracle user root account**, it is sufficient to add following line
 
-<code> oracle:x:0:0:Oracle Services:/data/network/oracle:/bin/bash </code>
+<code> pentester:x:0:0::/:/bin/bash </code>
 
 Instead of 1021, we got UID and GID 0, which corresponds to root account. So user orcale is root now.
 
 Additionally one may generate a password hash with crypt function and add it the second position instead of x. 
+
+`opensll passwd -1`
 
 
 # Shadow file hash cracking/adding

