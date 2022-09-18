@@ -262,7 +262,8 @@ gcc src.c -fPIC -shared -o /development/libshared.so	Compiled a shared libary
 lxd init	Start the LXD initialization process
 lxc image import alpine.tar.gz alpine.tar.gz.root --alias alpine	Import a local image
 lxc init alpine r00t -c security.privileged=true	Start a privileged LXD container
-lxc config device add r00t mydev disk source=/ path=/mnt/root recursive=true	Mount the host file system in a container
+lxc config device add r00t mip a
+ydev disk source=/ path=/mnt/root recursive=true	Mount the host file system in a container
 lxc start r00t	Start the container
 showmount -e 10.129.2.12	Show the NFS export list
 sudo mount -t nfs 10.129.2.12:/tmp /mnt	Mount an NFS share locally
