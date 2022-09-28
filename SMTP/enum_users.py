@@ -41,7 +41,7 @@ with open(sys.argv[1],'r') as hosts_file:
 
             #iterate through users
             for user in users:
-                s.send(b'VRFY ' + bytearray(user,encoding='ascii') + b' \\r\\n\\')
+                s.send(b'VRFY ' + bytearray(user,encoding='UTF-8') + b' \\r\\n\\')
                 print(s.recv(1024))
 
             
