@@ -25,6 +25,13 @@ https://payatu.com/guide-linux-privilege-escalation
 
 # Disclosed passwords or other credentials
 
+* If it is webserver, first thing is to look for database credentials
+```
+cd config
+
+grep -Ri password .
+```
+
 * Finding passwords using bash
 ```
 grep --color=auto -rnw '/' -ie "PASSWORD" --color=always 2> /dev/null
@@ -45,6 +52,7 @@ find / -name id_rsa 2> /dev/null
 
 * Advanced: SSH-DSS process
 https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md#ssh-key-predictable-prng-authorized_keys-process
+
 
 
 # sudo misconfigurations or vulnerabilities
