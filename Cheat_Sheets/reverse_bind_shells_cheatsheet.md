@@ -19,6 +19,9 @@ ruby -run -e httpd . -p 443
 busybox httpd -f -p 443
 ```
 
+Refer for more to: https://blog.certcube.com/file-transfer-cheatsheet-for-pentesters/
+
+
 # Reverse shells
 
 All of those methods assume that necessary programs like nc, python, php and etc are installed on target hosts.
