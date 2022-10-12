@@ -6,8 +6,8 @@ So I have decided to write this OSCP Cook Book to help takle all possible proble
 
 # How-To
 
-1. Read the cheat sheets to understand the problem and find a solution
-2. Refer to tools to aid in solving
+1. Read the cheat sheets to understand the problem and find a solution: https://github.com/jonnyzar/OSCP_Tools/tree/main/Cheat_Sheets
+2. Use tools 
 3. Contribute to this repository if you have a better tool
 
 # Warning
