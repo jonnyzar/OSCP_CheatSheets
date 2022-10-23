@@ -158,14 +158,15 @@ Use for any available payload.
 <code> python -c 'import pty; pty.spawn("/bin/bash")' </code><br>
 <code> python3 -c 'import pty;pty.spawn("/bin/bash")' </code>
 
-* All subsequent actions are performed on attack client
+## Getting fully working PTY
 
-2. press Ctrl + Z to pause shell on your attack client
-
-3. stty raw -echo 
-
-4. fg enter enter
-
-5. export TERM=xterm
-
-As result you should get a fully interactive shell with history and all other goodies
+```
+python -c 'import pty; pty.spawn("/bin/bash")'
+^Z bg
+stty -a
+echo $TERM
+stty raw -echo
+fg
+export TERM=...
+stty rows xx columns yy
+```
