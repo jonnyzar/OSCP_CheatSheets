@@ -11,6 +11,12 @@ It is the followed by more refined attacks.
 `gobuster dns -u google.com -w wordlist.txt`
 3. dobuster dns: enumerate subdomains
 `gobuster dns -d google.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt`
+4. use nmap scripts 
+
+```bash
+ls /usr/share/nmap/scripts | grep http
+nmap -p80,443 --script "http-*" $victim_ip
+````
 
 # OWASP Top 10
 
