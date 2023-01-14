@@ -149,7 +149,7 @@ Get-NetSession -ComputerName dc01
 
 ```
 
-### Domain Discovery Bloodhound
+### Bloodhound: AD Discovery
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
@@ -180,16 +180,16 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 
 `./bloodhound.py -d xxx.local -u xxxxxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
 
-### Launching Bloodhound and AD Visualization
+#### Launching Bloodhound and AD Visualization
 
 1. launch neo4j: `sudo neo4j console`
 2. launch GUI: `bloodhound`
 3. click on Upload Data in the upper right corner
 4. Right-Click on free are on the screen and select "Reload Query"
 
-# Exploitation
+## Exploitation
 
-1. Try attacking Kerberos in this order:
+Try attacking AD in this order:
 Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 * Kerberos brute-force
@@ -202,7 +202,22 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 * Silver ticket
 * Golden ticket
 
-## Brute Force ASREP roast
+### Local Host Memmory Dumping
+
+Most of the AD attacks shall require hash or ticket that can be only extracted with SYSTEM rights from the target host.
+
+
+
+
+```powershell
+# never use mimikatz as a standalone tool as it shall get detected
+# instead inject it into memmory using this module from ps mafia
+
+https://github.com/PowerShellMafia/PowerSploit/blob/master/CodeExecution/Invoke-ReflectivePEInjection.ps1
+
+```
+
+### Brute Force ASREP roast
 
 * To get user list of users use: `enum4linux`
 * If local access is give then use Rubeus: `Rubeus.exe asreproast`
