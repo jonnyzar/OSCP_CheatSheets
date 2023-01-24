@@ -212,7 +212,7 @@ cat output.txt
 
 So to **make oracle user root account**, it is sufficient to add following line
 
-<code> pentester:x:0:0::/:/bin/bash </code>
+<code> tester:x:0:0::/:/bin/bash </code>
 
 Instead of 1021, we got UID and GID 0, which corresponds to root account. So user orcale is root now.
 
@@ -249,7 +249,7 @@ AND dont forget salt!
 
 <code>  bg_proc > /dev/null 2>&1 &   </code>
 
-```
+```bash 
 ps aux | grep root	See processes running as root
 ps au	See logged in users
 ls /home	View user home directories
@@ -258,6 +258,7 @@ history	Check the current user's Bash history
 sudo -l	Can the user run anything as another user?
 ls -la /etc/cron.daily	Check for daily Cron jobs
 lsblk	Check for unmounted file systems/drives
+find / -perm -002 -type d 2>/dev/null Find world writeable directories
 find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null	Find world-writeable directories
 find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null	Find world-writeable files
 uname -a	Check the Kernel versiion
