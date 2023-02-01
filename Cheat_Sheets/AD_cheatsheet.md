@@ -150,7 +150,7 @@ Get-NetSession -ComputerName dc01
 
 ```
 
-### Bloodhound: AD Discovery
+### Bloodhound
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
@@ -187,6 +187,30 @@ use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
 2. launch GUI: `bloodhound`
 3. click on Upload Data in the upper right corner
 4. Right-Click on free are on the screen and select "Reload Query"
+
+#### Filtering
+
+* set owned principals 
+* click on funnel to filter and remove for instance `CanRDP`
+* set and find high value targets
+
+
+```powershell
+#here lookin for unconstrained deleg
+
+MATCH (dc:Computer)-[:MemberOf*1..]->(g:Group) WHERE g.objectsid ENDS WITH "516" WITH COLLECT(dc) as domainControllers MATCH p = (d:Domain)-[:Contains*1..]->(c:Computer {unconstraineddelegation:true}) WHERE NOT c in domainControllers SET c.highvalue = true RETURN c
+
+```
+
+* find shortest path
+
+```powershell
+
+MATCH p=shortestPath((c {owned: true})-[*1..3]->(s)) WHERE NOT c = s RETURN p
+
+# to high value and DA
+MATCH p=shortestPath((u {highvalue: false})-[*1..]->(g:Group {name: 'DOMAIN ADMINS@HACKERS.LAB'})) WHERE NOT (u)-[:MemberOf*1..]->(:Group {highvalue: true}) RETURN p
+```
 
 ## Exploitation
 
@@ -643,6 +667,14 @@ A  mechanism where a user sends its credentials to a service and then the servic
 
 * force DC to connect to it via MS-RPRN RPC interface: kudos https://github.com/leechristensen/SpoolSample
 `.\SpoolSample.exe DC01.HACKER.LAB HELPDESK.HACKER.LAB`
+
+Or one of the other options
+
+```text
+Responder
+ARP Poisoning
+Rogue DHCPv6
+```
 
 ### Constrained delegation
 
