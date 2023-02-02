@@ -702,9 +702,9 @@ see https://github.com/jonnyzar/windows-kernel-exploits
 
 ## Exposed GPP Password
 
-* Article to read: https://grimhacker.com/2015/04/10/gp3finder-group-policy-preference-password-finder/
-* Use gp3finder tool once .xml file with cpassword is found
-`docker run grimhacker/gp3finder -D edBSHOw...`
+* impacket-Get-GPPPassword to get password
+* gp3finder.py to crack password
+
 
 ## Compiling Exploits for Windows on Kali
 
@@ -732,7 +732,7 @@ Or connect as other service if needed from victim
 ```
 
 * look for stuff
-`Get-Childitem –Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
+`Get-Childitem -Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
 
 * enable RDP
 `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f`

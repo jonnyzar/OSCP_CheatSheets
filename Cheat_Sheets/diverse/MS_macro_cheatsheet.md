@@ -51,3 +51,5 @@ Sub MyMacro()
 End Sub
 
 ```
+
+* Always create a new .doc, don't reuse the old ones
