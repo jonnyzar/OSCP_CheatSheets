@@ -1,25 +1,27 @@
 # X-Compiling binaries on kali
 
 ## Get cross-compiler for windows
-<code> apt install mingw-w64 </code>
+
+`apt install mingw-w64 `
 
 
-
+```c
 #include <stdlib.h>
 
 int main(){
 	system("Your command here");
   return 0;
 }
+```
 
 cross compile for 32 bit
 	
-<code> i686-w64-mingw32-gcc foo.c -o foo.exe </code>
+`i686-w64-mingw32-gcc foo.c -o foo.exe`
 
 
 cross compile for 64 bits
 	
-<code> x86_64-w64-mingw32-gcc foo.c -o foo.exe </code>
+`x86_64-w64-mingw32-gcc foo.c -o foo.exe`
 	
 List compilation options
 	
@@ -27,7 +29,7 @@ List compilation options
 	
 Compile malicious dll
 
-<code> x86_64-w64-mingw32-gcc windows_dll.c -shared -o hijackme.dll </code>
+`x86_64-w64-mingw32-gcc windows_dll.c -shared -o hijackme.dll`
 
 ## For Linux
 
