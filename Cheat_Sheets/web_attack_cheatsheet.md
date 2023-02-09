@@ -194,6 +194,9 @@ Then find the framework on: https://wiki.owasp.org/index.php/OWASP_favicon_datab
 
 `ffuf -w /usr/share/seclists/Discovery/Web-Content/common.txt -u http://ip/FUZZ` (FUZZ keyword is there where you want to fuzz)
 
+Fuzzing for POST requests
+
+`ffuf -w passwords.txt -u http://192.168.123.52/login.php -H "Content-Type: application/x-www-form-urlencoded" -H "DNT: 1" -H "Upgrade-Insecure-Requests: 1" -d "username=admin&password=FUZZ&debug=0" -H "User-Agent: Fool"  -fr "Failed"`
 
 # Other Web Attacks
 
