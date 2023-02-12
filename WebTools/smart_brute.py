@@ -1,5 +1,6 @@
 '''
-This script
+This script was developed from example of brute forcing phpmyadmin site to assisst in developing similar Tools for self
+assessment of own web applications
 
 #POST1
 
@@ -42,3 +43,22 @@ set_session=CURRENT_COOKIE&pma_username=root&pma_password=PASS_LIST&server=1&tar
 
 3. evaluate to not have "Login Failed" in reposnse body
 '''
+
+import requests
+import re
+#import base64
+import sys
+
+URL = sys.argv[1]
+USER_FILE = sys.argv[2]
+PASS_FILE = sys.argv[3]
+
+def main():
+
+    print(f"Bruting for {URL}\n with users in {USER_FILE}\n and passwords in {PASS_FILE}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    main()
