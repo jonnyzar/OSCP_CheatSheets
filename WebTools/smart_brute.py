@@ -107,7 +107,7 @@ def analyze_resp(resp):
 
     fail_match = re.search(r'Login Failed', resp.text)
 
-    if not fail_match:
+    if fail_match.group(0) == 'Login Failed':
         password_correct = True
 
     return (next_cookie, token, password_correct)
