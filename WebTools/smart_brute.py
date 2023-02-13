@@ -79,7 +79,7 @@ def analyze_resp(resp):
     session_match = re.search(r'set_session" value="([a-f0-9]+)"', resp.text)
     
     if session_match:
-        next_cookie = session_match.group(1)
+        next_cookie = session_match.group(0)
         print("set_session cookie:", next_cookie)
     else:
         return 0
@@ -89,7 +89,7 @@ def analyze_resp(resp):
     token_match = re.search(r'token" value="([a-f0-9]+)"', resp.text)
     
     if token_match:
-        token = token_match.group(1)
+        token = token_match.group(0)
         print("Token value:", token)
     else:
         return 0
