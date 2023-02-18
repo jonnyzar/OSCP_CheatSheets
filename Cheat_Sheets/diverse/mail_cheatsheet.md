@@ -57,7 +57,7 @@ Content-Transfer-Encoding: 7bit;
 <html>
 <body>
 
-<a href="http://192.168.119.153">job application</a>
+<a href="http://192.168.119.153/">job application</a>
 
 </body>
 </html>
