@@ -25,7 +25,7 @@ with open(sys.argv[1],'r') as hosts_file:
 
     for host in hosts:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(2) 
+            s.settimeout(10) 
 
             try:
                 s.connect((host.strip("\n\r "),25))

