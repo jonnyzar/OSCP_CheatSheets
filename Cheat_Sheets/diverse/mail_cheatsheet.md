@@ -52,11 +52,10 @@ DATA
 
 Mime-Version: 1.0;
 Content-Type: text/html; charset="ISO-8859-1";
-Content-Transfer-Encoding: 8bit;
+Content-Transfer-Encoding: 7bit;
 
 <html>
-  <head></head>
-  <body>
+<body>
 
 <a href="http://192.168.119.153">job application</a>
 
