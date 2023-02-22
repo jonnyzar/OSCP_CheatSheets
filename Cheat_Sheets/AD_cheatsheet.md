@@ -62,6 +62,20 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 * **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.domain.local`
 * **Using nltest**: `nltest /dclist:domain.local`
 
+#### AD DNS
+
+```bash
+
+#poke Active Directory servers
+
+dig -t _gc._tcp.lab.domain.com
+dig -t _ldap._tcp.lab.domain.com
+dig -t _kerberos._tcp.lab.domain.com
+dig -t _kpasswd._tcp.lab.domain.com
+nmap --script dns-srv-enum --script-args "dns-srv-enum.domain='domain.com'"
+
+```
+
 #### Domain Hosts Discovery
 
 * NetBios scan: `nbtscan 192.168.100.0/24`
