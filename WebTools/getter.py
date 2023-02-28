@@ -16,6 +16,8 @@ import re
 #import base64
 import sys
 
+#import requests.utils.quote as url_enc
+
 URL = sys.argv[1]
 PAYLOAD_FILE = sys.argv[2]
 #PASS_FILE = sys.argv[3]
