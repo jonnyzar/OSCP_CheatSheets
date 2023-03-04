@@ -82,6 +82,11 @@ For SGID:
 For both (preferred way):
 `find / -perm -u=s -type f 2>/dev/null`
 
+2. Exploit SUID
+
+* use `strings` to identify use command within SUID file 
+* Always use elf payload for exploiting SUID
+
 
 
 # Write on root owned files
