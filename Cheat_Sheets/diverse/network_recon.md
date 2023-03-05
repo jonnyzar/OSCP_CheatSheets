@@ -6,7 +6,7 @@ Not a replacement for official docs but a rapid reference
 
 ### Ping scan
 
-#### nmap
+#### using nmap
 
 ```bash
 
@@ -18,4 +18,10 @@ grep Up ping_hosts.gnmap | cut -d ' ' -f 2 > hosts.txt
 
 Wont work if ICMP ping requests are blocked.
 
+#### using custom python script
+
+* advantage of using own custom script is that you can tune its parameters to suit your needs. Like changing the ping packet size.
+
 ### SYN-scan
+
+##
