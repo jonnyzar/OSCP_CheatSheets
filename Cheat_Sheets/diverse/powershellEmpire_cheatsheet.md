@@ -81,3 +81,12 @@ Now like with Metasploit set the attacker listener IP and port
 [+] Listener http successfully started
 
 ```
+
+#### Setup a stager
+
+Now somehow we need to connect to a victim. There are two ways of doing it:
+
+1. bind: we connect to a victim
+2. reverse: victim connects to us
+
+Both of those ways need a stager that must be transferred to victim and activated preferrably with root or SYSTEM privileges.
