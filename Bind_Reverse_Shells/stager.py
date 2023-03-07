@@ -9,7 +9,8 @@ filename = 'nc.exe'
 
 response = requests.get(url)
 
+#openfile in write binary mode
 with open(filename, 'wb') as f:
+    #write streamed content to local file
     f.write(response.content)
 
-print('File downloaded')
