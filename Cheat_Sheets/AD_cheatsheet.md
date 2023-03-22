@@ -329,6 +329,19 @@ after that DC shall provide a TGT
 
 `.\PsExec.exe \\dc01 cmd.exe`
 
+Also possible to generate NTLM hash in linux if password is given
+
+```bash
+pw=Password123
+
+printf '%s' "$pw" | iconv -t utf16le | openssl md4
+
+#thats NT hash
+MD4(stdin)= 58a478135a93ac3bf058a5ea0e8fdb71
+
+
+```
+
 ### Brute Force ASREP roast
 
 * To get user list of users use: `enum4linux`
