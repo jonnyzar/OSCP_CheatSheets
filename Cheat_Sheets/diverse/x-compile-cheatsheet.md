@@ -36,3 +36,11 @@ Compile malicious dll
 Use another box or directly on kali
 
 if doesnt compile, for older machines add : `-static -static-libgcc -static-libstdc++`
+
+For x64 bit:
+
+gcc -m64 hello.c -o exploit
+
+For x32 bit:
+
+gcc -m32 hello.c -o exploit
