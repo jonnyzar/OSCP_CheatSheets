@@ -50,3 +50,9 @@ grep Up ping_hosts.gnmap | cut -d ' ' -f 2 > hosts.txt
 FAst scan over a large network is better to do with masscan.
 
 `sudo masscan -p80 10.10.1.0/24 --rate=10000 -e tun0 --router-ip 10.10.0.1`
+
+#### Find ports fast
+
+masscan -p- --rate 10000 10.10.45.xx
+
+-> adjust fullscan script  with that
