@@ -1,0 +1,39 @@
+# no spaces in id
+id: git-config
+
+#info block is needed to facilitate search and provide some description to user
+
+info:
+  name: jhonnys template
+  author: jhonny
+  sverity: medium
+  description: Searches for the pattern /.git/config on passed URLs.
+  reference: https://www.acunetix.com/vulnerabilities/web/git-repository-found/
+  tags: git,config
+
+#craft request template for analysis
+requests:
+  method: GET
+  #Variables start with {{ and end with }} and are case-sensitive.
+  path:
+    - "{{BaseURL}}/.git/config"
+  matchers:
+    - type: word
+    words:
+      - "[core]"
+  redirects: true
+  max-redirects: 3
+
+# custom headers can be sent with request
+headers:
+  # Custom user-agent header
+  User-Agent: Some-Random-User-Agent
+  # Custom request origin
+  Origin: https://google.com
+
+# Body is a string sent along with the request
+body: "admin=test"
+
+# cookie-reuse accepts boolean input and false as default
+cookie-reuse: true
+
