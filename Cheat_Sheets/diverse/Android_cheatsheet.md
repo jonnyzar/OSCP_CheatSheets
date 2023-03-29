@@ -15,3 +15,8 @@
 
 * From the Emulated Device you can reach the Development Machine Host using `10.0.2.2`
 * follow this to setup certificates and know where to click: https://portswigger.net/burp/documentation/desktop/mobile/config-android-device
+
+### Decoding Ressources
+
+* MobSF: quick overview of vulenerabilities and source code
+* JADX-GUI: source code and ressources
