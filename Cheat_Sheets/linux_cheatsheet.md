@@ -128,6 +128,8 @@ This should help inside the system.
 1. List processes run as root:
 `ps aux | grep root`
 
+OR/AND use `pspy` to scout running processes https://github.com/DominicBreuker/pspy
+
 2. Search history:
 `history`
 

