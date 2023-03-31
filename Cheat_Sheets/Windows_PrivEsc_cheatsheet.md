@@ -766,6 +766,11 @@ Or connect as other service if needed from victim
 
 `net localgroup "Remote Desktop Users" Pentester /add`
 
+* Enable winrm to be evil
+
+`Enable-PSRemoting -SkipNetworkProfileCheck -Force`
+
+
 
 ## Use winexe
 
