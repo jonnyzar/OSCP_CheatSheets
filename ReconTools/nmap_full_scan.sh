@@ -8,3 +8,5 @@ echo $PORTS
 echo $PORTS > $PWD/ports_$TARGET.log
 
 nmap -p$PORTS -A -Pn -sS -sV -sC -vv --min-rate=1000 -oN $PWD/result_$TARGET.log $TARGET
+
+chmod 755 $PWD/*

