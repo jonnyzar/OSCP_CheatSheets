@@ -412,8 +412,7 @@ If service can be maunally started and stoped, pick the executable from that ser
 
 ```powershell
 
-Get-CimInstance -ClassName Win32_StartupCommand |
-  Select-Object -Property Command, Description, User, Location
+Get-CimInstance -ClassName Win32_StartupCommand | Select-Object -Property Command, Description, User, Location
 
 ```
 
@@ -865,3 +864,5 @@ Or connect as other service if needed from victim
 OR
 
 `winrm quickconfig -y`
+
+guide to evil-winrm: https://github.com/Hackplayers/evil-winrm
