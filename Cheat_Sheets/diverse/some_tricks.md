@@ -30,3 +30,7 @@ for file_name in $js_files; do
 done
 
 ```
+
+## Diverse Application exploits
+
+https://exploit-notes.hdks.org/exploit/linux/privilege-escalation/ruby-privilege-escalation/
