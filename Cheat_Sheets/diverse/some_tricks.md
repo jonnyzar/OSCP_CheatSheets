@@ -1,5 +1,12 @@
 # Random Tricks
 
+## First things to do once RCE obtained
+
+* check for ssh keys
+* check config files: .git, server configs etc
+* check logs
+
+
 ## SSH
 
 * ignore host key
