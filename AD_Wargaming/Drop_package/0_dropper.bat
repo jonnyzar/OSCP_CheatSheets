@@ -1,7 +1,7 @@
 @echo off
 
 if "%1"=="" (
-  echo Usage: wintools.bat http:/ip:port
+  echo Usage: wintools.bat http://ip:port
   exit /b 1
 )
 
