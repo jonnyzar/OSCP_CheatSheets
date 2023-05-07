@@ -60,6 +60,53 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 * **DNS query**: `nslookup -q=srv _ldap._tcp.dc._msdcs.domain.local`
 * **Using nltest**: `nltest /dclist:domain.local`
 
+
+#### powershell methods
+
+* execute commands stand alone or make a script
+
+```powershell
+
+# Import-Module .\function.ps1
+# Set-ExecutionPolicy -ExecutionPolicy Bypass 
+# LDAPSearch -LDAPQuery "(samAccountType=805306368)"
+
+function LDAPSearch {
+    param (
+        [string]$LDAPQuery
+    )
+
+   #[System.DirectoryServices.ActiveDirectory.Domain] namespace  used to get Domain Class and its method GetCurrentDomain()
+
+    $PDC = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name
+    $DistinguishedName = ([adsi]'').distinguishedName
+
+    $DirectoryEntry = New-Object System.DirectoryServices.DirectoryEntry("LDAP://$PDC/$DistinguishedName")
+
+   #DirectorySearcher class performs queries against AD using LDAP
+
+    $DirectorySearcher = New-Object System.DirectoryServices.DirectorySearcher($DirectoryEntry, $LDAPQuery)
+
+    return $DirectorySearcher.FindAll()
+
+}
+
+#To enumerate every group available in the domain and also display the user members
+
+foreach ($group in $(LDAPSearch -LDAPQuery "(objectCategory=group)")) {
+>> $group.properties | select {$_.cn}, {$_.member}
+>> }
+
+#$sales = LDAPSearch -LDAPQuery "(&(objectClass=user)(cn=jeff))"
+
+
+$sales = LDAPSearch -LDAPQuery "(&(objectCategory=group)(cn=Sales Department))"
+
+
+$sales.properties.member
+```
+
+
 #### AD DNS
 
 ```bash

