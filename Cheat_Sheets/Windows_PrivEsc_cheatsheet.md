@@ -171,9 +171,9 @@ $rb = $shell.Namespace(10)
 $rb.Items()
 ```
 
-# Enumeration
+## Enumeration
 
-## local enumeration
+### local enumeration
 
 * Winpeas
 
@@ -210,6 +210,16 @@ Use accesscheck from sysinternals
 Check access
 
 `.\accesschk.exe /accepteula -uwcqv user c:\`
+
+### Applications
+
+* 32 bit
+
+Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+
+* 64 bit
+
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
 
 ### Services
 
