@@ -1,2 +1,0 @@
-new session: tmux new-session s <name>
-scroll: C+b [ (up/down arrows)
