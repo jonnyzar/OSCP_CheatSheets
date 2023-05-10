@@ -133,6 +133,7 @@ nmap --script dns-srv-enum --script-args "dns-srv-enum.domain='domain.com'"
 `ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"`
 
 #### Domain dump with ldap
+
 ```
  ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
 
@@ -154,18 +155,15 @@ ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.su
 
 #### Crackmapexec
 
-'cme smb bamdc1.skorp.com -u DUMMY -p Password1 --users'
+find machines in range where current user is admin
+
+`cme smb 192.168.239.0/24 -u pete -p "Nexus123\!" --continue-on-success`
 
 #### Kerbrute
 
-* kerbrute
+find users of domain via TGT requests
 
 `./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
-
-* Nmap
-```
-nmap -p 88 --script krb5-enum-users --script-args "krb5-enum-users.realm='spookysec.local', userdb=userlist.txt 10.10.43.76"
-```
 
 #### PowerView
 
@@ -227,7 +225,7 @@ Get-NetEffectivePermissions -Identity <username> -Domain <domain_name> -ObjectNa
 
 #find computers where local user has admin access
 
-`Find-LocalAdminAccess `
+Find-LocalAdminAccess
 
 # get exact permission type for some identity
 
