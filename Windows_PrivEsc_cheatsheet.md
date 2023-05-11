@@ -847,7 +847,7 @@ big thanks for the skript to https://gist.github.com/t2psyto
 
 
 
-# Post exploitation
+## Post exploitation
 
 * Once Admin privileges obtained get SYSTEM shell
 `psexec.exe -accepteula -sid cmd.exe`
@@ -886,3 +886,9 @@ OR
 `winrm quickconfig -y`
 
 guide to evil-winrm: https://github.com/Hackplayers/evil-winrm
+
+* RDP into machine
+
+xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75
+
+use /pth: for pass the hash attack

