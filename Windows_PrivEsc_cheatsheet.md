@@ -158,8 +158,19 @@ Set-ExecutionPolicy Unrestricted
 
 ## Find Stuff
 
+* Primary option: PowerView.ps1
+
+```powershell
+
+. .\PowerView.ps1
+
+Find-InterestingFile -Path \\FileServer1.domain.com\S$\shares\
+
+```
+
 * cmd: `dir /s /b c:\filename` find filename in c: drive recursively
 * ps: `Get-Childitem –Path C:\ -Include *filetolookfor* -Exclude *.JPG,*.MP3,*.TMP -File -Recurse -ErrorAction SilentlyContinue`
+
 
 ## Recycle Bin // TBD
 
