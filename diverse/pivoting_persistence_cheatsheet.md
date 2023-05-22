@@ -68,10 +68,10 @@ some service is listening at attacker AND connection is incomming from the victi
 
 Attacker (1.1.1.1:8000) --------> Victim Pivot (client forwards input from attacker to next victim ) --------> Next Victim (3.3.3.4)
 
-./chisel server -p 8000 --reverse on local 
-./chisel client 1.1.1.1:8000 R:80:3.3.3.4:80 on the target. 
+./chisel server -p 9903 --reverse on local 
+./chisel client 10.10.xx.xx:9903 R:127.0.0.1:1280:172.16.xx.xx:80 &
 
-This will open a listener on port 80 on my Kali box, and any connections to that port will be forwarded to the target, which will pass them to port 80 on 3.3.3.4.
+This will open a listener on port 1280 on attackers localhost, and all connections to the target website on 172.16.xx.xx are going to be forwarded via pivot server at 10.10.xx.xx:9903
 
 #### Dynamic reverse forwarding
 
