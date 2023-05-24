@@ -1,23 +1,5 @@
 # Basics
 
-* Always work from %TEMP% directory as it allows all users to write and it might be less monitored than system folders
-
-```powershell
-PS> cd $env:temp
-```
-
-```cmd
-cmd> cd %TEMP%
-```
-
-```cmd
-
-#check version
-
-systeminfo | findstr /B /C:"Host Name" /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Hotfix(s)"
-
-```
-
 ## Enumeration
 
 Basic Strategy
@@ -35,6 +17,68 @@ Basic Strategy
 * look for internal ports
 * Check users
 
+### System
+
+```powershell
+
+sysminfo
+
+
+```
+
+### Users
+
+```powershell
+
+net user
+
+Get-LocalUser
+
+whoami /all
+
+```
+
+
+### Groups
+
+```powershell
+
+whoami /groups
+
+# get list of local groups
+Get-LocalGroup
+
+net localgroup
+
+# get group members of SomeGroup
+Get-LocalGroupMember SomeGroup
+
+net localgroup SomeGroup
+```
+
+### Installed Application
+
+```powershell
+
+# cmd
+
+wmic product get name, version
+
+
+# all
+
+Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+
+# 32 bit
+
+Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+
+# 64 bit
+
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
+```
+
+Then look for vulnerable applications that are running.
 
 ### Find Process and its ACL
 
@@ -43,6 +87,8 @@ Get-Process | findstr paint
 
 Get-Process -Name | Get-Acl
 ```
+
+Process ID can be then correlated with what is installed and exposed.
 
 ### NetBIOS
 
@@ -225,15 +271,6 @@ Check access
 
 `.\accesschk.exe /accepteula -uwcqv user c:\`
 
-### Applications
-
-* 32 bit
-
-Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
-
-* 64 bit
-
-Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
 
 ### Services
 
@@ -821,7 +858,7 @@ This shell works even on Windows 11 but needs MSF
 
 see https://github.com/jonnyzar/windows-kernel-exploits
 
-
+`wes.py systeminfo.txt`
 
 ## Standard Approach
 * Download Winpeas: see github

@@ -39,6 +39,8 @@ sudo -l
 # check for all cron jobs
 ls -la /etc/cron*	
 crontab -l
+grep "CRON" /var/log/syslog
+cat /var/log/cron.log
 
 #Check for unmounted file systems/drives
 lsblk	
@@ -137,16 +139,7 @@ lsmod
 # get more info about some module
 /sbin/mdinfo libdata
 ```
-### Abusing cron jobs
 
-```bash
-# observe cronjobs
-
-grep "CRON" /var/log/syslog
-
-cat /var/log/cron.log
-
-```
 
 ### Disclosed passwords or other credentials
 
