@@ -83,9 +83,16 @@ Then look for vulnerable applications that are running.
 ### Find Process and its ACL
 
 ```powershell
-Get-Process | findstr paint
+
+
+Get-Process | Select-Object ProcessName, Path
 
 Get-Process -Name | Get-Acl
+
+Get-Process | ForEach-Object { $_.Path } 
+
+
+
 ```
 
 Process ID can be then correlated with what is installed and exposed.
