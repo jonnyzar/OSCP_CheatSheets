@@ -21,6 +21,15 @@ Basic Strategy
 
 ```powershell
 
+# see user's history
+Get-History
+
+# check PSReadline history
+$psReadlineOptions = Get-PSReadlineOption; $historySavePath = $psReadlineOptions.HistorySavePath; if (Test-Path $historySavePath) { Get-Content $historySavePath } else { Write-Host "PS History File does not exist" }
+ 
+
+# check contents of this file
+
 # get into temp dir which is typically writable
 cd $env:temp
 
