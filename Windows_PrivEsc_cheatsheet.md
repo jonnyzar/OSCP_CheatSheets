@@ -362,7 +362,9 @@ Check access
 
 ### Services
 
-Programs running in the background. If run under SYSTEM and compromised, they lead to priv esc.
+#### Insecure Service Properties
+
+Dangerous permissions: SERVICE_CHANGE_CONFIG, SERVICE_ALL_ACCESS
 
 Enumerate service with winpeas
 
@@ -403,18 +405,13 @@ Start/Stop Service
 `net start/stop <name>`
 i.e. 'net start daclsvc' 
 
-#### Service Exploitation
 
-
-1. Insecure Service Properties
-
-Dangerous permissions: SERVICE_CHANGE_CONFIG, SERVICE_ALL_ACCESS
 
 RABBIT HOLE: Make sure you can restart the service or machine to make changes active!
 
 `accesschk.exe /accepteula -ucqv servicename`
 
-2. Unquoted Service Path
+#### Unquoted Service Path
 
 ```cmd
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v """
@@ -449,7 +446,7 @@ PS C:\temp> .\accesschk.exe /accepteula -uwdq "C:\Program Files\"
 ```
 
 
-3. Weak Registry Permissions
+#### Weak Registry Permissions
 
 First, check
 
@@ -505,63 +502,39 @@ The operation completed successfully.
 
 Now just start the service again and await reverse shell.
 
-4. Insecure Executables
 
-If original executable is writeable than it can be replaced with malicious file to obtain shell.
 
-Detection in winpeas: `File Permissions: Everyone [AllAccess]`
+#### Service Binary Hijacking
+
+1. Find running services
 
 ```powershell
-# confirm with accesschk
 
-.\accesschk.exe /accepteula -quvw "C:\Program Files\File Permissions Service\filepermservice.exe"
+# check for running services
+Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'}
 
-C:\Program Files\File Permissions Service\filepermservice.exe
-  Medium Mandatory Level (Default) [No-Write-Up]
-  RW Everyone # everyone can access this file and RW on it
-	FILE_ALL_ACCESS 
-  RW NT AUTHORITY\SYSTEM
-	FILE_ALL_ACCESS
-  RW BUILTIN\Administrators
-	FILE_ALL_ACCESS
-  RW P1\Pentester
-	FILE_ALL_ACCESS
-  RW BUILTIN\Users
-	FILE_ALL_ACCESS
+# check for privileged services
+
+Get-CimInstance -ClassName win32_service | Select Name,State,PathName,StartName,StartMode | Where-Object {$_.State -like 'Running' -and ($_.StartName -like '*LocalSystem' -or $_.StartName -like 'NT AUTHORITY')}
+
+# check specific service
+
+Where-Object {$_.Name -like 'mysql'}
+
+Get-CimInstance -ClassName win32_service | Select Name,State,PathName,StartName,StartMode | Where-Object {$_.Name -like 'service0815'}
+
+```
+2. Find writable binary 
+
+```powershell
+
+Get-CimInstance -ClassName win32_service | Where-Object {$_.State -like 'Running'} | ForEach-Object { $path = $_.PathName -replace '^"([^"]*)".*$','$1' -replace '^(.*\.exe).*','$1'; Write-Output "Permissions for $path"; & icacls $path }
+
 
 ```
 
-Let's back it up and the overwrite with shell file.
-
-`copy rev4444.exe "C:\Program Files\File Permissions Service\filepermservice.exe"`
-
-Now start malicous executable via service `net start filepermsvc`
-
-5. DLL Hijacking
-
-If service-DLL in absolute path is writeable, it can be overwritten with malicious payload.
-
-More common: DLL is missing, so malicious payload can be added into the writable folder to cause havoc.
-
-* Find possible vulnerable service
-
-Use winpeas output to see non-windows services.
-
-Pick some service that can be started and stoped: use accesschk
-`.\accesschk.exe /accepteula -ucqv <user> <service>`
-
-If service can be maunally started and stoped, pick the executable from that service and copy it to other windows machine for analysis
-
-* create service and assign the copied executable to it on the analysis machine (if not existent)
-* start procmon for analysis
-* stop and clear current capture in top panel
-* add filter on process name equal to copied exe `Process Name is `
-* remove network and registry activities
-* start capture
-* start the service
-* identify where is the missing dll `NAME NOT FOUND`
-* create malicious DLL binary and place in writeable directory
-* Enjoy reverse shell
+3. Replace writable binary with a malicious one
+4. Restart service or Reboot the machine
 
 ### Autostart exploit
 

