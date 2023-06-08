@@ -714,9 +714,12 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName, Ta
 ```
 
 * Find scripts use by scheduled task
-* Check permissions on script
+* Check permissions on script or exe 
 
-`accesschk.exe /accepteula -quv user scheduled_script.ps1`
+```cmd
+icacls C:\Users\user101\Cleanup.exe
+
+```
 
 * If writeable, replace this script with a malicious executable to obtain reverse shell
 
