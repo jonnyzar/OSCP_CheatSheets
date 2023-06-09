@@ -40,7 +40,7 @@ Get-ComputerInfo
 
 # search for interesting files
 
-Get-ChildItem -Path C:\ -Include  *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx,*.kdbx,*.ini -File -Recurse -ErrorAction SilentlyContinue
+Get-ChildItem -Path .\ -Include  *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx,*.kdbx,*.ini -File -Recurse -ErrorAction SilentlyContinue
 
 # see also hidden files
 Get-ChildItem . -Force
@@ -782,6 +782,10 @@ Start-Process powershell.exe -Credential $credential
 # it is going to start a new window with powershell as compromised user
 
 ```
+
+### Abusing Privileges
+
+https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/
 
 #### Token Impersonation
 
