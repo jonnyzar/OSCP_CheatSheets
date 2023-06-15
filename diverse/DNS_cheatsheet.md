@@ -18,7 +18,7 @@ nmap -p53 --open -sC 123.132.34.23
 
 `dig any victim.com @<DNS_IP>`
 
-## Lookupa
+## Lookup
 
 * direct
 
@@ -27,6 +27,14 @@ nmap -p53 --open -sC 123.132.34.23
 * reverse
 
 `dig -x 192.168.0.2 @<DNS_IP>`
+
+### nslookup
+
+```powershell
+
+nslookup -type=TXT info.domain.com 192.168.xxx.xxx
+
+```
 
 ## Records
 

