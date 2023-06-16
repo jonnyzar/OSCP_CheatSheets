@@ -61,7 +61,7 @@ shutdown /r /t 0
 
 # RDP into machine
 
-`xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75`
+`xfreerdp /cert:ignore /dynamic-resolution /clipboard /auto-reconnect /d:domain.com /u:jeff /p:'HenchmanPutridBonbon11' /v:192.168.244.75`
 
 # use `/pth:` for pass the hash
 
