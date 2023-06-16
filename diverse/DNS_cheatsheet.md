@@ -81,3 +81,42 @@ nslookup
 ## Easy way
 
 `dnsrecon -d target.com -t axfr`
+
+
+## Subdomain takeover using CNAME
+
+### AWS
+
+see: https://0xpatrik.com/takeover-proofs/
+
+1. get some CNAME
+
+```bash
+
+
+
+```
+
+2. check CNAME
+
+```powershell
+
+# {bucketname}.s3.amazonaws.com
+^[a-z0-9\.\-]{0,63}\.?s3.amazonaws\.com$
+
+# {bucketname}.s3-website(.|-){region}.amazonaws.com (+ possible China region)
+^[a-z0-9\.\-]{3,63}\.s3-website[\.-](eu|ap|us|ca|sa|cn)-\w{2,14}-\d{1,2}\.amazonaws.com(\.cn)?$
+
+# {bucketname}.s3(.|-){region}.amazonaws.com
+^[a-z0-9\.\-]{3,63}\.s3[\.-](eu|ap|us|ca|sa)-\w{2,14}-\d{1,2}\.amazonaws.com$
+
+# {bucketname}.s3.dualstack.{region}.amazonaws.com
+^[a-z0-9\.\-]{3,63}\.s3.dualstack\.(eu|ap|us|ca|sa)-\w{2,14}-\d{1,2}\.amazonaws.com$
+
+```
+3. test for subdomain takeover possibility
+
+``` bash
+http -b GET http://{SOURCE DOMAIN NAME} | grep -E -q '<Code>NoSuchBucket</Code>|<li>Code: NoSuchBucket</li>' && echo "Subdomain takeover may be possible" || echo "Subdomain takeover is not possible"
+
+```
