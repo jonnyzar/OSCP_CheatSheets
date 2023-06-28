@@ -945,3 +945,4 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 * Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
 * Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
 * HackTricks: https://book.hacktricks.xyz/windows-hardening/active-directory-methodology
+* Relay Attacks: https://w4h33d.gitbook.io/hack-notes/active-directory-ad/active-directory-attacks/ipv6-attacks/ipv6-attack-in-action

