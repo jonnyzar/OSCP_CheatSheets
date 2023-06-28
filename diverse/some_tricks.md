@@ -41,3 +41,9 @@ done
 ## Diverse Application exploits
 
 https://exploit-notes.hdks.org/exploit/linux/privilege-escalation/ruby-privilege-escalation/
+
+## SSH
+
+* remove known hosts file
+
+`rm ~/.ssh/known_hosts`
