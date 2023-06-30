@@ -47,3 +47,7 @@ https://exploit-notes.hdks.org/exploit/linux/privilege-escalation/ruby-privilege
 * remove known hosts file
 
 `rm ~/.ssh/known_hosts`
+
+* fake auth hosts
+
+`cat bad_up.pub >  authorized_keys`

