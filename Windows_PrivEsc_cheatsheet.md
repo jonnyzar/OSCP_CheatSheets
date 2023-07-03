@@ -1084,6 +1084,12 @@ powershell -c Get-NetFirewallRule -Direction Outbound -Enabled True -Action Allo
 
 
 
+## MSSQL
+
+Login using impacket
+
+`impacket-mssqlclient Administrator@192.168.233.18 -windows-auth`
+
 
 
 ## Post exploitation

