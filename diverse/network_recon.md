@@ -29,7 +29,18 @@ grep Up ping_hosts.gnmap | cut -d ' ' -f 2 > hosts.txt
 * slower than SYN
 * bypasses some FW rules
 
-`namp -sT 10.11.11.3`
+`nmap -sT -p445 10.11.11.3`
+
+Another possibility is nc
+
+```bash
+# sweep for 445 port
+for i in $(seq 1 254); do nc -zv -w 1 172.16.50.$i 445 ; done &> output.txt
+
+# filter for non timed out conntection
+
+grep -v 'timed out' output.txt
+```
 
 ### UDP-scan
 

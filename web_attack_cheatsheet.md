@@ -440,6 +440,9 @@ RECONFIGURE;EXEC master.dbo.xp_cmdshell 'cmd.exe dir c:'  -- pFml
 
 ```
 
+### PostgreSQL
+
+use psql in kali
 
 ### Find injectable parameters using SQLMAP
 

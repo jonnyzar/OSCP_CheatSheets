@@ -85,6 +85,27 @@ socks5 127.0.0.1 3333
 proxychains nmap -F 10.185.10.0/24
 
 
+### Using SSH
+
+
+#### SSH Local Port Forwarding
+
+* we need to forward packets to target via ssh client's port 4455 over sshserver to target's port 445. where 192.168.11.2 is a pivot point.
+
+`ssh -N -L 0.0.0.0:4455:10.16.223.217:445 root@192.168.11.2`
+
+Attacker can access remote victim port 445 locally on port 4455.
+
+### Using Socat
+
+#### Forward proxy with socat
+
+`socat -ddd TCP-LISTEN:7777,fork TCP:10.1.11.213:3060`
+
+This line is going to open a listener on 7777 and fork each new connection. New connections are then forwarded to `10.1.11.213:3060`.
+
+This is especially useful if socat is installed on target but not possible to install chisel.
+
 ## Configuration for Burp
 
 It can be tricky to use burp with socks but here is a good workaround
