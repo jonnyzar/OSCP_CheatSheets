@@ -37,7 +37,7 @@ ssh -l root VICTIM_IP
 some service is listening at victim and connection is incomming from atacker 
 
 
-### static  forwarding
+### static  forwardin
 
 
  <local-interface>:<local-port>:<remote-host>:<remote-port>
@@ -74,16 +74,21 @@ This will open a listener on port 1280 on attackers localhost, and all connectio
 * In this scenario all ports from the victim pivot point aer redirected to attacker so attacker can access Next Victim, which
 would be othervise not visible for his network adapter
 
-./chisel server -p 3333 --reverse --socks5
+`./chisel server -p 3333 --reverse --socks5`
 
-./chisel_lin client 172.16.40.5:3333 R:7777:socks
+* on server
 
+```bash
 sudo vim /etc/proxychains4.conf
 
-socks5 127.0.0.1 3333
+# socks5 127.0.0.1 1080
+
+./chisel client 172.16.40.5:3333 R:1080:socks
+
+# test
 
 proxychains nmap -F 10.185.10.0/24
-
+```
 
 ### Using SSH
 
@@ -95,6 +100,34 @@ proxychains nmap -F 10.185.10.0/24
 `ssh -N -L 0.0.0.0:4455:10.16.223.217:445 root@192.168.11.2`
 
 Attacker can access remote victim port 445 locally on port 4455.
+
+#### SSH Remote Port forwarding
+
+`ssh -N -R 9999:localhost:8080 user@remote`
+
+This command tells SSH to set up a tunnel from the remote machine's port 9999 to your local machine's port 8080. user@remote should be replaced with your actual SSH login credentials and server.
+
+#### SSH Dynamic Port forwarding
+
+```bash
+ssh -D 8080 -f -C -q -N user@yourserver.com
+```
+-D 8080 sets up the SOCKS proxy on port 8080.
+
+-f asks SSH to go into the background just before command execution.
+
+-C enables compression.
+
+-q enables quiet mode.
+
+-N tells SSH not to execute a remote command.
+
+Then make a socks5 entry in proxy chains for .
+
+##### Multi Hop Scenatio
+
+lets assume: localhost -> 10.11.2.3 -> tor
+
 
 ### Using Socat
 
