@@ -51,3 +51,24 @@ https://exploit-notes.hdks.org/exploit/linux/privilege-escalation/ruby-privilege
 * fake auth hosts
 
 `cat bad_up.pub >  authorized_keys`
+
+## setup puthon virtualenv
+
+### python2
+
+```bash
+virtualenv -p /usr/bin/python2 myenv
+
+source myenv/bin/activate
+
+
+```
+
+## python3
+
+```bash
+
+python3 -m venv myenv
+
+source myenv/bin/activate
+```

