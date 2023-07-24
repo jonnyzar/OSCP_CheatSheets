@@ -927,6 +927,12 @@ c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke
 * nmap scripts
 * crackmapexec
 
+#### well know exploits
+
+* PrinterNightmare: https://github.com/calebstewart/CVE-2021-1675/tree/main
+* Potatoes: SeImpersonate
+* ...
+
 ### RPC
 
 * Dump services
