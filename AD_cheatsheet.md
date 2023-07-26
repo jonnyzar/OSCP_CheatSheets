@@ -77,10 +77,12 @@ server 0.dc01.corp.local
 'net.exe' system utility is widely available and can be used once foothold on windows host within domain is obtained.
 
 * `net user`
-* `net user /domain` returns a list of users to work with
-* `net user some_admin /domain` info about some_admin
+* `net user /domain` returns a list of users in domain
+* `net user some_admin /domain` info about some_admin domain account
 * `net group /domain`
 * `net accounts` lookup AD password policy
+
+Always make sure that you check if some account is a domain account or local. If account is a domain accoutn use it for further domain enumeration!
 
 #### Domain Controller Discovery
 For more details see: https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/how-domain-controllers-are-located

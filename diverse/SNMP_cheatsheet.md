@@ -2,6 +2,10 @@
 
 Or `security not my problem`?
 
+https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp
+
+https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp/snmp-rce
+
 ### What is it
 
 * SNMP contains Management Information Base (MIB) 
