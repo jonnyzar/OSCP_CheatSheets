@@ -80,3 +80,11 @@ python3 -m venv myenv
 
 source myenv/bin/activate
 ```
+
+## curl and wget
+
+Both work wihtout protocol too
+
+like
+
+`wget 192.168.1.40`

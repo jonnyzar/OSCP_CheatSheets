@@ -120,12 +120,16 @@ tbd properly
 
 * Wappalyzer
 * Favicon
-```
+```bash
 # grab the favicon like this 
-user@machine$ curl https://ip.site.com/sites/favicon/images/favicon.ico | md5sum
-```
-Then find the framework on: https://wiki.owasp.org/index.php/OWASP_favicon_database
 
+curl https://ip.site.com/sites/favicon/images/favicon.ico | md5sum
+
+#Then find the framework
+
+https://github.com/nmap/nmap/blob/master/nselib/data/favicon-db
+
+```
 * Inspect Headers
 `user@machine$ curl http://MACHINE_IP -v`
 

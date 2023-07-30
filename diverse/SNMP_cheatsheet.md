@@ -1,11 +1,5 @@
 # SNP Pentesting Cheatsheet
 
-Or `security not my problem`?
-
-https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp
-
-https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp/snmp-rce
-
 ### What is it
 
 * SNMP contains Management Information Base (MIB) 
@@ -21,21 +15,22 @@ https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp/snmp-rce
 
 ### Onesixtyone
 
+* enurmerate community strings
+
 `onesixtyone -c community_list -i ip_list`
 
-where 
+find some strings in `/usr/share/seclists/Discovery/SNMP/snmp-onesixtyone.txt`
 
-```bash
-cat community_list 
+* look for write permissions
 
-public
-private
-other
-```
+`snmp-check -w -c secret_string ip_addr`
 
-```bash
-cat ip_list 
+* refer to those references to get RCE if writable 
 
-10.11.2.34
-10.34.21.1
-```
+https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp
+
+https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp/snmp-rce
+
+* if not writable then just dump all snmp outputs and scroll through them
+
+`snmpbulkwalk -c public -v2c 192.168.192.xxx .`
