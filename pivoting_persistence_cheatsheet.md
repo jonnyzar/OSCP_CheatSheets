@@ -82,6 +82,7 @@ would be othervise not visible for his network adapter
 
 * on server
 
+
 ```bash
 sudo vim /etc/proxychains4.conf
 
