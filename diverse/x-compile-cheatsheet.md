@@ -41,7 +41,7 @@ Compile malicious dll
 
 Use another box or directly on kali
 
-if doesnt compile, for older machines add : `-static -static-libgcc -static-libstdc++`
+if doesn't compile, for older machines add : `-static -static-libgcc -static-libstdc++`
 
 ```bash
 #For x64 bit:

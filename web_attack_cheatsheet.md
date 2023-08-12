@@ -480,3 +480,41 @@ sqlmap --url "http://192.168.204.49/class.php" --data="weight=12&height=2323&age
 * create `web bug/ URL token`
 * send token to target
 * when triggered check web hook logs or mail
+
+## OAuth
+
+### Recon
+
+* if login is redirected to other website than it is a strong indication that OAuth is used
+
+* look for indicators of authorization endpoint
+
+`/authorization` endpoint containing query parameters: `client_id, redirect_uri, and response_type`
+
+```bash
+
+# example of auth request (copyright portswigger)
+
+GET /authorization?client_id=12345&redirect_uri=https://client-app.com/callback&response_type=token&scope=openid%20profile&state=ae13d489bd00e3c24 HTTP/1.1
+Host: oauth-authorization-server.com
+
+```
+
+* once auth server is known look for configurations via GET to
+
+```bash
+
+/.well-known/oauth-authorization-server
+/.well-known/openid-configuration
+
+```
+
+* from there one may have several options: register rogue endpoint, ...
+
+#### Register rogue endpoint
+
+## OpenID connect
+
+* OAuth is not mean for authentication
+* OpenID Connect extends the OAuth protocol to provide a dedicated identity and authentication
+* it enables authentication on top of OAuth
