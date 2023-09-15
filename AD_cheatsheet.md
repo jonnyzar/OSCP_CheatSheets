@@ -70,6 +70,20 @@ server 0.dc01.corp.local
 
 ```
 
+### Kerberos authentication setup
+
+It is possible to setup local Kerberos authentication for linux if credentials and access to target networks are given.
+
+```bash
+kinit logtin@corp.com -V
+sudo cat /etc/krb5.conf
+klist
+```
+
+Also possible to associate workstation using `realm`
+
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/connecting-rhel-systems-directly-to-ad-using-sssd_integrating-rhel-systems-directly-with-active-directory
+
 ## Active Directory Enumeration
 
 ### net.exe

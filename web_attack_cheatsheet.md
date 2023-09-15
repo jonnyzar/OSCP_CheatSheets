@@ -51,12 +51,13 @@ For payloads refer to: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/
 
 Submit special characters and see if they are later present in the source code
 
-``` " ; < > ```
+`xpyxpy " ; < > `
 
-It may look like so
 
-```
-<td> John</td><td>I would eat tacos here every day if I could!</td></tr><tr><td> ok</td><td>doki</td></tr><tr><td> fg</td><td>" ; < > ' '</td></tr>	
+Then look for `xpyxpy` in source code to identify injection points.
+
+```html
+<td> John</td><td>I would eat tacos here every day if I could!</td></tr><tr><td> ok</td><td>doki</td></tr><tr><td> fg</td><td>"xpyxpy ; < > ' '</td></tr>	
 ```
 
 
