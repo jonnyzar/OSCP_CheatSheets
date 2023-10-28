@@ -68,6 +68,10 @@ Test-NetConnection -Port 445 192.168.50.111
 
 ```
 
+### Automated check
+
+https://github.com/itm4n/PrivescCheck/
+
 ### Helpful stuff
 
 ```powershell
