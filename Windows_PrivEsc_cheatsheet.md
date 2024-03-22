@@ -222,7 +222,7 @@ Register-ScheduledTask -TaskName "DisableUAC" -Action $action -Trigger $trigger 
 ## Detect AV Version
 
 * works with PS 3.0 and higher
-`Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntivirusProduct`
+Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntivirusProduct
 
 ## Download and Upload stuff
 

@@ -4,6 +4,15 @@ This is a cheat sheet for exploitation of OWASP Top 10.
 
 It is the followed by more refined attacks. 
 
+## Looting
+
+This ia gonna loot a `/folder` 
+
+```bash
+wget -r -np -R "index.html*" https://target.to.loot/folder/
+```
+
+
 ## Directory traversal
 
 Find parameters vulnerable to `../`

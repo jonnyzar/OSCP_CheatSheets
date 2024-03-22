@@ -34,6 +34,16 @@ cat id_ed25519.pub >> authorized_keys
 ssh -l root VICTIM_IP
 ```
 
+## Prot forwarding
+
+```bash
+# Listen on 443 and forward all incomming connections to local port 1389
+
+socat -v TCP-LISTEN:443,reuseaddr,fork TCP:127.0.0.1:1389
+```
+
+
+
 ##  Proxies
 
 ### Forward proxy

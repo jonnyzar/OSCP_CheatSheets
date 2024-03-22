@@ -55,6 +55,11 @@ TXT - Text records can contain any arbitrary data like SPF records
 
 `dig -t txt dns.google.com`
 
+### AS lookup
+
+* Every corp registers its IP range with AS number.
+* Here is the way of finding that out: https://hackertarget.com/as-ip-lookup/
+
 ## DNS Zone Transfer
 
 This misconfiguration may reveal hiffen domains and hosts behind firewalls and other defences.
@@ -78,14 +83,32 @@ nslookup
 > <IP_MACHINE> #Reverse lookup of a machine, maybe...
 ```
 
-## Easy way
+Zone traversal
 
 `dnsrecon -d target.com -t axfr`
 
 
-## Subdomain takeover using CNAME
 
-### AWS
+## Sub/Domain takeover
+
+## Recon with DNSreaper
+
+```bash
+sudo docker run -it --rm -v $(pwd):/etc/dnsreaper punksecurity/dnsreaper file --filename /etc/dnsreaper/domains.txt
+```
+
+`domains.txt`: list of domains to check
+
+## Domain takeover in general
+
+It is possible sometimes to takeover DNS zones. Depends if zone is vulnerable. 
+Look for `SERVFAIL` fault.
+
+https://github.com/indianajson/can-i-take-over-dns
+
+## AWS DNS
+
+### AWS buckets
 
 see: https://0xpatrik.com/takeover-proofs/
 
