@@ -1,29 +1,45 @@
 # Pentesting Android
 
-## Basics
+## Setup
 
-### Emulating
+### Setup Burp proxy and CA
 
-* use Android Studio
-* make sure qemu is installed
+```bash
 
-1. Install app in the GUI: use Google Play if app is in Google store or needs to start in non debugged mode
-2. start emulating 
+# careful do not use Google APIs
+emulator -writable-system -avd <Nougat 7.11 API>
 
-`emulator -avd Pixel_6a_API_33_Google_Store -qemu -s`
+# go to burp and export a cert.der in DER format
+# convert to pem and rename
 
+openssl x509 -inform DER -in cacert.der -out cacert.pem
+openssl x509 -inform PEM -subject_hash_old -in cacert.pem |head -1
+mv cacert.pem <hash>.0
 
-### Installing 
+# push to mobile device
 
-* install apk on Android emulator `adb install some.apk`
+adb root
+adb remount
+adb push <cert>.0 /sdcard/
+
+# move and give privs in device
+mv /sdcard/<cert>.0 /system/etc/security/cacerts/
+chmod 644 /system/etc/security/cacerts/<cert>.0
+
+reboot
+
+# enjoy your proxy traffic in burp
+Settings -> Wi-Fi -> Mofidy -> advanced -> proxy -> your burp ip and port 
+
+```
 
 ### Rooting
 
-3. root the device
+#### root the device
 
 `sudo docker run --rm --network host aeroot daemon`
 
-4. install and run frida to bypass debugging app's protection
+#### install and run frida to bypass debugging app's protection
 
 https://medium.com/my-infosec-write-ups/frida-installation-40f52845ae98
 
@@ -61,19 +77,16 @@ here is example:
 
 ```js
 this._v0.value = false;
-	this._u0.value = false;
-	this._w0.value = false;
-	this._x0.value = false;
-	this._z0.value = false;
+this._u0.value = false;
+this._w0.value = false;
+this._x0.value = false;
+this._z0.value = false;
 ```
 
+## Common hacks
 
-### Setting up Burp proxy
 
-* From the Emulated Device you can reach the Development Machine Host using `10.0.2.2`
-* follow this to setup certificates and know where to click: https://portswigger.net/burp/documentation/desktop/mobile/config-android-device
-
-### Decoding Ressources
+## Ressources
 
 * MobSF: quick overview of vulenerabilities and source code
 * JADX-GUI: source code and ressources
