@@ -4,7 +4,34 @@ This is a cheat sheet for exploitation of OWASP Top 10.
 
 It is the followed by more refined attacks. 
 
-## Looting
+
+## recon
+
+### Domain intel
+
+`https://crt.sh/?q=qmspot.com`
+dnsrecon
+subslister
+`host $IP`
+dnsreaper
+
+
+### Web server detection
+
+```bash
+
+cat amass_enum_result.txt \
+aquatone -ports xlarge -scan-timeout 500 -out $(date +'%y%m%d') -threads 100 \
+nuclei -list $(date +'%y%m%d')/aquatone_urls.txt
+
+```
+
+### vuln scan
+
+nuclei -list hosts.txt
+nikto
+
+## Download site copy
 
 This ia gonna loot a `/folder` 
 
