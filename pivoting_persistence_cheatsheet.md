@@ -122,7 +122,7 @@ Attacker can access remote victim port 445 locally on port 4455.
 
 This command tells SSH to set up a tunnel from the remote machine's port 9999 to your local machine's port 8080. user@remote should be replaced with your actual SSH login credentials and server.
 
-#### SSH Dynamic Port forwarding
+#### SSH Dynamic Port forwarding -> SOCKS
 
 ```bash
 ssh -D 8080 -f -C -q -N user@yourserver.com
