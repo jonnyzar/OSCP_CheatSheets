@@ -39,6 +39,27 @@ This ia gonna loot a `/folder`
 wget -r -np -R "index.html*" https://target.to.loot/folder/
 ```
 
+## SAML
+## OAuth
+## JWT
+## Verticl ccess control
+## Horizontl ccess control
+## SQLi
+## OS
+## SSTI
+## XXE
+## XSLT
+## Deseriliztion
+## Rce condition
+## PRNG
+## CORS
+## X-domin
+## XSS
+## CSRF
+## CSTI
+## Encryption
+## Request Smuggling
+## Cache Poisoning
 
 ## Directory traversal
 
