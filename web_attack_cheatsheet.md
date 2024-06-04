@@ -16,20 +16,22 @@ subslister
 dnsreaper
 
 
-### Web server detection
+### Web server detection and vuln scan
 
 ```bash
 
-cat amass_enum_result.txt \
-aquatone -ports xlarge -scan-timeout 500 -out $(date +'%y%m%d') -threads 100 \
-nuclei -list $(date +'%y%m%d')/aquatone_urls.txt
+docker run -v $(pwd):/home/rustscan/  -it --rm --name rustscan rustscan/rustscan:latest --top -a /home/rustscan/targets.txt -b 1000
+
+subfinder -d example.com | $HOME/go/bin/httpx | tee urls.txt
+
+gowitness file -f urls.txt
+
+gowitness server --address 0.0.0.0:7171
+
+nuclei -list urls.txt
+
 
 ```
-
-### vuln scan
-
-nuclei -list hosts.txt
-nikto
 
 ## Download site copy
 
@@ -42,18 +44,17 @@ wget -r -np -R "index.html*" https://target.to.loot/folder/
 ## SAML
 ## OAuth
 ## JWT
-## Verticl ccess control
-## Horizontl ccess control
+## Vertical ccess control
+## Horizontal ccess control
 ## SQLi
 ## OS
 ## SSTI
 ## XXE
 ## XSLT
-## Deseriliztion
-## Rce condition
-## PRNG
+## Deserilization
+## Race condition
 ## CORS
-## X-domin
+## X-domain
 ## XSS
 ## CSRF
 ## CSTI

