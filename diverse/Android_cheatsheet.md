@@ -7,7 +7,11 @@
 ```bash
 
 # careful do not use Google APIs
-emulator -writable-system -avd <Nougat 7.11 API>
+emulator -writable-system -avd <Nougat 7.11 API> -qemu -s
+
+# for google Store phone
+
+docker run --rm --network host ha0ris/aeroot daemon
 
 # go to burp and export a cert.der in DER format
 # convert to pem and rename
@@ -18,7 +22,7 @@ mv cacert.pem <hash>.0
 
 # push to mobile device
 
-adb root
+#adb root
 adb remount
 adb push <cert>.0 /sdcard/
 
@@ -35,9 +39,11 @@ Settings -> Wi-Fi -> Mofidy -> advanced -> proxy -> your burp ip and port
 
 ### Rooting
 
-#### root the device
+#### root the device on the fly
 
-`sudo docker run --rm --network host aeroot daemon`
+1. start the device as (parameters ahve to be in exact same order!!!): `emulator -abd <name.apk> -qemu -s` 
+
+2. root: `docker run --rm --network host ha0ris/aeroot daemon`
 
 #### install and run frida to bypass debugging app's protection
 
@@ -85,6 +91,28 @@ this._z0.value = false;
 
 ## Common hacks
 
+### finding installed apk and downloading it
+
+Useful if you do not have apk but only Google play link
+
+```bash
+
+adb shell pm list packages | sort
+
+adb shell pm path <pkg name>
+
+adb pull data/app/path/to/base.apk
+
+```
+
+
+## use Burp proxy
+
+since Nougat has no proxy setting in the UI, do it per CLI
+
+`adb shell settings put global http_proxy :0`
+
+then go to Setting (via ... in emulator Window) and set Manual proxy `127.0.0.1:8080`
 
 ## Ressources
 

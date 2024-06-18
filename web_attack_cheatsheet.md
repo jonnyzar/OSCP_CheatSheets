@@ -16,7 +16,6 @@ subslister
 dnsreaper
 
 
-<<<<<<< HEAD
 ### Web server detection and vuln scan
 
 ```bash
@@ -34,23 +33,6 @@ nuclei -list urls.txt
 
 ```
 
-=======
-### Web server detection
-
-```bash
-
-cat amass_enum_result.txt \
-aquatone -ports xlarge -scan-timeout 500 -out $(date +'%y%m%d') -threads 100 \
-nuclei -list $(date +'%y%m%d')/aquatone_urls.txt
-
-```
-
-### vuln scan
-
-nuclei -list hosts.txt
-nikto
-
->>>>>>> f54a3d3c9486cd2084fe945ccc465a6ad39339d2
 ## Download site copy
 
 This ia gonna loot a `/folder` 
@@ -59,7 +41,6 @@ This ia gonna loot a `/folder`
 wget -r -np -R "index.html*" https://target.to.loot/folder/
 ```
 
-<<<<<<< HEAD
 ## SAML
 ## OAuth
 ## JWT
@@ -80,8 +61,6 @@ wget -r -np -R "index.html*" https://target.to.loot/folder/
 ## Encryption
 ## Request Smuggling
 ## Cache Poisoning
-=======
->>>>>>> f54a3d3c9486cd2084fe945ccc465a6ad39339d2
 
 ## Directory traversal
 
