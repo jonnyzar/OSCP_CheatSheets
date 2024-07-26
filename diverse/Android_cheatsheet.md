@@ -24,10 +24,8 @@ mv cacert.pem <hash>.0
 
 #adb root
 adb remount
-adb push <cert>.0 /sdcard/
-
-# move and give privs in device
-mv /sdcard/<cert>.0 /system/etc/security/cacerts/
+adb push <cert>.0 /system/etc/security/cacerts/
+adb shell
 chmod 644 /system/etc/security/cacerts/<cert>.0
 
 reboot
@@ -110,7 +108,7 @@ adb pull data/app/path/to/base.apk
 
 since Nougat has no proxy setting in the UI, do it per CLI
 
-`adb shell settings put global http_proxy :0`
+adb shell settings put global http_proxy :0
 
 then go to Setting (via ... in emulator Window) and set Manual proxy `127.0.0.1:8080`
 
