@@ -72,6 +72,12 @@ Test-NetConnection -Port 445 192.168.50.111
 
 https://github.com/itm4n/PrivescCheck/
 
+Invoke all checks 
+
+```cmd
+powershell -ep bypass -c ". .\PrivescCheck.ps1; Invoke-PrivescCheck -Extended -Audit -Report PrivescCheck_$($env:COMPUTERNAME) -Format TXT,HTML,CSV,XML"
+```
+
 ### Helpful stuff
 
 ```powershell
