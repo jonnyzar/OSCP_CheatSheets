@@ -256,6 +256,8 @@ Look for passwords
 
 `dir /s *pass* == *.config`
 
+`Get-ChildItem -Path "C:\YourDirectory" -Recurse -File | Select-String -Pattern "password"`
+
 If found then search in the directory for strings within files
 
 `findstr /si password *.xml *.ini *.txt`

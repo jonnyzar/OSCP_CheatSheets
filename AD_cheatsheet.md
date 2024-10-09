@@ -814,7 +814,11 @@ Access anything without knowing the user
 
 * NTLM
 
-`hashcat -a 0 -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt --force --potfile-disable`
+`hashcat -m 1000 admin.hashfile  /usr/share/wordlists/rockyou.txt`
+
+* NTLMv2
+
+`hashcat -m 5600 hash.txt passwords.txt`
 
 ## Distributed Component Object Model
 
