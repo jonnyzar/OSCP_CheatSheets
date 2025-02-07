@@ -45,6 +45,24 @@ Users are core of AD and DC's task is to manage access of those users to service
 
 ### Time Sync
 
+* manual way
+
+```bash
+
+
+nmap -sT $DC_IP -p445 --script smb2-time -vv
+
+Host script results:
+| smb2-time: 
+|   date: 2024-10-11T22:58:45
+|_  start_date: N/A
+
+
+faketime '2022-10-11 22:58:45' bash
+
+```
+
+
 * to be able to use Kerberos Authentication it is necessary to sync clock with AD domain controller
 
 ```bash

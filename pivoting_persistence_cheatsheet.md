@@ -13,7 +13,14 @@ chisel performs HTTP tunneling thus aboiding most IDS. Use encryption for better
 
 It is important to establish persistence before moving forward with actions on objectives.
 
-### Linux
+
+### simple listener
+
+`nc -lvnpk <PORT>`
+
+this makes a listener that persists even if client disconnects.
+
+### Configuring SSH on Linux
 
 #### private ssh key
 
