@@ -10,11 +10,14 @@ It is the followed by more refined attacks.
 ### Domain intel
 
 `https://crt.sh/?q=qmspot.com`
+
 dnsrecon
+
 subslister
-`host $IP`
+
 dnsreaper
 
+amass enum -active -d $domain -brute -w $sub_domains -o $domain.recon.log -timeout 30
 
 ### Web server detection and vuln scan
 
